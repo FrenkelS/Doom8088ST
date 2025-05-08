@@ -20,7 +20,6 @@ then
 fi
 
 nasm i_vcgaa.asm -f elf -DCPU=$CPU
-nasm m_fixed.asm -f elf -DCPU=$CPU
 nasm z_xms.asm   -f elf -DCPU=$CPU
 
 ia16-elf-gcc -c i_vcgabw.c $RENDER_OPTIONS -march=$CPU -mcmodel=medium -mnewlib-nano-stdio -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparmcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
@@ -57,7 +56,6 @@ export GLOBOBJS+=" i_vcgabw.o"
 export GLOBOBJS+=" i_vcgaa.o"
 export GLOBOBJS+=" info.c"
 export GLOBOBJS+=" m_cheat.c"
-export GLOBOBJS+=" m_fixed.o"
 export GLOBOBJS+=" m_menu.c"
 export GLOBOBJS+=" m_random.c"
 export GLOBOBJS+=" p_doors.c"
@@ -110,7 +108,6 @@ export GLOBOBJS+=" z_zone.o"
 ia16-elf-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT
 
 rm i_vcgaa.o
-rm m_fixed.o
 rm z_xms.o
 
 rm i_vcgabw.o
