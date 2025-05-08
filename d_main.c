@@ -457,7 +457,7 @@ static void D_DoomMainSetup(void)
 
     I_InitSound();
 
-    printf("Z_Init: Init zone memory allocation daemon.\n");
+    printf("Z_Init: Init zone memory.\n");
     Z_Init();
 
     G_ReloadDefaults();    // killough 3/4/98: set defaults just loaded.
@@ -474,7 +474,7 @@ static void D_DoomMainSetup(void)
     printf("M_Init: Init miscellaneous info.\n");
     M_Init();
 
-    printf("R_Init: DOOM refresh daemon - [...................]\n");
+    printf("R_Init: DOOM refresh daemon - [.....]\n");
     R_Init();
 
     printf("P_Init: Init Playloop state.\n");
