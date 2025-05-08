@@ -31,7 +31,7 @@ m68k-atari-mintelf-gcc -c tables.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-f
 m68k-atari-mintelf-gcc -c w_wad.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-atari-mintelf-gcc -c z_zone.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 
-export CFLAGS="-march=$CPU -li86 -Os -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -funsafe-loop-optimizations -freorder-blocks-algorithm=stc -fno-tree-pre -fira-region=mixed"
+export CFLAGS="-march=$CPU -Os -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -funsafe-loop-optimizations -freorder-blocks-algorithm=stc -fno-tree-pre -fira-region=mixed"
 #export CFLAGS="$CFLAGS -Ofast -flto -fwhole-program -fomit-frame-pointer -funroll-loops -fgcse-sm -fgcse-las -fipa-pta -Wno-attributes -Wpedantic"
 #export CFLAGS="$CFLAGS -Wall -Wextra"
 

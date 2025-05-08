@@ -24,6 +24,8 @@
 
 #if defined _M_I86
 #include <dos.h>
+#elif defined atarist
+#include <osbind.h>
 #endif
 
 #include <stdlib.h>
@@ -107,15 +109,21 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 }
 
 
-#if !defined _M_I86
+#if defined atarist
 static unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 {
 	static uint8_t* ptr;
 
 	if (__size == 0xffff)
 	{
-		int32_t paragraphs = 1023 * 1024L / PARAGRAPH_SIZE;
+		uint32_t availableMemory = Malloc(-1);
+		int32_t paragraphs = availableMemory < 1023 * 1024 ? availableMemory / PARAGRAPH_SIZE : 1023 * 1024L / PARAGRAPH_SIZE;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		while (!ptr)
+		{
+			paragraphs--;
+			ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		}
 
 		// align ptr
 		uint32_t m = (uint32_t) ptr;
@@ -276,7 +284,7 @@ static void Z_FreeBlock(memblock_t __far* block)
 //
 // Z_Free
 //
-void Z_Free (const void __far* ptr)
+void Z_Free(const void __far* ptr)
 {
 #if defined RANGECHECK
 	if ((((uint32_t) ptr) & (PARAGRAPH_SIZE - 1)) != 0)

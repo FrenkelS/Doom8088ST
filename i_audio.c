@@ -74,8 +74,7 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 
 void I_InitSound(void)
 {
-	// Finished initialization.
-	printf("I_InitSound: sound ready\n");
+	// Do nothing
 }
 
 
