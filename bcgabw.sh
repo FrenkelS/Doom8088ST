@@ -20,7 +20,6 @@ then
 fi
 
 nasm i_vcgaa.asm -f elf -DCPU=$CPU
-nasm z_xms.asm   -f elf -DCPU=$CPU
 
 ia16-elf-gcc -c i_vcgabw.c $RENDER_OPTIONS -march=$CPU -mcmodel=medium -mnewlib-nano-stdio -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparmcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 ia16-elf-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -mcmodel=medium -mnewlib-nano-stdio -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparmcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
@@ -101,14 +100,12 @@ export GLOBOBJS+=" w_wad.o"
 export GLOBOBJS+=" wi_lib.c"
 export GLOBOBJS+=" wi_stuff.c"
 export GLOBOBJS+=" z_bmallo.c"
-export GLOBOBJS+=" z_xms.o"
 #export GLOBOBJS+=" z_zone.c"
 export GLOBOBJS+=" z_zone.o"
 
 ia16-elf-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT
 
 rm i_vcgaa.o
-rm z_xms.o
 
 rm i_vcgabw.o
 rm p_enemy2.o
