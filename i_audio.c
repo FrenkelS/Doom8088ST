@@ -52,7 +52,6 @@
 #include "w_wad.h"
 #include "s_sound.h"
 
-#include "doomdef.h"
 #include "d_player.h"
 #include "doomtype.h"
 
@@ -60,36 +59,14 @@
 
 #include "m_fixed.h"
 
-#include "a_pcfx.h"
-
 #include "globdata.h"
-
-
-#define MAX_CHANNELS    1
-
-
-static int16_t firstsfx;
 
 
 int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 {
+	UNUSED(id);
 	UNUSED(vol);
 	UNUSED(sep);
-
-	if (!(0 <= channel && channel < MAX_CHANNELS))
-		return -1;
-
-//	// hacks out certain PC sounds
-//	if (id == sfx_posact
-//	 || id == sfx_bgact
-//	 || id == sfx_dmact
-//	 || id == sfx_dmpain
-//	 || id == sfx_popain
-//	 || id == sfx_sawidl)
-//		return -1;
-
-	int16_t lumpnum = firstsfx + id;
-	PCFX_Play(lumpnum);
 
 	return channel;
 }
@@ -97,14 +74,6 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 
 void I_InitSound(void)
 {
-	if (M_CheckParm("-nosound") || M_CheckParm("-nosfx"))
-		nosfxparm = true;
-
-	if (nomusicparm && nosfxparm)
-		return;
-
-	PCFX_Init();
-
 	// Finished initialization.
 	printf("I_InitSound: sound ready\n");
 }
@@ -112,16 +81,13 @@ void I_InitSound(void)
 
 void I_InitSound2(void)
 {
-	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+	// Do nothing
 }
 
 
 void I_ShutdownSound(void)
 {
-	if (nosfxparm)
-		return;
-
-	PCFX_Shutdown();
+	// Do nothing
 }
 
 
