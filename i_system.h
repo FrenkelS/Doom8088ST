@@ -48,8 +48,6 @@ void I_InitKeyboard(void);
 
 void I_InitGraphics(void);
 
-void I_SetScreenMode(uint16_t mode);
-
 void I_FinishUpdate(void);
 
 void I_ReloadPalette(void);

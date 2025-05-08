@@ -153,6 +153,9 @@ static void I_UploadNewPalette(int8_t pal)
 }
 
 
+void I_SetScreenMode(uint16_t mode);
+
+
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	__djgpp_nearptr_enable();
