@@ -322,8 +322,6 @@ static void I_Shutdown(void)
 	{
 		restoreInterrupt(KEYBOARDINT, oldkeyboardisr, newkeyboardisr);
 	}
-
-	Z_Shutdown();
 }
 
 
