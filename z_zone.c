@@ -22,7 +22,10 @@
 //
 //-----------------------------------------------------------------------------
 
+#if defined _M_I86
 #include <dos.h>
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include "compiler.h"
@@ -104,14 +107,14 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 }
 
 
-#if defined __DJGPP__ || defined _M_I386
+#if !defined _M_I86
 static unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 {
 	static uint8_t* ptr;
 
 	if (__size == 0xffff)
 	{
-		int32_t paragraphs = 640 * 1024L / PARAGRAPH_SIZE;
+		int32_t paragraphs = 1023 * 1024L / PARAGRAPH_SIZE;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 
 		// align ptr
