@@ -236,15 +236,15 @@ void I_FinishUpdate(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-const uint8_t* colormap;
+static const uint8_t* colormap;
 
-const uint8_t __far* source;
-uint8_t __far* dest;
+static const uint8_t __far* source;
+static       uint8_t __far* dst;
 
 
-#if defined C_ONLY
 static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 {
+	uint8_t __far* dest = dst;
 	int16_t l = count >> 4;
 	while (l--)
 	{
@@ -288,9 +288,6 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 		case  1: *dest = colormap[source[frac >> COLBITS]];
 	}
 }
-#else
-void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count);
-#endif
 
 
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
@@ -305,7 +302,7 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 
 	colormap = dcvars->colormap;
 
-	dest = _s_screen + (dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x;
+	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
 	const uint16_t fracstep = dcvars->fracstep;
 	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
@@ -324,7 +321,6 @@ void R_DrawColumnWall(const draw_column_vars_t *dcvars)
 }
 
 
-#if defined C_ONLY
 static uint8_t swapNibbles(uint8_t color)
 {
 	return (color << 4) | (color >> 4);
@@ -335,6 +331,7 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 {
 	uint8_t color0;
 	uint8_t color1;
+	uint8_t __far* dest = dst;
 
 	if (yl & 1)
 	{
@@ -356,9 +353,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 	if (count & 1)
 		*dest = color0;
 }
-#else
-void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count);
-#endif
 
 
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
@@ -369,7 +363,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	dest = _s_screen + (dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x;
+	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
 	R_DrawColumnFlat2(color, dcvars->yl, count);
 }
