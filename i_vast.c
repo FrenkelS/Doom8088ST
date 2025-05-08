@@ -23,8 +23,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <osbind.h>
 #include <stdint.h>
+#include <mint/osbind.h>
 
 #include "compiler.h"
 

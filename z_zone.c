@@ -25,7 +25,7 @@
 #if defined _M_I86
 #include <dos.h>
 #elif defined atarist
-#include <osbind.h>
+#include <mint/osbind.h>
 #endif
 
 #include <stdlib.h>

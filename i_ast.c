@@ -24,7 +24,8 @@
  *-----------------------------------------------------------------------------*/
 
 #include <stdarg.h>
-#include <time.h>
+#include <mint/osbind.h>
+#include <mint/sysvars.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -78,18 +79,19 @@ void I_StartTic(void)
 // Returns time in 1/35th second tics.
 //
 
-static volatile int32_t ticcount;
+static int32_t basetime;
 
 
 int32_t I_GetTime(void)
 {
-    return ticcount++;
+    return (*_hz_200 - basetime) * TICRATE / 200;
 }
 
 
 void I_InitTimer(void)
 {
-
+	Super(0L);
+	basetime = *_hz_200;
 }
 
 
