@@ -22,9 +22,8 @@
  *      Video code for Atari ST 640x200 4 color
  *
  *-----------------------------------------------------------------------------*/
- 
-#include <conio.h>
-#include <dos.h>
+
+#include <osbind.h>
 #include <stdint.h>
 
 #include "compiler.h"
@@ -39,15 +38,11 @@
 #include "globdata.h"
 
 
-#define PLANEWIDTH        80
-#define SCREENHEIGHT_CGA 200
-
-
 extern const int16_t CENTERY;
 
 
-static uint8_t __far* _s_screen;
-static uint8_t __far* videomemory;
+static uint8_t *_s_screen;
+static uint16_t *videomemory;
 
 
 void I_ReloadPalette(void)
@@ -61,110 +56,32 @@ void I_ReloadPalette(void)
 		lumpName[7] = '0' + _g_gamma;
 	}
 
-	W_ReadLumpByNum(W_GetNumForName(lumpName), (void __far*)fullcolormap);
+	W_ReadLumpByNum(W_GetNumForName(lumpName), (void *)fullcolormap);
 }
 
 
-typedef enum
+static const uint16_t colors[14] =
 {
-	MDA,
-	CGA,
-	PCJR,
-	TANDY,
-	EGA,
-	VGA,
-	MCGA
-} videocardsenum_t;
-
-
-static videocardsenum_t videocard;
-
-
-static videocardsenum_t I_DetectVideoCard(void)
-{
-	// This code is based on Jason M. Knight's Paku Paku code
-
-	union REGS regs;
-	regs.w.ax = 0x1200;
-	regs.h.bl = 0x32;
-	int86(0x10, &regs, &regs);
-
-	if (regs.h.al == 0x12)
-	{
-		regs.w.ax = 0x1a00;
-		regs.h.bl = 0;
-		int86(0x10, &regs, &regs);
-		return (0x0a <= regs.h.bl && regs.h.bl <= 0x0c) ? MCGA : VGA;
-	}
-
-	regs.h.ah = 0x12;
-	regs.h.bl = 0x10;
-	int86(0x10, &regs, &regs);
-	if (regs.h.bl & 3)
-		return EGA;
-
-	regs.h.ah = 0x0f;
-	int86(0x10, &regs, &regs);
-	if (regs.h.al == 7)
-		return MDA;
-
-	uint8_t __far* fp;
-	fp = D_MK_FP(0xffff, 0x000e);
-	if (*fp == 0xfd)
-		return PCJR;
-
-	if (*fp == 0xff)
-	{
-		fp = D_MK_FP(0xfc00, 0);
-		if (*fp == 0x21)
-			return TANDY;
-	}
-
-	return CGA;
-}
-
-
-static const uint8_t colors[14] =
-{
-	15,							// normal
-	12, 12, 12, 12, 4, 4, 4, 4,	// red
-	14, 14, 6, 6,				// yellow
-	10							// green
+	0x000,													// normal
+	0x100, 0x300, 0x500, 0x700, 0x800, 0xa00, 0xc00, 0xe00,	// red
+	0x110, 0x321, 0x541, 0x652,								// yellow
+	0x020													// green
 };
 
 
 static void I_UploadNewPalette(int8_t pal)
 {
-	uint8_t color = colors[pal];
-
-	if (videocard == CGA)
-		outp(0x3d9, color);
-	else
-	{
-		if (color > 7)
-			color |= 0x10;
-
-		union REGS regs;
-		regs.w.ax = 0x1000;
-		regs.h.bl = 1;
-		regs.h.bh = color;
-		int86(0x10, &regs, &regs);
-	}
+	Setcolor(0, colors[pal]);
 }
-
-
-void I_SetScreenMode(uint16_t mode);
 
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
-	__djgpp_nearptr_enable();
+	Setscreen(-1L, -1L, 1);
+	Setcolor(0, 0x000);
+	Setcolor(1, 0x777);
 
-	videocard = I_DetectVideoCard();
-
-	I_SetScreenMode(6);
-
-	videomemory = D_MK_FP(0xb800, (((SCREENHEIGHT_CGA - SCREENHEIGHT) / 2) / 2) * PLANEWIDTH + (PLANEWIDTH - VIEWWINDOWWIDTH) / 2 + __djgpp_conventional_base);
+	videomemory = Physbase();
 
 	_s_screen = Z_MallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
 	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
@@ -173,40 +90,42 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
-	I_SetScreenMode(3);
+	Setscreen(-1L, -1L, 0);
+	Setcolor(0, 0x777);
+	Setcolor(1, 0x000);
 }
 
 
 static boolean drawStatusBar = true;
 
 
-static void I_DrawBuffer(uint8_t __far* buffer)
+static void I_DrawBuffer(uint8_t *buffer)
 {
-	uint8_t __far* src = buffer;
-	uint8_t __far* dst = videomemory;
+	uint16_t *src = (uint16_t *)buffer;
+	uint16_t *dst = videomemory;
 
-	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT) / 2; y++)
+	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT); y++)
 	{
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst += 0x2000;
-		src += VIEWWINDOWWIDTH;
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
+		{
+			*dst = *src++;
+			dst += 2;
+		}
 
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst -= 0x2000 - PLANEWIDTH;
-		src += VIEWWINDOWWIDTH;
+		dst += 20;
 	}
 
 	if (drawStatusBar)
 	{
-		for (int16_t y = 0; y < ST_HEIGHT / 2; y++)
+		for (int16_t y = 0; y < ST_HEIGHT; y++)
 		{
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst += 0x2000;
-			src += VIEWWINDOWWIDTH;
+			for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
+			{
+				*dst = *src++;
+				dst += 2;
+			}
 
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst -= 0x2000 - PLANEWIDTH;
-			src += VIEWWINDOWWIDTH;
+			dst += 20;
 		}
 	}
 	drawStatusBar = true;
@@ -241,13 +160,13 @@ void I_FinishUpdate(void)
 
 static const uint8_t* colormap;
 
-static const uint8_t __far* source;
-static       uint8_t __far* dst;
+static const uint8_t *source;
+static       uint8_t *dst;
 
 
 static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 {
-	uint8_t __far* dest = dst;
+	uint8_t *dest = dst;
 	int16_t l = count >> 4;
 	while (l--)
 	{
@@ -334,7 +253,7 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 {
 	uint8_t color0;
 	uint8_t color1;
-	uint8_t __far* dest = dst;
+	uint8_t *dest = dst;
 
 	if (yl & 1)
 	{
@@ -398,7 +317,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t __far* dest = _s_screen + (dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x;
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
 	static int16_t fuzzpos = 0;
 
@@ -477,14 +396,14 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 void V_DrawBackground(int16_t backgroundnum)
 {
-	const byte __far* src = W_GetLumpByNum(backgroundnum);
+	const byte *src = W_GetLumpByNum(backgroundnum);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
 		{
-			uint8_t __far* d = &_s_screen[y * VIEWWINDOWWIDTH + x];
-			const byte __far* s = &src[((y & 63) * 16)];
+			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH + x];
+			const byte *s = &src[((y & 63) * 16)];
 
 			size_t len = 16;
 
@@ -501,7 +420,7 @@ void V_DrawBackground(int16_t backgroundnum)
 
 void V_DrawRaw(int16_t num, uint16_t offset)
 {
-	const uint8_t __far* lump = W_TryGetLumpByNum(num);
+	const uint8_t *lump = W_TryGetLumpByNum(num);
 
 	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH;
 
@@ -533,7 +452,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte __far* desttop = _s_screen + (y * VIEWWINDOWWIDTH) + (x >> 2);
+	byte *desttop = &_s_screen[(y * VIEWWINDOWWIDTH) + (x >> 2)];
 
 	int16_t width = patch->width;
 
@@ -542,13 +461,13 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (int16_t col = 0; col < width; col++)
 	{
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col]);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
 		{
-			const byte __far* source = (const byte __far*)column + 3;
-			byte __far* dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
+			const byte *source = (const byte *)column + 3;
+			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
 
 			uint16_t count = column->length;
 
@@ -596,7 +515,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				}
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t *)((const byte *)column + column->length + 4);
 		}
 
 		p++;
@@ -633,7 +552,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		else if (dc_x >= SCREENWIDTH)
 			break;
 
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col >> 8]);
+		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col >> 8]);
 
 		int16_t p = dc_x & 3;
 		uint8_t bitmask = bitmasks4[p];
@@ -648,11 +567,11 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte __far* dest = _s_screen + (dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2);
+			byte *dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2)];
 
 			int16_t frac = 0;
 
-			const byte __far* source = (const byte __far*)column + 3;
+			const byte *source = (const byte *)column + 3;
 
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
@@ -664,14 +583,14 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				frac += DYI;
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t *)((const byte *)column + column->length + 4);
 		}
 	}
 }
 
 
-static uint8_t __far* frontbuffer;
-static int16_t __far* wipe_y_lookup;
+static uint8_t *frontbuffer;
+static int16_t *wipe_y_lookup;
 
 
 void wipe_StartScreen(void)
@@ -686,7 +605,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint8_t __far* backbuffer = _s_screen;
+	uint8_t *backbuffer = _s_screen;
 
 	while (ticks--)
 	{
@@ -708,9 +627,9 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				uint8_t __far* s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
+				uint8_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
 
-				uint8_t __far* d = &frontbuffer[i] + ((SCREENHEIGHT - 1) * VIEWWINDOWWIDTH);
+				uint8_t *d = &frontbuffer[i] + ((SCREENHEIGHT - 1) * VIEWWINDOWWIDTH);
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy

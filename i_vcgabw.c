@@ -22,7 +22,7 @@
  *      Video code for CGA 640x200 2 color
  *
  *-----------------------------------------------------------------------------*/
- 
+
 #include <conio.h>
 #include <dos.h>
 #include <stdint.h>
@@ -398,7 +398,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t __far* dest = _s_screen + (dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x;
+	uint8_t __far* dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
 	static int16_t fuzzpos = 0;
 
