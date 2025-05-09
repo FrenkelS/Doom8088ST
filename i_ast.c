@@ -105,6 +105,34 @@ void I_InitKeyboard(void)
 }
 
 
+#define SC_ESCAPE			0x01
+#define SC_MINUS			0x0c
+#define SC_PLUS				0x0d
+#define SC_TAB				0x0f
+#define SC_BRACKET_LEFT		0x1a
+#define SC_BRACKET_RIGHT	0x1b
+#define SC_ENTER			0x1c
+#define SC_CTRL				0x1d
+#define SC_LSHIFT			0x2a
+#define SC_RSHIFT			0x36
+#define SC_COMMA			0x33
+#define SC_PERIOD			0x34
+#define SC_ALT				0x38
+#define SC_SPACE			0x39
+#define SC_F10				0x44
+#define SC_UPARROW			0x48
+#define SC_DOWNARROW		0x50
+#define SC_LEFTARROW		0x4b
+#define SC_RIGHTARROW		0x4d
+
+#define SC_Q	0x10
+#define SC_P	0x19
+#define SC_A	0x1e
+#define SC_L	0x26
+#define SC_Z	0x2c
+#define SC_M	0x32
+
+
 void I_StartTic(void)
 {
 	while (next_read != next_write) {
@@ -128,74 +156,74 @@ void I_StartTic(void)
 		k &= 0x7f;
 		switch (k)
 		{
-			case 0x01:
+			case SC_ESCAPE:
 				ev.data1 = KEYD_START;
 				break;
-			case 0x1c:
-			case 0x39:
+			case SC_ENTER:
+			case SC_SPACE:
 				ev.data1 = KEYD_A;
 				break;
-			case 0x2a:
-			case 0x36:
+			case SC_LSHIFT:
+			case SC_RSHIFT:
 				ev.data1 = KEYD_SPEED;
 				break;
-			case 0x48:
+			case SC_UPARROW:
 				ev.data1 = KEYD_UP;
 				break;
-			case 0x50:
+			case SC_DOWNARROW:
 				ev.data1 = KEYD_DOWN;
 				break;
-			case 0x4b:
+			case SC_LEFTARROW:
 				ev.data1 = KEYD_LEFT;
 				break;
-			case 0x4d:
+			case SC_RIGHTARROW:
 				ev.data1 = KEYD_RIGHT;
 				break;
-			case 0x0f:
+			case SC_TAB:
 				ev.data1 = KEYD_SELECT;
 				break;
-			case 0x1d:
+			case SC_CTRL:
 				ev.data1 = KEYD_B;
 				break;
-			case 0x38:
+			case SC_ALT:
 				ev.data1 = KEYD_STRAFE;
 				break;
-			case 0x33:
+			case SC_COMMA:
 				ev.data1 = KEYD_L;
 				break;
-			case 0x34:
+			case SC_PERIOD:
 				ev.data1 = KEYD_R;
 				break;
-			case 0x0c:
+			case SC_MINUS:
 				ev.data1 = KEYD_MINUS;
 				break;
-			case 0x0d:
+			case SC_PLUS:
 				ev.data1 = KEYD_PLUS;
 				break;
-			case 0x1a:
+			case SC_BRACKET_LEFT:
 				ev.data1 = KEYD_BRACKET_LEFT;
 				break;
-			case 0x1b:
+			case SC_BRACKET_RIGHT:
 				ev.data1 = KEYD_BRACKET_RIGHT;
 				break;
 
-			case 0x44:
+			case SC_F10:
 				I_Quit();
 
 			default:
-				if (0x10 <= k && k <= 0x19)
+				if (SC_Q <= k && k <= SC_P)
 				{
-					ev.data1 = "qwertyuiop"[k - 0x10];
+					ev.data1 = "qwertyuiop"[k - SC_Q];
 					break;
 				}
-				else if (0x1e <= k && k <= 0x26)
+				else if (SC_A <= k && k <= SC_L)
 				{
-					ev.data1 = "asdfghjkl"[k - 0x1e];
+					ev.data1 = "asdfghjkl"[k - SC_A];
 					break;
 				}
-				else if (0x2c <= k && k <= 0x32)
+				else if (SC_Z <= k && k <= SC_M)
 				{
-					ev.data1 = "zxcvbnm"[k - 0xc];
+					ev.data1 = "zxcvbnm"[k - SC_Z];
 					break;
 				}
 				else

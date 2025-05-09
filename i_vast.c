@@ -82,8 +82,8 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	Setcolor(1, 0x777);
 
 	videomemory = Physbase();
-	videomemory += 10;
-	videomemory += 1600;
+	videomemory += 10;   // center horizontally
+	videomemory += 1600; // center vertically
 
 	_s_screen = Z_MallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
 	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
