@@ -98,7 +98,6 @@ __attribute__((interrupt)) static void I_KeyboardISR(void)
 
 void I_InitKeyboard(void)
 {
-	Super(0L);
 	oldkeyboardisr = *(void**)0x118;
 	*(void**)0x118 = I_KeyboardISR;
 	isKeyboardIsrSet = true;
@@ -289,7 +288,6 @@ void I_Error(const char *error, ...)
 	va_start(argptr, error);
 	vprintf(error, argptr);
 	va_end(argptr);
-
 	printf("\n");
 	exit(1);
 }
@@ -297,7 +295,9 @@ void I_Error(const char *error, ...)
 
 int main(int argc, const char * const * argv)
 {
-	printf("Doom1ST System Startup\n");
+	printf("Doom8088: Atari ST Edition\n");
+
+	Super(0L);
 
 	D_DoomMain(argc, argv);
 	return 0;
