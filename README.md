@@ -64,17 +64,14 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 |IDRATE    |Toggle FPS counter       |
 
 ## Command line arguments:
-|Command line argument|Effect               |
-|---------------------|---------------------|
-|/timedemo demo3      |Run benchmark        |
+|Command line argument|Effect       |
+|---------------------|-------------|
+|`/timedemo demo3`    |Run benchmark|
 
 ## Building:
-1) Install [m68k-atari-mintelf](http://vincent.riviere.free.fr/soft/m68k-atari-mintelf) on Ubuntu.
+|Platform     |Platform specific code |Compiler                                                                    |Build script|Additional information                              |
+|-------------|-----------------------|----------------------------------------------------------------------------|------------|----------------------------------------------------|
+|Atari ST     |`i_ast.c`, `i_vast.c`  |[m68k-atari-mintelf](http://vincent.riviere.free.fr/soft/m68k-atari-mintelf)|`batari.sh` |640x200 4 colors resolution, only 2 colors are used |
+|IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                              |`bcgabw.sh` |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
-2) Run one of the build scripts:
-
-|Build script |Version                                  |
-|-------------|-----------------------------------------|
-|`batarist.sh`|640x200 4 colors (only 2 colors are used)|
-
-3) Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
+Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
