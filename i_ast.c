@@ -25,7 +25,6 @@
 
 #include <stdarg.h>
 #include <mint/osbind.h>
-#include <mint/sysvars.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -251,18 +250,41 @@ void I_StartTic(void)
 // Returns time in 1/35th second tics.
 //
 
-static int32_t basetime;
+static volatile int32_t ticcount;
+
+static boolean isTimerSet;
+
+
+static volatile uint8_t *pMfpIsra  = (void*) 0xfffa0f;
+
+
+__attribute__((interrupt)) static void I_TimerISR(void)
+{
+	ticcount++;
+
+	// Clear interrupt
+	*pMfpIsra &= ~(1<<5);
+}
 
 
 int32_t I_GetTime(void)
 {
-    return (*_hz_200 - basetime) * TICRATE / 200;
+	return ticcount >> 1;
 }
 
 
 void I_InitTimer(void)
 {
-	basetime = *_hz_200;
+	// 7 -> 200
+	// 2457600 / (200 * 176) ~= 70 Hz
+	Xbtimer(XB_TIMERA, 7, 176, I_TimerISR);
+	isTimerSet = true;
+}
+
+
+static void I_ShutdownTimer(void)
+{
+	Xbtimer(XB_TIMERA, 0, 176, I_TimerISR);
 }
 
 
@@ -277,6 +299,9 @@ static void I_Shutdown(void)
 		I_ShutdownGraphics();
 
 	I_ShutdownSound();
+
+	if (isTimerSet)
+		I_ShutdownTimer();
 
 	if (isKeyboardIsrSet)
 		*(void **)0x118 = oldkeyboardisr;
