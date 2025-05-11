@@ -45,6 +45,12 @@ static uint8_t *_s_screen;
 static uint16_t *videomemory;
 
 
+static  int16_t oldrez;
+static uint16_t oldc0;
+static uint16_t oldc1;
+static uint16_t oldc2;
+static uint16_t oldc3;
+
 void I_ReloadPalette(void)
 {
 	char* lumpName;
@@ -77,9 +83,12 @@ static void I_UploadNewPalette(int8_t pal)
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
+	oldrez = Getrez();
 	Setscreen(-1L, -1L, 1);
-	Setcolor(0, 0x000);
-	Setcolor(1, 0x777);
+	oldc0 = Setcolor(0, 0x000);
+	oldc1 = Setcolor(1, 0x777);
+	oldc2 = Setcolor(2, 0x000);
+	oldc3 = Setcolor(3, 0x777);
 
 	videomemory = Physbase();
 	videomemory += 10;   // center horizontally
@@ -92,9 +101,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
-	Setscreen(-1L, -1L, 0);
-	Setcolor(0, 0x777);
-	Setcolor(1, 0x000);
+	Setscreen(-1L, -1L, oldrez);
+	Setcolor(0, oldc0);
+	Setcolor(1, oldc1);
+	Setcolor(2, oldc2);
+	Setcolor(3, oldc3);
 }
 
 
