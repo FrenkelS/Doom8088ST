@@ -268,14 +268,49 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 		color1 = swapNibbles(color);
 	}
 
-	for (int16_t i = 0; i < count / 2; i++)
+	int16_t l = count >> 4;
+
+	while (l--)
 	{
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
 		*dest = color0; dest += VIEWWINDOWWIDTH;
 		*dest = color1; dest += VIEWWINDOWWIDTH;
 	}
 
-	if (count & 1)
-		*dest = color0;
+	switch (count & 15)
+	{
+		case 15: dest[VIEWWINDOWWIDTH * 14] = color0;
+		case 14: dest[VIEWWINDOWWIDTH * 13] = color1;
+		case 13: dest[VIEWWINDOWWIDTH * 12] = color0;
+		case 12: dest[VIEWWINDOWWIDTH * 11] = color1;
+		case 11: dest[VIEWWINDOWWIDTH * 10] = color0;
+		case 10: dest[VIEWWINDOWWIDTH *  9] = color1;
+		case  9: dest[VIEWWINDOWWIDTH *  8] = color0;
+		case  8: dest[VIEWWINDOWWIDTH *  7] = color1;
+		case  7: dest[VIEWWINDOWWIDTH *  6] = color0;
+		case  6: dest[VIEWWINDOWWIDTH *  5] = color1;
+		case  5: dest[VIEWWINDOWWIDTH *  4] = color0;
+		case  4: dest[VIEWWINDOWWIDTH *  3] = color1;
+		case  3: dest[VIEWWINDOWWIDTH *  2] = color0;
+		case  2: dest[VIEWWINDOWWIDTH *  1] = color1;
+		case  1: dest[VIEWWINDOWWIDTH *  0] = color0;
+	}
 }
 
 
