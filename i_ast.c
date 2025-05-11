@@ -71,8 +71,8 @@ static volatile uint8_t *pAciaData = (void*) 0xfffc02;
 static volatile uint8_t *pMfpIsrb  = (void*) 0xfffa11;
 
 #define KBDQUESIZE 32
-static uint8_t input_buffer[KBDQUESIZE];
-static uint8_t *next_read = input_buffer, *next_write = input_buffer;
+static uint8_t keyboardqueue[KBDQUESIZE];
+static int16_t kbdtail, kbdhead;
 
 
 __attribute__((interrupt)) static void I_KeyboardISR(void)
@@ -83,10 +83,8 @@ __attribute__((interrupt)) static void I_KeyboardISR(void)
 		*pAciaData;
 	} else {
 		while (aciaCtrl & ACIA_RX_DATA) {
-			*next_write++ = *pAciaData;
-			if (next_write == input_buffer + sizeof(input_buffer)) {
-				next_write = input_buffer;
-			}
+			keyboardqueue[kbdhead & (KBDQUESIZE - 1)] = *pAciaData;
+			kbdhead++;
 			aciaCtrl = *pAciaCtrl;
 		}
 	}
@@ -134,11 +132,10 @@ void I_InitKeyboard(void)
 
 void I_StartTic(void)
 {
-	while (next_read != next_write) {
-		uint8_t *next_read_copy = next_read;
-		uint8_t k = *next_read++;
-		if (next_read == input_buffer + sizeof(input_buffer))
-			next_read = input_buffer;
+	while (kbdtail < kbdhead)
+	{
+		uint8_t k = keyboardqueue[kbdtail & (KBDQUESIZE - 1)];
+		kbdtail++;
 
 		if (k == 0) {
 			// Ignore. Slightly worrying that we're seeing these.
