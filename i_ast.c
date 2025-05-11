@@ -102,6 +102,7 @@ void I_InitKeyboard(void)
 }
 
 
+// Atari ST keyboard layout: https://temlib.org/AtariForumWiki/index.php/Atari_ST_Scancode_diagram_by_Unseen_Menace
 #define SC_ESCAPE			0x01
 #define SC_MINUS			0x0c
 #define SC_PLUS				0x0d
@@ -137,8 +138,24 @@ void I_StartTic(void)
 		uint8_t k = keyboardqueue[kbdtail & (KBDQUESIZE - 1)];
 		kbdtail++;
 
-		if (k == 0) {
-			// Ignore. Slightly worrying that we're seeing these.
+		// special codes
+		if (k >= 0xf6)
+		{
+			char packetSize;
+			switch (k)
+			{
+				case 0xf6: packetSize = (Kbdvbase())->kbstate; break;
+				case 0xf7: packetSize = 4; break;
+				case 0xf8:
+				case 0xf9:
+				case 0xfa:
+				case 0xfb: packetSize = 2; break;
+				case 0xfc: packetSize = 6; break;
+				case 0xfd: packetSize = 2; break;
+				case 0xfe:
+				case 0xff: packetSize = 1; break;
+			}
+			kbdtail += packetSize;
 			continue;
 		}
 
@@ -148,7 +165,6 @@ void I_StartTic(void)
 		else
 			ev.type = ev_keydown;
 
-		// Atari ST keyboard layout: https://temlib.org/AtariForumWiki/index.php/Atari_ST_Scancode_diagram_by_Unseen_Menace
 		k &= 0x7f;
 		switch (k)
 		{
