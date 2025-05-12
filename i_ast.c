@@ -298,13 +298,13 @@ static void I_Shutdown(void)
 	if (isGraphicsModeSet)
 		I_ShutdownGraphics();
 
+	if (isKeyboardIsrSet)
+		*(void **)0x118 = oldkeyboardisr;
+
 	I_ShutdownSound();
 
 	if (isTimerSet)
 		I_ShutdownTimer();
-
-	if (isKeyboardIsrSet)
-		*(void **)0x118 = oldkeyboardisr;
 }
 
 

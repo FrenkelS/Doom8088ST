@@ -451,8 +451,6 @@ static void D_Init(void)
 static void D_DoomMainSetup(void)
 {
     // init subsystems
-    I_InitKeyboard();
-
     I_InitTimer();
 
     I_InitSound();
@@ -491,6 +489,8 @@ static void D_DoomMainSetup(void)
     G_LoadSettings();
 
     _g_fps_show = false;
+
+    I_InitKeyboard();
 
     I_InitGraphics();
 
