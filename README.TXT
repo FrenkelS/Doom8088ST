@@ -27,6 +27,7 @@ What's special?
 
 Known bugs:
  - When there's not enough memory for a texture, one color is drawn
+ - When there's not enough memory for the intermission screen, the last few frames of gameplay are shown instead
 
 Controls:
 |Action                           |Keys         |
