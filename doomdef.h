@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -57,10 +57,6 @@
 
 
 #define UNUSED(x)	(x = x)	// for pesky compiler / lint warnings
-
-
-#define LOBYTE(w)	(((uint8_t *)&w)[0])
-#define HIBYTE(w)	(((uint8_t *)&w)[1])
 
 
 #if !defined VIEWWINDOWWIDTH

@@ -294,6 +294,9 @@ static boolean isTS_Installed = false;
    Sets the rate of the 8253 timer.
 ---------------------------------------------------------------------*/
 
+#define LOBYTE(w)	(((uint8_t *)&(w))[0])
+#define HIBYTE(w)	(((uint8_t *)&(w))[1])
+
 static void TS_SetClockSpeed(int32_t speed)
 {
 	_disable();
