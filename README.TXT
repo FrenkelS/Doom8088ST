@@ -15,7 +15,7 @@ What's special?
  - Rotating overlaid automap
  - Only demo3 is supported
  - 2 color mode
- - No sound effects
+ - PC speaker like sound effects
  - No music
  - No texture mapped floors and ceilings
  - No light diminishing
@@ -68,4 +68,6 @@ Cheats:
 Command line arguments:
 |Command line argument|Effect               |
 |---------------------|---------------------|
+|/nosfx               |Disable sound effects|
+|/nosound             |Disable sound effects|
 |/timedemo demo3      |Run benchmark        |

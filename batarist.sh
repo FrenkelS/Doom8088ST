@@ -3,7 +3,7 @@ mkdir atarist
 unset CFLAGS
 
 
-export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOM1ST.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
+export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
 
 export CPU=$1
 export OUTPUT=$2
@@ -15,7 +15,7 @@ fi
 
 if [ -z "$OUTPUT" ]
 then
-  export OUTPUT=DOOM1ST.TOS
+  export OUTPUT=DOOMST2.TOS
 fi
 
 m68k-atari-mintelf-gcc -c i_vast.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre

@@ -31,6 +31,7 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
+#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 #include "globdata.h"
@@ -248,6 +249,27 @@ void I_StartTic(void)
 		}
 		D_PostEvent(&ev);
 	}
+}
+
+
+//**************************************************************************************
+//
+// Audio
+//
+
+void PCFX_Play(int16_t lumpnum)
+{
+	// TODO implement me
+}
+
+void PCFX_Init(void)
+{
+	// TODO implement me
+}
+
+void PCFX_Shutdown(void)
+{
+	// TODO implement me
 }
 
 

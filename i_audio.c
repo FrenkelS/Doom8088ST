@@ -59,14 +59,37 @@
 
 #include "m_fixed.h"
 
+#include "a_pcfx.h"
+
 #include "globdata.h"
+
+
+
+#define MAX_CHANNELS    1
+
+
+static int16_t firstsfx;
 
 
 int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 {
-	UNUSED(id);
 	UNUSED(vol);
 	UNUSED(sep);
+
+	if (!(0 <= channel && channel < MAX_CHANNELS))
+		return -1;
+
+//	// hacks out certain PC sounds
+//	if (id == sfx_posact
+//	 || id == sfx_bgact
+//	 || id == sfx_dmact
+//	 || id == sfx_dmpain
+//	 || id == sfx_popain
+//	 || id == sfx_sawidl)
+//		return -1;
+
+	int16_t lumpnum = firstsfx + id;
+	PCFX_Play(lumpnum);
 
 	return channel;
 }
@@ -74,19 +97,31 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 
 void I_InitSound(void)
 {
-	// Do nothing
+	if (M_CheckParm("/nosound") || M_CheckParm("/nosfx"))
+		nosfxparm = true;
+
+	if (nomusicparm && nosfxparm)
+		return;
+
+	PCFX_Init();
+
+	// Finished initialization.
+	printf("I_InitSound: sound ready\n");
 }
 
 
 void I_InitSound2(void)
 {
-	// Do nothing
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
 }
 
 
 void I_ShutdownSound(void)
 {
-	// Do nothing
+	if (nosfxparm)
+		return;
+
+	PCFX_Shutdown();
 }
 
 

@@ -15,7 +15,7 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
  - Rotating overlaid automap
  - Only demo3 is supported
  - 2 color mode
- - No sound effects
+ - PC speaker like sound effects
  - No music
  - No texture mapped floors and ceilings
  - No light diminishing
@@ -65,9 +65,11 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 |IDRATE    |Toggle FPS counter       |
 
 ## Command line arguments:
-|Command line argument|Effect       |
-|---------------------|-------------|
-|`/timedemo demo3`    |Run benchmark|
+|Command line argument|Effect               |
+|---------------------|---------------------|
+|`/nosfx`             |Disable sound effects|
+|`/nosound`           |Disable sound effects|
+|`/timedemo demo3`    |Run benchmark        |
 
 ## Building:
 |Platform     |Platform specific code |Compiler                                                                    |Build script|Additional information                              |

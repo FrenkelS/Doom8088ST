@@ -42,7 +42,7 @@
 
 //jff end of external declaration of command line playmode
 
-extern const boolean nosfxparm;
+extern       boolean nosfxparm;
 extern const boolean nomusicparm;
 
 extern const boolean nodrawers;

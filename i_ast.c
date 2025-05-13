@@ -29,8 +29,10 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
+#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
+
 #include "globdata.h"
 
 
@@ -65,7 +67,7 @@ static void *oldkeyboardisr;
 
 #define ACIA_RX_OVERRUN (1<<5)
 #define ACIA_RX_DATA    (1<<0)
-static volatile uint8_t *pAciaCtrl = (void*) 0xfffc00; 
+static volatile uint8_t *pAciaCtrl = (void*) 0xfffc00;
 static volatile uint8_t *pAciaData = (void*) 0xfffc02;
 static volatile uint8_t *pMfpIsrb  = (void*) 0xfffa11;
 
@@ -247,6 +249,116 @@ void I_StartTic(void)
 
 //**************************************************************************************
 //
+// Audio
+//
+// This code is based on
+// https://www.fxjavadevblog.fr/m68k-atari-st-ym-player/#interagir-avec-le-ym-2149
+
+static volatile uint8_t *PSG_REGISTER_INDEX_ADDRESS = (void*) 0xFF8800;
+static volatile uint8_t *PSG_REGISTER_DATA_ADDRESS  = (void*) 0xFF8802;
+#define PSG_R0_TONE_A_PITCH_LOW_BYTE  0
+#define PSG_R1_TONE_A_PITCH_HIGH_BYTE 1
+#define PSG_R7_MIXER_MODE 7
+#define PSG_R8_VOLUME_CHANNEL_A 8
+
+
+static uint16_t	data[146];
+static int16_t	PCFX_LengthLeft;
+static const uint16_t *PCFX_Sound = NULL;
+static uint16_t	PCFX_LastSample = 0;
+
+
+inline static void write_PSG(uint8_t registerIndex, uint8_t registerValue)
+{
+	*PSG_REGISTER_INDEX_ADDRESS = registerIndex;
+	*PSG_REGISTER_DATA_ADDRESS  = registerValue;
+}
+
+
+#define	lobyte(x)	(((uint8_t *)&(x))[1])
+#define	hibyte(x)	(((uint8_t *)&(x))[0])
+
+static void PCFX_Service(void)
+{
+	if (PCFX_Sound)
+	{
+		uint16_t value = *PCFX_Sound++;
+
+		if (value != PCFX_LastSample)
+		{
+			PCFX_LastSample = value;
+			// now write 12 bits value into R0 and R1
+			write_PSG(PSG_R0_TONE_A_PITCH_LOW_BYTE,  lobyte(value)); // first 8 bits into R0. PSG_APITCHLOW = 0 (R0)
+			write_PSG(PSG_R1_TONE_A_PITCH_HIGH_BYTE, hibyte(value)); // last  4 bits into R1, so let's ignore first 8 bits. PSG_APITCHHIGH = 1 (R1)
+		}
+
+		if (--PCFX_LengthLeft == 0)
+		{
+			write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000000); // volume channel A, OFF
+
+			PCFX_Sound      = NULL;
+			PCFX_LastSample = 0;
+		}
+	}
+}
+
+
+static void PCFX_Stop(void)
+{
+	if (PCFX_Sound == NULL)
+		return;
+
+	Jdisint(13);
+
+	write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000000); // volume channel A, OFF
+
+	PCFX_Sound      = NULL;
+	PCFX_LastSample = 0;
+
+	Jenabint(13);
+}
+
+
+typedef struct {
+	uint16_t	length;
+	uint16_t	data[];
+} pcspkmuse_t;
+
+
+void PCFX_Play(int16_t lumpnum)
+{
+	PCFX_Stop();
+
+	const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(lumpnum);
+	PCFX_LengthLeft = pcspkmuse->length;
+	memcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
+	Z_ChangeTagToCache(pcspkmuse);
+
+	Jdisint(13);
+
+	PCFX_Sound = &data[0];
+
+	write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000111); // volume channel A, ON
+
+	Jenabint(13);
+}
+
+
+void PCFX_Init(void)
+{
+	write_PSG(PSG_R7_MIXER_MODE, 0b00111110); // activate (0) only Tone on channel A, yes activation is 0 !
+}
+
+
+void PCFX_Shutdown(void)
+{
+	PCFX_Stop();
+	write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
+}
+
+
+//**************************************************************************************
+//
 // Returns time in 1/35th second tics.
 //
 
@@ -261,6 +373,7 @@ static volatile uint8_t *pMfpIsra  = (void*) 0xfffa0f;
 __attribute__((interrupt)) static void I_TimerISR(void)
 {
 	ticcount++;
+	PCFX_Service();
 
 	// Clear interrupt
 	*pMfpIsra &= ~(1<<5);
@@ -269,22 +382,23 @@ __attribute__((interrupt)) static void I_TimerISR(void)
 
 int32_t I_GetTime(void)
 {
-	return ticcount >> 1;
+	return ticcount >> 2;
 }
 
 
 void I_InitTimer(void)
 {
 	// 7 -> 200
-	// 2457600 / (200 * 176) ~= 70 Hz
-	Xbtimer(XB_TIMERA, 7, 176, I_TimerISR);
+	// 2457600 / (200 * 88) ~= 140 Hz
+	Xbtimer(XB_TIMERA, 7, 88, I_TimerISR);
+
 	isTimerSet = true;
 }
 
 
 static void I_ShutdownTimer(void)
 {
-	Xbtimer(XB_TIMERA, 0, 176, I_TimerISR);
+	Xbtimer(XB_TIMERA, 0, 0, NULL);
 }
 
 
