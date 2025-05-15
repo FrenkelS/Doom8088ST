@@ -68,6 +68,6 @@ Cheats:
 Command line arguments:
 |Command line argument|Effect               |
 |---------------------|---------------------|
-|/nosfx               |Disable sound effects|
-|/nosound             |Disable sound effects|
-|/timedemo demo3      |Run benchmark        |
+|-nosfx               |Disable sound effects|
+|-nosound             |Disable sound effects|
+|-timedemo demo3      |Run benchmark        |

@@ -67,9 +67,9 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 ## Command line arguments:
 |Command line argument|Effect               |
 |---------------------|---------------------|
-|`/nosfx`             |Disable sound effects|
-|`/nosound`           |Disable sound effects|
-|`/timedemo demo3`    |Run benchmark        |
+|`-nosfx`             |Disable sound effects|
+|`-nosound`           |Disable sound effects|
+|`-timedemo demo3`    |Run benchmark        |
 
 ## Building:
 |Platform     |Platform specific code |Compiler                                                                    |Build script|Additional information                              |

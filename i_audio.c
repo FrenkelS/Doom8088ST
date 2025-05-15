@@ -97,7 +97,7 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 
 void I_InitSound(void)
 {
-	if (M_CheckParm("/nosound") || M_CheckParm("/nosfx"))
+	if (M_CheckParm("-nosound") || M_CheckParm("-nosfx"))
 		nosfxparm = true;
 
 	if (nomusicparm && nosfxparm)

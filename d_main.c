@@ -494,7 +494,7 @@ static void D_DoomMainSetup(void)
 
     I_InitGraphics();
 
-    int16_t p = M_CheckParm("/timedemo");
+    int16_t p = M_CheckParm("-timedemo");
     if (p && p < myargc - 1)
     {
         singletics = true;
