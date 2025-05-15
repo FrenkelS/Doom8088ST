@@ -30,20 +30,20 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
  - When there's not enough memory for the intermission screen, the last few frames of gameplay are shown instead
 
 ## Controls:
-|Action                           |Keys         |
-|---------------------------------|-------------|
-|Fire                             |Ctrl         |
-|Use                              |Enter & Space|
-|Sprint                           |Shift        |
-|Walk                             |Arrow keys   |
-|Strafe                           |Alt          |
-|Strafe left and right            |< & >        |
-|Automap                          |Tab          |
-|Automap zoom in and out          |+ & -        |
-|Automap follow mode              |F            |
-|Weapon up and down               |[ & ]        |
-|Menu                             |Esc          |
-|Quit to OS                       |F10          |
+|Action                 |Keys         |
+|-----------------------|-------------|
+|Fire                   |Ctrl         |
+|Use                    |Enter & Space|
+|Sprint                 |Shift        |
+|Walk                   |Arrow keys   |
+|Strafe                 |Alt          |
+|Strafe left and right  |< & >        |
+|Automap                |Tab          |
+|Automap zoom in and out|+ & -        |
+|Automap follow mode    |F            |
+|Weapon up and down     |[ & ]        |
+|Menu                   |Esc          |
+|Quit to OS             |F10          |
 
 ## Cheats:
 |Code      |Effects                  |

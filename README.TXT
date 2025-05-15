@@ -2,13 +2,20 @@ Doom8088: Atari ST Edition
 Doom8088 for Atari ST computers
 https://github.com/FrenkelS/Doom8088ST
 
-Doom was originally designed in 1993 for 32-bit DOS computers with 4 MB of RAM.
-It's mostly written in C code with very little assembly code.
-It has been ported to all kinds of systems.
-Usually these systems are 32-bit or more and have a flat memory model.
+Doom was originally designed in 1993
+for 32-bit DOS computers with
+4 MB of RAM.
+It's mostly written in C code
+with very little assembly code.
+It has been ported to
+all kinds of systems.
+Usually these systems are 32-bit or
+more and have a flat memory model.
 
-Doom8088: Atari ST Edition is a port for Atari ST computers.
-It's based on Doom8088, a port of Doom for 16-bit DOS computers.
+Doom8088: Atari ST Edition is
+a port for Atari ST computers.
+It's based on Doom8088,
+a port of Doom for 16-bit DOS computers.
 
 What's special?
  - Supports only Doom 1 Episode 1
@@ -26,25 +33,27 @@ What's special?
  - No mouse and joystick support
 
 Known bugs:
- - When there's not enough memory for a texture, one color is drawn
- - When there's not enough memory for the intermission screen, the last few frames of gameplay are shown instead
+ - When there's not enough memory for
+   a texture, one color is drawn
+ - When there's not enough memory for
+   the intermission screen, the last few
+   frames of gameplay are shown instead
 
 Controls:
-|Action                           |Keys         |
-|---------------------------------|-------------|
-|Fire                             |Ctrl         |
-|Use                              |Enter & Space|
-|Sprint                           |Shift        |
-|Walk                             |Arrow keys   |
-|Strafe                           |Alt          |
-|Strafe left and right            |< & >        |
-|Automap                          |Tab          |
-|Automap zoom in and out          |+ & -        |
-|Automap follow mode              |F            |
-|Weapon up and down               |[ & ]        |
-|Menu                             |Esc          |
-|Switch palette (CGA version only)|F5           |
-|Quit to OS                       |F10          |
+|Action                 |Keys         |
+|-----------------------|-------------|
+|Fire                   |Ctrl         |
+|Use                    |Enter & Space|
+|Sprint                 |Shift        |
+|Walk                   |Arrow keys   |
+|Strafe                 |Alt          |
+|Strafe left and right  |< & >        |
+|Automap                |Tab          |
+|Automap zoom in and out|+ & -        |
+|Automap follow mode    |F            |
+|Weapon up and down     |[ & ]        |
+|Menu                   |Esc          |
+|Quit to OS             |F10          |
 
 Cheats:
 |Code      |Effects                  |
@@ -66,8 +75,9 @@ Cheats:
 |IDRATE    |Toggle FPS counter       |
 
 Command line arguments:
-|Command line argument|Effect               |
-|---------------------|---------------------|
-|-nosfx               |Disable sound effects|
-|-nosound             |Disable sound effects|
-|-timedemo demo3      |Run benchmark        |
+|Command line   |Effect               |
+|argument       |                     |
+|---------------|---------------------|
+|-nosfx         |Disable sound effects|
+|-nosound       |Disable sound effects|
+|-timedemo demo3|Run benchmark        |
