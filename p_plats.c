@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -266,7 +266,7 @@ static void P_AddActivePlat(plat_t __far* plat)
     if ((list->next = old_head))
         list->next->prev = &list->next;
 
-    list->prev = old_head;
+    list->prev = (platlist_t __far* __far*)old_head;
 }
 
 //
