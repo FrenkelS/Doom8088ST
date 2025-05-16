@@ -429,7 +429,7 @@ static const char * const * myargv;
 int16_t M_CheckParm(char *check)
 {
 	for (int16_t i = 1; i < myargc; i++)
-		if (!stricmp(check, myargv[i]))
+		if (!strcasecmp(check, myargv[i]))
 			return i;
 
 	return 0;
