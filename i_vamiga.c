@@ -178,7 +178,8 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	coplist[COPLIST_IDX_BPL1PTH_VALUE] = addr >> 16;
 	coplist[COPLIST_IDX_BPL1PTL_VALUE] = addr;
 
-	I_UploadNewPalette(0);
+	videomemory += 10;   // center horizontally
+	videomemory += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2; // center vertically
 
 	custom.dmacon = 0x0020;
 	custom.cop1lc = (uint32_t) coplist;
