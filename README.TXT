@@ -73,6 +73,8 @@ Cheats:
 |IDEND     |Show end text            |
 |IDROCKET  |Enemy Rockets (GoldenEye)|
 |IDRATE    |Toggle FPS counter       |
+|          |(Divide by 10 to get the |
+|          | real FPS)               |
 
 Command line arguments:
 |Command line   |Effect               |
