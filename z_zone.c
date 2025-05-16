@@ -24,6 +24,8 @@
 
 #if defined _M_I86
 #include <dos.h>
+#elif defined amiga
+#include <proto/exec.h>
 #elif defined atarist
 #include <mint/osbind.h>
 #endif
@@ -109,7 +111,39 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 }
 
 
-#if defined atarist
+#if defined amiga
+static unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
+{
+	static uint8_t* ptr;
+
+	if (__size == 0xffff)
+	{
+		uint32_t availableMemory = AvailMem(MEMF_PUBLIC);
+		int32_t paragraphs = availableMemory < 1023 * 1024 ? availableMemory / PARAGRAPH_SIZE : 1023 * 1024L / PARAGRAPH_SIZE;
+		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		while (!ptr)
+		{
+			paragraphs--;
+			ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		}
+
+		// align ptr
+		uint32_t m = (uint32_t) ptr;
+		if ((m & (PARAGRAPH_SIZE - 1)) != 0)
+		{
+			paragraphs--;
+			while ((m & (PARAGRAPH_SIZE - 1)) != 0)
+				m = (uint32_t) ++ptr;
+		}
+
+		*__seg = paragraphs;
+	}
+	else
+		*__seg = D_FP_SEG(ptr);
+
+	return 0;
+}
+#elif defined atarist
 static unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 {
 	static uint8_t* ptr;
@@ -133,7 +167,6 @@ static unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 			while ((m & (PARAGRAPH_SIZE - 1)) != 0)
 				m = (uint32_t) ++ptr;
 		}
-
 
 		*__seg = paragraphs;
 	}
