@@ -18,7 +18,7 @@ then
   export OUTPUT=DOOMST2.TOS
 fi
 
-m68k-atari-mintelf-gcc -c i_vast.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
+m68k-atari-mintelf-gcc -c i_vast2.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
@@ -44,8 +44,8 @@ export GLOBOBJS+=" g_game.c"
 export GLOBOBJS+=" hu_stuff.c"
 export GLOBOBJS+=" i_audio.c"
 export GLOBOBJS+=" i_ast.c"
-#export GLOBOBJS+=" i_vast.c"
-export GLOBOBJS+=" i_vast.o"
+#export GLOBOBJS+=" i_vast2.c"
+export GLOBOBJS+=" i_vast2.o"
 export GLOBOBJS+=" info.c"
 export GLOBOBJS+=" m_cheat.c"
 export GLOBOBJS+=" m_menu.c"
@@ -99,7 +99,7 @@ export GLOBOBJS+=" z_zone.o"
 m68k-atari-mintelf-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT
 m68k-atari-mintelf-strip -s atarist/$OUTPUT
 
-rm i_vast.o
+rm i_vast2.o
 rm p_enemy2.o
 rm p_map.o
 rm p_maputl.o

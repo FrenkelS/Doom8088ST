@@ -19,7 +19,7 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Atari ST 640x200 4 color
+ *      Video code for Atari ST 640x200 4 color (2 colors used)
  *
  *-----------------------------------------------------------------------------*/
 

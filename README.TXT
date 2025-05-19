@@ -21,7 +21,7 @@ What's special?
  - Supports only Doom 1 Episode 1
  - Rotating overlaid automap
  - Only demo3 is supported
- - 2 color mode
+ - 16 and 2 color modes
  - PC speaker like sound effects
  - No music
  - No texture mapped floors and ceilings
