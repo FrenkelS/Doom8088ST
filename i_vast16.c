@@ -83,22 +83,22 @@ void I_InitGraphicsHardwareSpecificCode(void)
 {
 	oldrez = Getrez();
 	Setscreen(-1L, -1L, 0);
-	oldcolors[ 0] = Setcolor( 0, 0x000);
-	oldcolors[ 1] = Setcolor( 1, 0x005);
-	oldcolors[ 2] = Setcolor( 2, 0x050);
-	oldcolors[ 3] = Setcolor( 3, 0x055);
-	oldcolors[ 4] = Setcolor( 4, 0x500);
-	oldcolors[ 5] = Setcolor( 5, 0x505);
-	oldcolors[ 6] = Setcolor( 6, 0x520);
-	oldcolors[ 7] = Setcolor( 7, 0x555);
-	oldcolors[ 8] = Setcolor( 8, 0x222);
-	oldcolors[ 9] = Setcolor( 9, 0x227);
-	oldcolors[10] = Setcolor(10, 0x272);
-	oldcolors[11] = Setcolor(11, 0x277);
-	oldcolors[12] = Setcolor(12, 0x722);
-	oldcolors[13] = Setcolor(13, 0x727);
-	oldcolors[14] = Setcolor(14, 0x772);
-	oldcolors[15] = Setcolor(15, 0x777);
+	oldcolors[ 0] = Setcolor( 0, 0x000); //   0   0   0
+	oldcolors[ 1] = Setcolor( 1, 0x002); //   0   0  68
+	oldcolors[ 2] = Setcolor( 2, 0x121); //  51  68  34
+	oldcolors[ 3] = Setcolor( 3, 0x443); // 153 136 102
+	oldcolors[ 4] = Setcolor( 4, 0x300); // 119  17  17
+	oldcolors[ 5] = Setcolor( 5, 0x321); // 119  68  34
+	oldcolors[ 6] = Setcolor( 6, 0x432); // 136 102  85
+	oldcolors[ 7] = Setcolor( 7, 0x555); // 170 170 170
+	oldcolors[ 8] = Setcolor( 8, 0x333); // 102 102 102
+	oldcolors[ 9] = Setcolor( 9, 0x006); //   0   0 204
+	oldcolors[10] = Setcolor(10, 0x141); //  51 136  34
+	oldcolors[11] = Setcolor(11, 0x753); // 238 170 119
+	oldcolors[12] = Setcolor(12, 0x620); // 221  85   0
+	oldcolors[13] = Setcolor(13, 0x606); // 204   0 204
+	oldcolors[14] = Setcolor(14, 0x772); // 255 238  68
+	oldcolors[15] = Setcolor(15, 0x777); // 255 255 255
 
 	videomemory = Physbase();
 	videomemory +=    8;	// center horizontally
