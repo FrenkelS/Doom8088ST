@@ -24,6 +24,7 @@
  *-----------------------------------------------------------------------------*/
 
 #include <stdarg.h>
+#include <time.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -108,19 +109,21 @@ void PCFX_Shutdown(void)
 // Returns time in 1/35th second tics.
 //
 
-static volatile int32_t ticcount;
+static clock_t basetime;
 
 static boolean isTimerSet;
 
 
 int32_t I_GetTime(void)
 {
-	return ticcount++;
+	return (clock() - basetime) * TICRATE / CLOCKS_PER_SEC;
 }
 
 
 void I_InitTimer(void)
 {
+	basetime = clock();
+
 	isTimerSet = true;
 }
 
