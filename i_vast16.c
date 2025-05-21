@@ -43,7 +43,7 @@
 extern const int16_t CENTERY;
 
 
-static uint8_t *_s_screen;
+static uint8_t _s_screen[VIEWWINDOWWIDTH * 4 * SCREENHEIGHT];
 static uint16_t *videomemory;
 
 static uint32_t lut[256];
@@ -110,9 +110,6 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	videomemory = Physbase();
 	videomemory +=    8;	// center horizontally
 	videomemory += 1600;	// center vertically
-
-	_s_screen = Z_MallocStatic(VIEWWINDOWWIDTH * 4 * SCREENHEIGHT);
-	memset(_s_screen, 0, VIEWWINDOWWIDTH * 4 * SCREENHEIGHT);
 
 	int16_t i = 0;
 	for (int16_t y = 0; y < 16; y++)
