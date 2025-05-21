@@ -113,73 +113,41 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		for (int16_t x = 0; x < 16; x++)
 		{
 			uint32_t c = 0;
-			int16_t plane = 1;
-
-			if (plane & x)
-			{
-				if (plane & y)
-					c |= 0xff;
+			if (x & 1)
+				if (y & 1)
+					c |= 0xff000000;
 				else
-					c |= 0x55;
-			}
+					c |= 0x55000000;
 			else
-			{
-				if (plane & y)
-					c |= 0xaa;
-				else
-					c |= 0;
-			}
-			c <<= 8;
-			plane <<= 1;
+				if (y & 1)
+					c |= 0xaa000000;
 
-			if (plane & x)
-			{
-				if (plane & y)
-					c |= 0xff;
+			if (x & 2)
+				if (y & 2)
+					c |= 0x00ff0000;
 				else
-					c |= 0x55;
-			}
+					c |= 0x00550000;
 			else
-			{
-				if (plane & y)
-					c |= 0xaa;
-				else
-					c |= 0;
-			}
-			c <<= 8;
-			plane <<= 1;
+				if (y & 2)
+					c |= 0x00aa0000;
 
-			if (plane & x)
-			{
-				if (plane & y)
-					c |= 0xff;
+			if (x & 4)
+				if (y & 4)
+					c |= 0x0000ff00;
 				else
-					c |= 0x55;
-			}
+					c |= 0x00005500;
 			else
-			{
-				if (plane & y)
-					c |= 0xaa;
-				else
-					c |= 0;
-			}
-			c <<= 8;
-			plane <<= 1;
+				if (y & 4)
+					c |= 0x0000aa00;
 
-			if (plane & x)
-			{
-				if (plane & y)
-					c |= 0xff;
+			if (x & 8)
+				if (y & 8)
+					c |= 0x000000ff;
 				else
-					c |= 0x55;
-			}
+					c |= 0x00000055;
 			else
-			{
-				if (plane & y)
-					c |= 0xaa;
-				else
-					c |= 0;
-			}
+				if (y & 8)
+					c |= 0x000000aa;
 
 			lut[i] = c;
 			i++;
