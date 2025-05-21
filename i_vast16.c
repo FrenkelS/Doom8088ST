@@ -38,6 +38,8 @@
 #include "globdata.h"
 
 
+#define PLANEWIDTH (VIEWWINDOWWIDTH*4)
+
 extern const int16_t CENTERY;
 
 
@@ -163,7 +165,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		lutx[x] = 4 * x - 3 * (x & 1);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
-		luty[y] = y * VIEWWINDOWWIDTH * 4;
+		luty[y] = y * PLANEWIDTH;
 }
 
 
@@ -260,43 +262,43 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 	int16_t l = count >> 4;
 	while (l--)
 	{
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case 14: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case 13: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case 12: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case 11: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case 10: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  9: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  8: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  7: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  6: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  5: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  4: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  3: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
-		case  2: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += VIEWWINDOWWIDTH * 4; frac += fracstep;
+		case 15: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 14: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 13: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 12: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 11: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 10: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  9: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  8: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  7: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  6: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  5: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  4: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  3: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  2: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 		case  1: movep(lut[colormap[source[frac >> COLBITS]]], dest);
 	}
 }
@@ -361,88 +363,88 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 
 	while (l--)
 	{
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
 
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
 
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
 
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color0, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(color1, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
+		movep(color0, dest); dest += PLANEWIDTH;
+		movep(color1, dest); dest += PLANEWIDTH;
 	}
 
 	switch (count & 15)
 	{
-		case 15: movep(color0, &dest[VIEWWINDOWWIDTH * 4 * 14]);
-		case 14: movep(color1, &dest[VIEWWINDOWWIDTH * 4 * 13]);
-		case 13: movep(color0, &dest[VIEWWINDOWWIDTH * 4 * 12]);
-		case 12: movep(color1, &dest[VIEWWINDOWWIDTH * 4 * 11]);
-		case 11: movep(color0, &dest[VIEWWINDOWWIDTH * 4 * 10]);
-		case 10: movep(color1, &dest[VIEWWINDOWWIDTH * 4 *  9]);
-		case  9: movep(color0, &dest[VIEWWINDOWWIDTH * 4 *  8]);
-		case  8: movep(color1, &dest[VIEWWINDOWWIDTH * 4 *  7]);
-		case  7: movep(color0, &dest[VIEWWINDOWWIDTH * 4 *  6]);
-		case  6: movep(color1, &dest[VIEWWINDOWWIDTH * 4 *  5]);
-		case  5: movep(color0, &dest[VIEWWINDOWWIDTH * 4 *  4]);
-		case  4: movep(color1, &dest[VIEWWINDOWWIDTH * 4 *  3]);
-		case  3: movep(color0, &dest[VIEWWINDOWWIDTH * 4 *  2]);
-		case  2: movep(color1, &dest[VIEWWINDOWWIDTH * 4 *  1]);
-		case  1: movep(color0, &dest[VIEWWINDOWWIDTH * 4 *  0]);
+		case 15: movep(color0, &dest[PLANEWIDTH * 14]);
+		case 14: movep(color1, &dest[PLANEWIDTH * 13]);
+		case 13: movep(color0, &dest[PLANEWIDTH * 12]);
+		case 12: movep(color1, &dest[PLANEWIDTH * 11]);
+		case 11: movep(color0, &dest[PLANEWIDTH * 10]);
+		case 10: movep(color1, &dest[PLANEWIDTH *  9]);
+		case  9: movep(color0, &dest[PLANEWIDTH *  8]);
+		case  8: movep(color1, &dest[PLANEWIDTH *  7]);
+		case  7: movep(color0, &dest[PLANEWIDTH *  6]);
+		case  6: movep(color1, &dest[PLANEWIDTH *  5]);
+		case  5: movep(color0, &dest[PLANEWIDTH *  4]);
+		case  4: movep(color1, &dest[PLANEWIDTH *  3]);
+		case  3: movep(color0, &dest[PLANEWIDTH *  2]);
+		case  2: movep(color1, &dest[PLANEWIDTH *  1]);
+		case  1: movep(color0, &dest[PLANEWIDTH *  0]);
 	}
 #else
 	uint32_t c = lut[color];
 
 	while (l--)
 	{
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
 
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
 
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
 
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
-		movep(c, dest); dest += VIEWWINDOWWIDTH * 4;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
+		movep(c, dest); dest += PLANEWIDTH;
 	}
 
 	switch (count & 15)
 	{
-		case 15: movep(c, &dest[VIEWWINDOWWIDTH * 4 * 14]);
-		case 14: movep(c, &dest[VIEWWINDOWWIDTH * 4 * 13]);
-		case 13: movep(c, &dest[VIEWWINDOWWIDTH * 4 * 12]);
-		case 12: movep(c, &dest[VIEWWINDOWWIDTH * 4 * 11]);
-		case 11: movep(c, &dest[VIEWWINDOWWIDTH * 4 * 10]);
-		case 10: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  9]);
-		case  9: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  8]);
-		case  8: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  7]);
-		case  7: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  6]);
-		case  6: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  5]);
-		case  5: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  4]);
-		case  4: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  3]);
-		case  3: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  2]);
-		case  2: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  1]);
-		case  1: movep(c, &dest[VIEWWINDOWWIDTH * 4 *  0]);
+		case 15: movep(c, &dest[PLANEWIDTH * 14]);
+		case 14: movep(c, &dest[PLANEWIDTH * 13]);
+		case 13: movep(c, &dest[PLANEWIDTH * 12]);
+		case 12: movep(c, &dest[PLANEWIDTH * 11]);
+		case 11: movep(c, &dest[PLANEWIDTH * 10]);
+		case 10: movep(c, &dest[PLANEWIDTH *  9]);
+		case  9: movep(c, &dest[PLANEWIDTH *  8]);
+		case  8: movep(c, &dest[PLANEWIDTH *  7]);
+		case  7: movep(c, &dest[PLANEWIDTH *  6]);
+		case  6: movep(c, &dest[PLANEWIDTH *  5]);
+		case  5: movep(c, &dest[PLANEWIDTH *  4]);
+		case  4: movep(c, &dest[PLANEWIDTH *  3]);
+		case  3: movep(c, &dest[PLANEWIDTH *  2]);
+		case  2: movep(c, &dest[PLANEWIDTH *  1]);
+		case  1: movep(c, &dest[PLANEWIDTH *  0]);
 	}
 #endif
 }
@@ -495,7 +497,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	do
 	{
 		movep(lut[fuzzcolors[fuzzpos]], dest);
-		dest += VIEWWINDOWWIDTH * 4;
+		dest += PLANEWIDTH;
 
 		fuzzpos++;
 		if (fuzzpos >= FUZZTABLE)
@@ -596,7 +598,7 @@ void V_DrawBackground(int16_t backgroundnum)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH * 4; x += 32)
 		{
-			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH * 4 + x];
+			uint8_t *d = &_s_screen[y * PLANEWIDTH + x];
 			const byte *s = &src[((y & 63) * 32)];
 
 			size_t len = 32;
@@ -616,7 +618,7 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 {
 	const uint8_t *lump = W_TryGetLumpByNum(num);
 
-	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH * 4;
+	offset = (offset / SCREENWIDTH) * PLANEWIDTH;
 
 	if (lump != NULL)
 	{
@@ -657,48 +659,48 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		while (column->topdelta != 0xff)
 		{
 			const byte *source = (const byte *)column + 3;
-			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH * 4);
+			byte *dest = desttop + (column->topdelta * PLANEWIDTH);
 
 			uint16_t count = column->length;
 
 			if (count == 7)
 			{
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				setPixelAB(dest, bit, *source++);
 			}
 			else if (count == 3)
 			{
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				setPixelAB(dest, bit, *source++);
 			}
 			else if (count == 5)
 			{
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				setPixelAB(dest, bit, *source++);
 			}
 			else if (count == 6)
 			{
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
-				setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				setPixelAB(dest, bit, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					setPixelAB(dest, bit, *source++); dest += VIEWWINDOWWIDTH * 4;
+					setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				}
 			}
 
@@ -763,7 +765,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			while (count--)
 			{
 				setPixelAB(dest, bit, source[frac >> 8]);
-				dest += VIEWWINDOWWIDTH * 4;
+				dest += PLANEWIDTH;
 				frac += DYI;
 			}
 
@@ -824,8 +826,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 					d[2] = s[2];
 					d[4] = s[4];
 					d[6] = s[6];
-					d += -VIEWWINDOWWIDTH * 4;
-					s += -VIEWWINDOWWIDTH * 4;
+					d += -PLANEWIDTH;
+					s += -PLANEWIDTH;
 				}
 
 				// copy new screen. We need to copy only between y_lookup and + dy y_lookup
@@ -838,8 +840,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 					d[2] = s[2];
 					d[4] = s[4];
 					d[6] = s[6];
-					d += VIEWWINDOWWIDTH * 4;
-					s += VIEWWINDOWWIDTH * 4;
+					d += PLANEWIDTH;
+					s += PLANEWIDTH;
 				}
 
 				wipe_y_lookup[i] += dy;
