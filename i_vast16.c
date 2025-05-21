@@ -38,13 +38,18 @@
 #include "globdata.h"
 
 
-#define PLANEWIDTH (VIEWWINDOWWIDTH*4)
+#define PLANEWIDTH 160
 
 extern const int16_t CENTERY;
 
 
-static uint8_t _s_screen[VIEWWINDOWWIDTH * 4 * SCREENHEIGHT];
-static uint16_t *videomemory;
+static uint8_t mem_chunk1[320 * 200 / 2 + 256];
+static uint8_t mem_chunk2[320 * 200 / 2 + 256];
+static uint16_t page;
+static uint8_t *page0;
+static uint8_t *page1;
+static uint8_t *page2;
+static uint8_t *_s_screen;
 
 static uint32_t lut[256];
 
@@ -107,9 +112,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	oldcolors[14] = Setcolor(14, 0x772); // 255 238  68
 	oldcolors[15] = Setcolor(15, 0x777); // 255 255 255
 
-	videomemory = Physbase();
-	videomemory +=    8;	// center horizontally
-	videomemory += 1600;	// center vertically
+	page0 = Physbase();
+	page1 = (uint8_t *)(((uint32_t)mem_chunk1 | 0xff) + 1);
+	page2 = (uint8_t *)(((uint32_t)mem_chunk2 | 0xff) + 1);
+	page = 1;
+	_s_screen = page1;
 
 	int16_t i = 0;
 	for (int16_t y = 0; y < 16; y++)
@@ -168,39 +175,9 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
-	Setscreen(-1L, -1L, oldrez);
+	Setscreen(-1L, page0, oldrez);
 	for (int16_t c = 0; c < 16; c++)
 		Setcolor(c, oldcolors[c]);
-}
-
-
-static boolean drawStatusBar = true;
-
-
-static void I_DrawBuffer(uint8_t *buffer)
-{
-	uint16_t *src = (uint16_t *)buffer;
-	uint16_t *dst = videomemory;
-
-	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT); y++)
-	{
-		for (int16_t x = 0; x < VIEWWINDOWWIDTH * 4 / 2; x++)
-			*dst++ = *src++;
-
-		dst += 20;
-	}
-
-	if (drawStatusBar)
-	{
-		for (int16_t y = 0; y < ST_HEIGHT; y++)
-		{
-			for (int16_t x = 0; x < VIEWWINDOWWIDTH * 4 / 2; x++)
-				*dst++ = *src++;
-
-			dst += 20;
-		}
-	}
-	drawStatusBar = true;
 }
 
 
@@ -215,15 +192,55 @@ void I_SetPalette(int8_t p)
 
 #define NO_PALETTE_CHANGE 100
 
+static int16_t st_needrefresh = 0;
+
 void I_FinishUpdate(void)
 {
+	// palette
 	if (newpal != NO_PALETTE_CHANGE)
 	{
 		I_UploadNewPalette(newpal);
 		newpal = NO_PALETTE_CHANGE;
 	}
 
-	I_DrawBuffer(_s_screen);
+	// status bar
+	if (st_needrefresh)
+	{
+		st_needrefresh--;
+
+		if (st_needrefresh != 2)
+		{
+			uint8_t *s;
+			if (page == 0)
+				s = page2;
+			else if (page == 1)
+				s = page0;
+			else
+				s = page1;
+			uint8_t *d = _s_screen;
+			s += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
+			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
+			for (int16_t y = 0; y < ST_HEIGHT; y++)
+			{
+				memcpy(d, s, VIEWWINDOWWIDTH * 4);
+				s += PLANEWIDTH;
+				d += PLANEWIDTH;
+			}
+		}
+	}
+
+	// page flip
+	Setscreen(-1L, _s_screen, -1L);
+	page++;
+	if (page == 3)
+		page = 0;
+
+	if (page == 0)
+		_s_screen = page0;
+	else if (page == 1)
+		_s_screen = page1;
+	else
+		_s_screen = page2;
 }
 
 
@@ -505,7 +522,8 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
-	memset(_s_screen, 0, VIEWWINDOWWIDTH * 4 * (SCREENHEIGHT - ST_HEIGHT));
+	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWWIDTH * 4);
 }
 
 
@@ -615,25 +633,31 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 {
 	const uint8_t *lump = W_TryGetLumpByNum(num);
 
-	offset = (offset / SCREENWIDTH) * PLANEWIDTH;
-
 	if (lump != NULL)
 	{
+		offset = (offset / SCREENWIDTH) * PLANEWIDTH;
+		const uint8_t *src = lump;
+		uint8_t *dest = &_s_screen[offset];
 		uint16_t lumpLength = W_LumpLength(num);
-		memcpy(&_s_screen[offset], lump, lumpLength);
+		while (lumpLength)
+		{
+			memcpy(dest, src, VIEWWINDOWWIDTH * 4);
+			src  += VIEWWINDOWWIDTH * 4;
+			dest += PLANEWIDTH;
+			lumpLength -= VIEWWINDOWWIDTH * 4;
+		}
 		Z_ChangeTagToCache(lump);
 	}
-	else
-		W_ReadLumpByNum(num, &_s_screen[offset]);
 }
 
 
 void ST_Drawer(void)
 {
 	if (ST_NeedUpdate())
+	{
 		ST_doRefresh();
-	else
-		drawStatusBar = false;
+		st_needrefresh = 3; // 3 screen pages
+	}
 }
 
 
@@ -778,9 +802,7 @@ static int16_t *wipe_y_lookup;
 
 void wipe_StartScreen(void)
 {
-	frontbuffer = Z_TryMallocStatic(VIEWWINDOWWIDTH * 4 * SCREENHEIGHT);
-	if (frontbuffer)
-		memcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * 4 * SCREENHEIGHT);
+	// Do nothing
 }
 
 
@@ -792,7 +814,6 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 	while (ticks--)
 	{
-		I_DrawBuffer(frontbuffer);
 		for (int16_t i = 0; i < VIEWWINDOWWIDTH; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
@@ -872,8 +893,12 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
-	if (!frontbuffer)
-		return;
+	if (page == 0)
+		frontbuffer = page2;
+	else if (page == 1)
+		frontbuffer = page0;
+	else
+		frontbuffer = page1;
 
 	wipe_initMelt();
 
