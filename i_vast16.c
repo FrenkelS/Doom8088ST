@@ -46,6 +46,11 @@ static uint16_t *videomemory;
 
 static uint32_t lut[256];
 
+static int16_t lutx[VIEWWINDOWWIDTH];
+static int16_t luty[SCREENHEIGHT];
+#define OFFSET(x,y) (lutx[(x)]+luty[(y)])
+
+
 static  int16_t oldrez;
 static uint16_t oldcolors[16];
 
@@ -153,6 +158,12 @@ void I_InitGraphicsHardwareSpecificCode(void)
 			i++;
 		}
 	}
+
+	for (int16_t x = 0; x < VIEWWINDOWWIDTH; x++)
+		lutx[x] = 4 * x - 3 * (x & 1);
+
+	for (int16_t y = 0; y < SCREENHEIGHT; y++)
+		luty[y] = y * VIEWWINDOWWIDTH * 4;
 }
 
 
@@ -224,9 +235,6 @@ static const uint8_t* colormap;
 
 static const uint8_t *source;
 static       uint8_t *dst;
-
-
-#define OFFSET(x,y) ((y)*VIEWWINDOWWIDTH*4+4*(x)-(((x)&1)*3))
 
 
 static void movep(uint32_t d, uint8_t *a)
