@@ -38,6 +38,17 @@
 
 #include "config.h"
 
+
+#if defined _M_I86
+#include <dos.h>
+#else
+unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg);
+#endif
+
+
+#define PARAGRAPH_SIZE 16
+
+
 void I_InitTimer(void);
 int32_t I_GetTime(void);
 
