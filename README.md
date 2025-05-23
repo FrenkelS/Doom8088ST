@@ -74,7 +74,7 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 ## Building:
 |Platform     |Platform specific code |Compiler                                                                      |Build script|Additional information                              |
 |-------------|-----------------------|------------------------------------------------------------------------------|------------|----------------------------------------------------|
-|Atari ST     |`i_ast.c`, `i_vast.c`  |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`batari.sh` |640x200 4 colors resolution, only 2 colors are used |
+|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`  |640x200 4 colors mode, only 2 colors are used       |
 |IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh` |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
