@@ -43,8 +43,7 @@
 extern const int16_t CENTERY;
 
 
-static uint8_t mem_chunk1[320 * 200 / 2 + 256];
-static uint8_t mem_chunk2[320 * 200 / 2 + 256];
+static uint8_t mem_chunk[2 * 320 * 200 / 2 + 256];
 static uint16_t page;
 static uint8_t *page0;
 static uint8_t *page1;
@@ -113,8 +112,8 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	oldcolors[15] = Setcolor(15, 0x777); // 255 255 255
 
 	page0 = Physbase();
-	page1 = (uint8_t *)(((uint32_t)mem_chunk1 | 0xff) + 1);
-	page2 = (uint8_t *)(((uint32_t)mem_chunk2 | 0xff) + 1);
+	page1 = (uint8_t *)(((uint32_t)mem_chunk | 0xff) + 1);
+	page2 = page1 + (320 * 200 / 2);
 	page = 1;
 	_s_screen = page1;
 
