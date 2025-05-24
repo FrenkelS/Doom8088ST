@@ -427,11 +427,6 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 		uint32_t ll = (uint32_t) alw * blw;
 		 int32_t hl = ( int32_t) ahw * blw;
 		return (ll >> FRACBITS) + hl;
-	} else if (alw == 0) {
-		//return ahw * b;
-		 int32_t hl = ( int32_t) ahw * blw;
-		 int32_t hh = ( int32_t) ahw * bhw;
-		return hl + (hh << FRACBITS);
 	} else {
 		uint32_t ll = (uint32_t) alw * blw;
 		 int32_t hl = ( int32_t) ahw * blw;
