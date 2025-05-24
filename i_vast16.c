@@ -679,7 +679,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		while (column->topdelta != 0xff)
 		{
 			const byte *source = (const byte *)column + 3;
-			byte *dest = desttop + (column->topdelta * PLANEWIDTH);
+			byte *dest = desttop + luty[column->topdelta];
 
 			uint16_t count = column->length;
 
