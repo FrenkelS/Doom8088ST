@@ -19,7 +19,7 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Atari ST 320x200 16 color, 30x128 effective resolution
+ *      Video code for Atari ST 320x200 16 color, 60x128 effective resolution
  *
  *-----------------------------------------------------------------------------*/
 
@@ -52,7 +52,7 @@ static uint8_t *_s_screen;
 
 static uint32_t lutc[256];
 
-static int16_t lutx[VIEWWINDOWWIDTH];
+static int16_t lutx[VIEWWINDOWWIDTH / 2];
 static int16_t luty[SCREENHEIGHT];
 #define OFFSET(x,y) (lutx[(x)]+luty[(y)])
 
@@ -142,7 +142,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		}
 	}
 
-	for (int16_t x = 0; x < VIEWWINDOWWIDTH; x++)
+	for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
 		lutx[x] = 4 * x - 3 * (x & 1);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
@@ -199,7 +199,7 @@ void I_FinishUpdate(void)
 			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
 			for (int16_t y = 0; y < ST_HEIGHT; y++)
 			{
-				memcpy(d, s, VIEWWINDOWWIDTH * 4);
+				memcpy(d, s, VIEWWINDOWWIDTH / 2 * 4);
 				s += PLANEWIDTH;
 				d += PLANEWIDTH;
 			}
@@ -228,21 +228,41 @@ static const uint8_t* colormap;
 
 static const uint8_t *source;
 static       uint8_t *dst;
-
+static boolean odd;
 
 static void movep(uint32_t d, uint8_t *a)
 {
-#if 1
+#if 0
 	asm (
 		"movep.l %0, 0(%1)"
 		:
 		: "d"(d), "a"(a)
 	);
 #else
-	a[0] = (d >> 24) & 0xff;
-	a[2] = (d >> 16) & 0xff;
-	a[4] = (d >>  8) & 0xff;
-	a[6] = (d >>  0) & 0xff;
+	if (odd)
+	{
+		a[0] &= 0xf0;
+		a[2] &= 0xf0;
+		a[4] &= 0xf0;
+		a[6] &= 0xf0;
+		d &= 0x0f0f0f0f;
+		a[0] |= (d >> 24) & 0xff;
+		a[2] |= (d >> 16) & 0xff;
+		a[4] |= (d >>  8) & 0xff;
+		a[6] |= (d >>  0) & 0xff;
+	}
+	else
+	{
+		a[0] &= 0x0f;
+		a[2] &= 0x0f;
+		a[4] &= 0x0f;
+		a[6] &= 0x0f;
+		d &= 0xf0f0f0f0;
+		a[0] |= (d >> 24) & 0xff;
+		a[2] |= (d >> 16) & 0xff;
+		a[4] |= (d >>  8) & 0xff;
+		a[6] |= (d >>  0) & 0xff;
+	}
 #endif
 }
 
@@ -309,7 +329,8 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 
 	colormap = dcvars->colormap;
 
-	dst = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+	dst = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
 
 	const uint16_t fracstep = dcvars->fracstep;
 	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
@@ -405,7 +426,8 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	dst = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+	dst = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
 
 	R_DrawColumnFlat2(color, dcvars->yl, count);
 }
@@ -437,7 +459,8 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
 
 	static int16_t fuzzpos = 0;
 
@@ -456,7 +479,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 void V_ClearViewWindow(void)
 {
 	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWWIDTH * 4);
+		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWWIDTH / 2 * 4);
 }
 
 
@@ -544,15 +567,15 @@ void V_DrawBackground(int16_t backgroundnum)
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
-		for (int16_t x = 0; x < VIEWWINDOWWIDTH * 4; x += 32)
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2* 4; x += 32)
 		{
 			uint8_t *d = &_s_screen[y * PLANEWIDTH + x];
 			const byte *s = &src[((y & 63) * 32)];
 
 			size_t len = 32;
 
-			if (VIEWWINDOWWIDTH * 4 - x < 32)
-				len = VIEWWINDOWWIDTH * 4 - x;
+			if (VIEWWINDOWWIDTH / 2 * 4 - x < 32)
+				len = VIEWWINDOWWIDTH / 2 * 4 - x;
 
 			memcpy(d, s, len);
 		}
@@ -574,10 +597,10 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 		uint16_t lumpLength = W_LumpLength(num);
 		while (lumpLength)
 		{
-			memcpy(dest, src, VIEWWINDOWWIDTH * 4);
-			src  += VIEWWINDOWWIDTH * 4;
+			memcpy(dest, src, VIEWWINDOWWIDTH / 2 * 4);
+			src  += VIEWWINDOWWIDTH / 2 * 4;
 			dest += PLANEWIDTH;
-			lumpLength -= VIEWWINDOWWIDTH * 4;
+			lumpLength -= VIEWWINDOWWIDTH / 2 * 4;
 		}
 		Z_ChangeTagToCache(lump);
 	}
@@ -724,7 +747,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 	while (ticks--)
 	{
-		for (int16_t i = 0; i < VIEWWINDOWWIDTH; i++)
+		for (int16_t i = 0; i < VIEWWINDOWWIDTH / 2; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
 			{
@@ -784,10 +807,10 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 static void wipe_initMelt()
 {
-	wipe_y_lookup = Z_MallocStatic(VIEWWINDOWWIDTH * sizeof(int16_t));
+	wipe_y_lookup = Z_MallocStatic(VIEWWINDOWWIDTH / 2 * sizeof(int16_t));
 
 	wipe_y_lookup[0] = -(M_Random() % 16);
-	for (int16_t i = 1; i < VIEWWINDOWWIDTH; i++)
+	for (int16_t i = 1; i < VIEWWINDOWWIDTH / 2; i++)
 	{
 		int16_t r = (M_Random() % 3) - 1;
 
