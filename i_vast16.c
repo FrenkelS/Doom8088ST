@@ -359,7 +359,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 	uint8_t *dest = dst;
 	int16_t l = count >> 4;
 
-#if 1
 	uint32_t color0;
 	uint32_t color1;
 
@@ -415,51 +414,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 		case  2: movep(color1, &dest[PLANEWIDTH *  1]);
 		case  1: movep(color0, &dest[PLANEWIDTH *  0]);
 	}
-#else
-	uint32_t c = lutc[color];
-
-	while (l--)
-	{
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-		movep(c, dest); dest += PLANEWIDTH;
-	}
-
-	switch (count & 15)
-	{
-		case 15: movep(c, &dest[PLANEWIDTH * 14]);
-		case 14: movep(c, &dest[PLANEWIDTH * 13]);
-		case 13: movep(c, &dest[PLANEWIDTH * 12]);
-		case 12: movep(c, &dest[PLANEWIDTH * 11]);
-		case 11: movep(c, &dest[PLANEWIDTH * 10]);
-		case 10: movep(c, &dest[PLANEWIDTH *  9]);
-		case  9: movep(c, &dest[PLANEWIDTH *  8]);
-		case  8: movep(c, &dest[PLANEWIDTH *  7]);
-		case  7: movep(c, &dest[PLANEWIDTH *  6]);
-		case  6: movep(c, &dest[PLANEWIDTH *  5]);
-		case  5: movep(c, &dest[PLANEWIDTH *  4]);
-		case  4: movep(c, &dest[PLANEWIDTH *  3]);
-		case  3: movep(c, &dest[PLANEWIDTH *  2]);
-		case  2: movep(c, &dest[PLANEWIDTH *  1]);
-		case  1: movep(c, &dest[PLANEWIDTH *  0]);
-	}
-#endif
 }
 
 
