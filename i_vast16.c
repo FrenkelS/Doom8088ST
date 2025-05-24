@@ -50,7 +50,7 @@ static uint8_t *page1;
 static uint8_t *page2;
 static uint8_t *_s_screen;
 
-static uint32_t lut[256];
+static uint32_t lutc[256];
 
 static int16_t lutx[VIEWWINDOWWIDTH];
 static int16_t luty[SCREENHEIGHT];
@@ -159,7 +159,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 				if (y & 8)
 					c |= 0x000000aa;
 
-			lut[i] = c;
+			lutc[i] = c;
 			i++;
 		}
 	}
@@ -275,44 +275,44 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 	int16_t l = count >> 4;
 	while (l--)
 	{
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 14: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 13: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 12: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 11: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 10: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  9: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  8: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  7: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  6: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  5: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  4: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  3: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  2: movep(lut[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  1: movep(lut[colormap[source[frac >> COLBITS]]], dest);
+		case 15: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 14: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 13: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 12: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 11: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 10: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  9: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  8: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  7: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  6: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  5: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  4: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  3: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  2: movep(lutc[colormap[source[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  1: movep(lutc[colormap[source[frac >> COLBITS]]], dest);
 	}
 }
 
@@ -365,13 +365,13 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 
 	if (yl & 1)
 	{
-		color0 = lut[swapNibbles(color)];
-		color1 = lut[color];
+		color0 = lutc[swapNibbles(color)];
+		color1 = lutc[color];
 	}
 	else
 	{
-		color0 = lut[color];
-		color1 = lut[swapNibbles(color)];
+		color0 = lutc[color];
+		color1 = lutc[swapNibbles(color)];
 	}
 
 	while (l--)
@@ -416,7 +416,7 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 		case  1: movep(color0, &dest[PLANEWIDTH *  0]);
 	}
 #else
-	uint32_t c = lut[color];
+	uint32_t c = lutc[color];
 
 	while (l--)
 	{
@@ -509,7 +509,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 	do
 	{
-		movep(lut[fuzzcolors[fuzzpos]], dest);
+		movep(lutc[fuzzcolors[fuzzpos]], dest);
 		dest += PLANEWIDTH;
 
 		fuzzpos++;
