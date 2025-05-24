@@ -123,41 +123,19 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		for (int16_t x = 0; x < 16; x++)
 		{
 			uint32_t c = 0;
-			if (x & 1)
-				if (y & 1)
-					c |= 0xff000000;
+			int16_t plane = 1;
+			for (int16_t p = 1; p <= 4; p++)
+			{
+				if (x & plane)
+					if (y & plane)
+						c |= (0x000000ff << (8 * (4 - p)));
+					else
+						c |= (0x00000055 << (8 * (4 - p)));
 				else
-					c |= 0x55000000;
-			else
-				if (y & 1)
-					c |= 0xaa000000;
-
-			if (x & 2)
-				if (y & 2)
-					c |= 0x00ff0000;
-				else
-					c |= 0x00550000;
-			else
-				if (y & 2)
-					c |= 0x00aa0000;
-
-			if (x & 4)
-				if (y & 4)
-					c |= 0x0000ff00;
-				else
-					c |= 0x00005500;
-			else
-				if (y & 4)
-					c |= 0x0000aa00;
-
-			if (x & 8)
-				if (y & 8)
-					c |= 0x000000ff;
-				else
-					c |= 0x00000055;
-			else
-				if (y & 8)
-					c |= 0x000000aa;
+					if (y & plane)
+						c |= (0x000000aa << (8 * (4 - p)));
+				plane <<= 1;
+			}
 
 			lutc[i] = c;
 			i++;
