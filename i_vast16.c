@@ -693,29 +693,6 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
 				setPixelAB(dest, bit, *source++);
 			}
-			else if (count == 3)
-			{
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++);
-			}
-			else if (count == 5)
-			{
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++);
-			}
-			else if (count == 6)
-			{
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++);
-			}
 			else
 			{
 				while (count--)
