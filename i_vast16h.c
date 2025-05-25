@@ -45,10 +45,8 @@ extern const int16_t CENTERY;
 
 
 static uint8_t mem_chunk[2 * 320 * 200 / 2 + 256];
-static uint16_t page;
-static uint8_t *page0;
-static uint8_t *page1;
-static uint8_t *page2;
+static int16_t page;
+static uint8_t *pages[3];
 static uint8_t *_s_screen;
 
 static uint32_t lutc[256];
@@ -112,11 +110,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	oldcolors[14] = Setcolor(14, 0x772); // 255 238  68
 	oldcolors[15] = Setcolor(15, 0x777); // 255 255 255
 
-	page0 = Physbase();
-	page1 = (uint8_t *)(((uint32_t)mem_chunk | 0xff) + 1);
-	page2 = page1 + (320 * 200 / 2);
+	pages[0] = Physbase();
+	pages[1] = (uint8_t *)(((uint32_t)mem_chunk | 0xff) + 1);
+	pages[2] = pages[1] + (320 * 200 / 2);
 	page = 1;
-	_s_screen = page1;
+	_s_screen = pages[page] + PLANEWIDTH * 20 + 16;
 
 	int16_t i = 0;
 	for (int16_t y = 0; y < 16; y++)
@@ -153,7 +151,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
-	Setscreen(-1L, page0, oldrez);
+	Setscreen(-1L, pages[0], oldrez);
 	for (int16_t c = 0; c < 16; c++)
 		Setcolor(c, oldcolors[c]);
 }
@@ -188,13 +186,11 @@ void I_FinishUpdate(void)
 
 		if (st_needrefresh != 2)
 		{
-			uint8_t *s;
-			if (page == 0)
-				s = page2;
-			else if (page == 1)
-				s = page0;
-			else
-				s = page1;
+			int16_t prevpage = page - 1;
+			if (prevpage == -1)
+				prevpage = 2;
+
+			uint8_t *s = pages[prevpage] + PLANEWIDTH * 20 + 16;
 			uint8_t *d = _s_screen;
 			s += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
 			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
@@ -208,17 +204,12 @@ void I_FinishUpdate(void)
 	}
 
 	// page flip
-	Setscreen(-1L, _s_screen, -1L);
+	Setscreen(-1L, pages[page], -1L);
 	page++;
 	if (page == 3)
 		page = 0;
 
-	if (page == 0)
-		_s_screen = page0;
-	else if (page == 1)
-		_s_screen = page1;
-	else
-		_s_screen = page2;
+	_s_screen = pages[page] + PLANEWIDTH * 20 + 16;
 }
 
 
@@ -760,7 +751,6 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
 				uint8_t *s = &frontbuffer[OFFSET(i, SCREENHEIGHT - dy - 1)];
-
 				uint8_t *d = &frontbuffer[OFFSET(i, SCREENHEIGHT - 1)];
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
@@ -821,12 +811,11 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
-	if (page == 0)
-		frontbuffer = page2;
-	else if (page == 1)
-		frontbuffer = page0;
-	else
-		frontbuffer = page1;
+	int16_t prevpage = page - 1;
+	if (prevpage == -1)
+		prevpage = 2;
+
+	frontbuffer = pages[prevpage] + PLANEWIDTH * 20 + 16;
 
 	wipe_initMelt();
 
