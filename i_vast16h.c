@@ -496,7 +496,7 @@ void V_ShutdownDrawLine(void)
 }
 
 
-static void setPixelAB(uint8_t *address, uint8_t bit, uint8_t color)
+static void setPixel(uint8_t *address, uint8_t bit, uint8_t color)
 {
 	if (color & 1)
 		address[0] |=  bit;
@@ -520,14 +520,6 @@ static void setPixelAB(uint8_t *address, uint8_t bit, uint8_t color)
 }
 
 
-static void setPixelXY(int16_t x, int16_t y, int8_t color)
-{
-	uint8_t *address = &_s_screen[OFFSET(x >> 3, y)];
-	uint8_t bit = 0x80 >> (x & 7);
-	setPixelAB(address, bit, color);
-}
-
-
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
 	int16_t dx = abs(x1 - x0);
@@ -540,7 +532,9 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	while (true)
 	{
-		setPixelXY(x0, y0, color);
+		uint8_t *address = &_s_screen[OFFSET(x0 >> 3, y0)];
+		uint8_t bit = 0x80 >> (x0 & 7);
+		setPixel(address, bit, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -643,19 +637,19 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixelAB(dest, bit, *source++);
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+				setPixel(dest, bit, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					setPixelAB(dest, bit, *source++); dest += PLANEWIDTH;
+					setPixel(dest, bit, *source++); dest += PLANEWIDTH;
 				}
 			}
 
@@ -719,7 +713,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
 			{
-				setPixelAB(dest, bit, source[frac >> 8]);
+				setPixel(dest, bit, source[frac >> 8]);
 				dest += PLANEWIDTH;
 				frac += DYI;
 			}
