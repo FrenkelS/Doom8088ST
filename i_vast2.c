@@ -188,17 +188,31 @@ void I_FinishUpdate(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-static const uint8_t* colormap;
 
-static const uint8_t *source;
-static       uint8_t *dst;
+#define OFFSET(x,y) ((y)*PLANEWIDTH+2*(x)-((x)&1))
 
 
-static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
+void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	const uint8_t *colmap = colormap;
-	const uint8_t *src = source;
-	uint8_t *dest = dst;
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	const uint8_t *src = dcvars->source;
+
+	const uint8_t *colmap = dcvars->colormap;
+
+	uint8_t *dest = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
+
+	const uint16_t fracstep = dcvars->fracstep;
+	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
+
+	// Inner loop that does the actual texture mapping,
+	//  e.g. a DDA-lile scaling.
+	// This is as fast as it gets.
+
 	int16_t l = count >> 4;
 	while (l--)
 	{
@@ -244,34 +258,6 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 }
 
 
-#define OFFSET(x,y) ((y)*PLANEWIDTH+2*(x)-((x)&1))
-
-
-void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	source = dcvars->source;
-
-	colormap = dcvars->colormap;
-
-	dst = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
-
-	const uint16_t fracstep = dcvars->fracstep;
-	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
-
-	// Inner loop that does the actual texture mapping,
-	//  e.g. a DDA-lile scaling.
-	// This is as fast as it gets.
-
-	R_DrawColumn2(fracstep, frac, count);
-}
-
-
 void R_DrawColumnWall(const draw_column_vars_t *dcvars)
 {
 	R_DrawColumnSprite(dcvars);
@@ -284,13 +270,20 @@ static uint8_t swapNibbles(uint8_t color)
 }
 
 
-static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
+void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	uint8_t *dest = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
+
 	uint8_t color0;
 	uint8_t color1;
-	uint8_t *dest = dst;
 
-	if (yl & 1)
+	if (dcvars->yl & 1)
 	{
 		color0 = swapNibbles(color);
 		color1 = color;
@@ -344,20 +337,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 		case  2: dest[PLANEWIDTH *  1] = color1;
 		case  1: dest[PLANEWIDTH *  0] = color0;
 	}
-}
-
-
-void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	dst = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
-
-	R_DrawColumnFlat2(color, dcvars->yl, count);
 }
 
 
