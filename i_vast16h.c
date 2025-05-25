@@ -38,7 +38,8 @@
 #include "globdata.h"
 
 
-#define PLANEWIDTH 160
+#define PLANEWIDTH				160
+#define VIEWWINDOWPLANEWIDTH	120
 
 extern const int16_t CENTERY;
 
@@ -199,7 +200,7 @@ void I_FinishUpdate(void)
 			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
 			for (int16_t y = 0; y < ST_HEIGHT; y++)
 			{
-				memcpy(d, s, VIEWWINDOWWIDTH / 2 * 4);
+				memcpy(d, s, VIEWWINDOWPLANEWIDTH);
 				s += PLANEWIDTH;
 				d += PLANEWIDTH;
 			}
@@ -479,7 +480,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 void V_ClearViewWindow(void)
 {
 	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWWIDTH / 2 * 4);
+		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWPLANEWIDTH);
 }
 
 
@@ -567,15 +568,15 @@ void V_DrawBackground(int16_t backgroundnum)
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
-		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2* 4; x += 32)
+		for (int16_t x = 0; x < VIEWWINDOWPLANEWIDTH; x += 32)
 		{
 			uint8_t *d = &_s_screen[y * PLANEWIDTH + x];
 			const byte *s = &src[((y & 63) * 32)];
 
 			size_t len = 32;
 
-			if (VIEWWINDOWWIDTH / 2 * 4 - x < 32)
-				len = VIEWWINDOWWIDTH / 2 * 4 - x;
+			if (VIEWWINDOWPLANEWIDTH - x < 32)
+				len = VIEWWINDOWPLANEWIDTH - x;
 
 			memcpy(d, s, len);
 		}
@@ -597,10 +598,10 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 		uint16_t lumpLength = W_LumpLength(num);
 		while (lumpLength)
 		{
-			memcpy(dest, src, VIEWWINDOWWIDTH / 2 * 4);
-			src  += VIEWWINDOWWIDTH / 2 * 4;
+			memcpy(dest, src, VIEWWINDOWPLANEWIDTH);
+			src  += VIEWWINDOWPLANEWIDTH;
 			dest += PLANEWIDTH;
-			lumpLength -= VIEWWINDOWWIDTH / 2 * 4;
+			lumpLength -= VIEWWINDOWPLANEWIDTH;
 		}
 		Z_ChangeTagToCache(lump);
 	}
