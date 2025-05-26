@@ -466,6 +466,57 @@ static void setPixel(uint8_t *address, uint8_t bit, uint8_t color)
 }
 
 
+static void setPixel2(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
+{
+	static const uint32_t cols[16] = {
+		0x00000000,
+		0x80000000,
+		0x00800000,
+		0x80800000,
+		0x00008000,
+		0x80008000,
+		0x00808000,
+		0x80808000,
+		0x00000080,
+		0x80000080,
+		0x00800080,
+		0x80800080,
+		0x00008080,
+		0x80008080,
+		0x00808080,
+		0x80808080
+	};
+
+	uint32_t ormask = cols[color] >> x;
+
+#if 1
+	uint32_t d = 0;
+	asm (
+		"movep.l 0(%1), %0\n"
+		"and.l %2, %0\n"
+		" or.l %3, %0\n"
+		"movep.l %0, 0(%1)"
+		:
+		: "d"(d), "a"(a), "d"(andmask), "d"(ormask)
+	);
+
+#else
+	uint32_t d = (a[0] << 24)
+	           | (a[2] << 16)
+	           | (a[4] <<  8)
+	           | (a[6] <<  0);
+
+	d &= andmask;
+	d |=  ormask;
+
+	a[0] = (d >> 24) & 0xff;
+	a[2] = (d >> 16) & 0xff;
+	a[4] = (d >>  8) & 0xff;
+	a[6] = (d >>  0) & 0xff;
+#endif
+}
+
+
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
 	int16_t dx = abs(x1 - x0);
@@ -565,13 +616,15 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	byte *desttop = &_s_screen[OFFSET(x >> 3, y)];
 	boolean odd = (x >> 3) & 1;
-	uint8_t bit = 0x80 >> (x & 7);
+	x &= 7;
 
 	int16_t width = patch->width;
 
 	for (int16_t col = 0; col < width; col++)
 	{
 		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col]);
+
+		uint32_t andmask = ~(0x80808080 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -583,29 +636,52 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++);
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++);
+			}
+			else if (count == 3)
+			{
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++);
+			}
+			else if (count == 5)
+			{
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++);
+			}
+			else if (count == 6)
+			{
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel2(dest, x, andmask, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+					setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
 				}
 			}
 
 			column = (const column_t *)((const byte *)column + column->length + 4);
 		}
 
-		bit >>= 1;
-		if (bit == 0)
+		x++;
+		if (x == 8)
 		{
-			bit = 0x80;
+			x = 0;
 			desttop += odd ? 7 : 1;
 			odd = !odd;
 		}
