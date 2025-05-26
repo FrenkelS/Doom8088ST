@@ -442,31 +442,7 @@ void V_ShutdownDrawLine(void)
 }
 
 
-static void setPixel(uint8_t *address, uint8_t bit, uint8_t color)
-{
-	if (color & 1)
-		address[0] |=  bit;
-	else
-		address[0] &= ~bit;
-
-	if (color & 2)
-		address[2] |=  bit;
-	else
-		address[2] &= ~bit;
-
-	if (color & 4)
-		address[4] |=  bit;
-	else
-		address[4] &= ~bit;
-
-	if (color & 8)
-		address[6] |=  bit;
-	else
-		address[6] &= ~bit;
-}
-
-
-static void setPixel2(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
+static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 {
 	static const uint32_t cols[16] = {
 		0x00000000,
@@ -532,7 +508,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 		uint8_t *address = &_s_screen[OFFSET(x0 >> 3, y0)];
 		int16_t x = x0 & 7;
 		uint32_t andmask = ~(0x80808080 >> x);
-		setPixel2(address, x, andmask, color);
+		setPixel(address, x, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -637,42 +613,42 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++);
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 3)
 			{
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++);
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 5)
 			{
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++);
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 6)
 			{
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
-				setPixel2(dest, x, andmask, *source++);
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					setPixel2(dest, x, andmask, *source++); dest += PLANEWIDTH;
+					setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
 				}
 			}
 
@@ -715,7 +691,8 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col >> 8]);
 
-		uint8_t bit = 0x80 >> (dc_x & 7);
+		x = dc_x & 7;
+		uint32_t andmask = ~(0x80808080 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -736,7 +713,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
 			{
-				setPixel(dest, bit, source[frac >> 8]);
+				setPixel(dest, x, andmask, source[frac >> 8]);
 				dest += PLANEWIDTH;
 				frac += DYI;
 			}
