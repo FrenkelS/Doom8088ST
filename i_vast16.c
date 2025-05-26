@@ -530,8 +530,9 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 	while (true)
 	{
 		uint8_t *address = &_s_screen[OFFSET(x0 >> 3, y0)];
-		uint8_t bit = 0x80 >> (x0 & 7);
-		setPixel(address, bit, color);
+		int16_t x = x0 & 7;
+		uint32_t andmask = ~(0x80808080 >> x);
+		setPixel2(address, x, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
