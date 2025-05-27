@@ -40,6 +40,7 @@
 
 #define PLANEWIDTH				160
 #define VIEWWINDOWPLANEWIDTH	120
+#define THIRTY					 30
 
 extern const int16_t CENTERY;
 
@@ -51,7 +52,7 @@ static uint8_t *_s_screen;
 
 static uint32_t lutc[256];
 
-static int16_t lutx[VIEWWINDOWWIDTH / 2];
+static int16_t lutx[THIRTY];
 static int16_t luty[SCREENHEIGHT];
 #define OFFSET(x,y) (lutx[(x)]+luty[(y)])
 
@@ -141,7 +142,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		}
 	}
 
-	for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
+	for (int16_t x = 0; x < THIRTY; x++)
 		lutx[x] = 4 * x - 3 * (x & 1);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
@@ -467,27 +468,53 @@ void V_ShutdownDrawLine(void)
 }
 
 
-static void setPixel(uint8_t *address, uint8_t bit, uint8_t color)
+static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 {
-	if (color & 1)
-		address[0] |=  bit;
-	else
-		address[0] &= ~bit;
+	static const uint32_t cols[16] = {
+		0x00000000,
+		0x80000000,
+		0x00800000,
+		0x80800000,
+		0x00008000,
+		0x80008000,
+		0x00808000,
+		0x80808000,
+		0x00000080,
+		0x80000080,
+		0x00800080,
+		0x80800080,
+		0x00008080,
+		0x80008080,
+		0x00808080,
+		0x80808080
+	};
 
-	if (color & 2)
-		address[2] |=  bit;
-	else
-		address[2] &= ~bit;
+	uint32_t ormask = cols[color] >> x;
 
-	if (color & 4)
-		address[4] |=  bit;
-	else
-		address[4] &= ~bit;
+#if defined C_ONLY
+	uint32_t d = (a[0] << 24)
+	           | (a[2] << 16)
+	           | (a[4] <<  8)
+	           | (a[6] <<  0);
 
-	if (color & 8)
-		address[6] |=  bit;
-	else
-		address[6] &= ~bit;
+	d &= andmask;
+	d |=  ormask;
+
+	a[0] = (d >> 24) & 0xff;
+	a[2] = (d >> 16) & 0xff;
+	a[4] = (d >>  8) & 0xff;
+	a[6] = (d >>  0) & 0xff;
+#else
+	uint32_t d = 0;
+	asm (
+		"movep.l 0(%1), %0\n"
+		"and.l %2, %0\n"
+		" or.l %3, %0\n"
+		"movep.l %0, 0(%1)"
+		:
+		: "d"(d), "a"(a), "d"(andmask), "d"(ormask)
+	);
+#endif
 }
 
 
@@ -504,8 +531,9 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 	while (true)
 	{
 		uint8_t *address = &_s_screen[OFFSET(x0 >> 3, y0)];
-		uint8_t bit = 0x80 >> (x0 & 7);
-		setPixel(address, bit, color);
+		int16_t x = x0 & 7;
+		uint32_t andmask = ~(0x80808080 >> x);
+		setPixel(address, x, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -590,13 +618,15 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	byte *desttop = &_s_screen[OFFSET(x >> 3, y)];
 	boolean odd = (x >> 3) & 1;
-	uint8_t bit = 0x80 >> (x & 7);
+	x &= 7;
 
 	int16_t width = patch->width;
 
 	for (int16_t col = 0; col < width; col++)
 	{
 		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col]);
+
+		uint32_t andmask = ~(0x80808080 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -608,29 +638,52 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++); dest += PLANEWIDTH;
-				setPixel(dest, bit, *source++);
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
+			}
+			else if (count == 3)
+			{
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
+			}
+			else if (count == 5)
+			{
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
+			}
+			else if (count == 6)
+			{
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					setPixel(dest, bit, *source++); dest += PLANEWIDTH;
+					setPixel(dest, x, andmask, *source++); dest += PLANEWIDTH;
 				}
 			}
 
 			column = (const column_t *)((const byte *)column + column->length + 4);
 		}
 
-		bit >>= 1;
-		if (bit == 0)
+		x++;
+		if (x == 8)
 		{
-			bit = 0x80;
+			x = 0;
 			desttop += odd ? 7 : 1;
 			odd = !odd;
 		}
@@ -663,7 +716,8 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col >> 8]);
 
-		uint8_t bit = 0x80 >> (dc_x & 7);
+		x = dc_x & 7;
+		uint32_t andmask = ~(0x80808080 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -684,7 +738,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
 			{
-				setPixel(dest, bit, source[frac >> 8]);
+				setPixel(dest, x, andmask, source[frac >> 8]);
 				dest += PLANEWIDTH;
 				frac += DYI;
 			}
@@ -713,7 +767,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 	while (ticks--)
 	{
-		for (int16_t i = 0; i < VIEWWINDOWWIDTH / 2; i++)
+		for (int16_t i = 0; i < THIRTY; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
 			{
@@ -772,10 +826,10 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 static void wipe_initMelt()
 {
-	wipe_y_lookup = Z_MallocStatic(VIEWWINDOWWIDTH / 2 * sizeof(int16_t));
+	wipe_y_lookup = Z_MallocStatic(THIRTY * sizeof(int16_t));
 
 	wipe_y_lookup[0] = -(M_Random() % 16);
-	for (int16_t i = 1; i < VIEWWINDOWWIDTH / 2; i++)
+	for (int16_t i = 1; i < THIRTY; i++)
 	{
 		int16_t r = (M_Random() % 3) - 1;
 

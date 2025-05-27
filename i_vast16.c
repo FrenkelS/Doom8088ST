@@ -40,6 +40,7 @@
 
 #define PLANEWIDTH				160
 #define VIEWWINDOWPLANEWIDTH	120
+#define THIRTY					 30
 
 extern const int16_t CENTERY;
 
@@ -51,7 +52,7 @@ static uint8_t *_s_screen;
 
 static uint32_t lutc[256];
 
-static int16_t lutx[VIEWWINDOWWIDTH];
+static int16_t lutx[THIRTY];
 static int16_t luty[SCREENHEIGHT];
 #define OFFSET(x,y) (lutx[(x)]+luty[(y)])
 
@@ -141,7 +142,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		}
 	}
 
-	for (int16_t x = 0; x < VIEWWINDOWWIDTH; x++)
+	for (int16_t x = 0; x < THIRTY; x++)
 		lutx[x] = 4 * x - 3 * (x & 1);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
@@ -741,7 +742,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 	while (ticks--)
 	{
-		for (int16_t i = 0; i < VIEWWINDOWWIDTH; i++)
+		for (int16_t i = 0; i < THIRTY; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
 			{
@@ -800,10 +801,10 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 static void wipe_initMelt()
 {
-	wipe_y_lookup = Z_MallocStatic(VIEWWINDOWWIDTH * sizeof(int16_t));
+	wipe_y_lookup = Z_MallocStatic(THIRTY * sizeof(int16_t));
 
 	wipe_y_lookup[0] = -(M_Random() % 16);
-	for (int16_t i = 1; i < VIEWWINDOWWIDTH; i++)
+	for (int16_t i = 1; i < THIRTY; i++)
 	{
 		int16_t r = (M_Random() % 3) - 1;
 
