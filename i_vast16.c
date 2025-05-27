@@ -218,17 +218,17 @@ void I_FinishUpdate(void)
 
 static void movep(uint32_t d, uint8_t *a)
 {
-#if 1
+#if defined C_ONLY
+	a[0] = (d >> 24) & 0xff;
+	a[2] = (d >> 16) & 0xff;
+	a[4] = (d >>  8) & 0xff;
+	a[6] = (d >>  0) & 0xff;
+#else
 	asm (
 		"movep.l %0, 0(%1)"
 		:
 		: "d"(d), "a"(a)
 	);
-#else
-	a[0] = (d >> 24) & 0xff;
-	a[2] = (d >> 16) & 0xff;
-	a[4] = (d >>  8) & 0xff;
-	a[6] = (d >>  0) & 0xff;
 #endif
 }
 
@@ -465,18 +465,7 @@ static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 
 	uint32_t ormask = cols[color] >> x;
 
-#if 1
-	uint32_t d = 0;
-	asm (
-		"movep.l 0(%1), %0\n"
-		"and.l %2, %0\n"
-		" or.l %3, %0\n"
-		"movep.l %0, 0(%1)"
-		:
-		: "d"(d), "a"(a), "d"(andmask), "d"(ormask)
-	);
-
-#else
+#if defined C_ONLY
 	uint32_t d = (a[0] << 24)
 	           | (a[2] << 16)
 	           | (a[4] <<  8)
@@ -489,6 +478,16 @@ static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 	a[2] = (d >> 16) & 0xff;
 	a[4] = (d >>  8) & 0xff;
 	a[6] = (d >>  0) & 0xff;
+#else
+	uint32_t d = 0;
+	asm (
+		"movep.l 0(%1), %0\n"
+		"and.l %2, %0\n"
+		" or.l %3, %0\n"
+		"movep.l %0, 0(%1)"
+		:
+		: "d"(d), "a"(a), "d"(andmask), "d"(ormask)
+	);
 #endif
 }
 
