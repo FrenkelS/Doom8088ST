@@ -19,7 +19,8 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Atari ST 320x200 16 color, 30x128 effective resolution
+ *      Video code for Atari ST 320x200 16 color
+ *      30x128 and 60x128 effective resolution
  *
  *-----------------------------------------------------------------------------*/
 
@@ -217,8 +218,13 @@ void I_FinishUpdate(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
+#if VIEWWINDOWWIDTH == 60
+static boolean odd;
+#endif
+
 static void movep(uint32_t d, uint8_t *a)
 {
+#if VIEWWINDOWWIDTH == 30
 #if defined C_ONLY
 	a[0] = (d >> 24) & 0xff;
 	a[2] = (d >> 16) & 0xff;
@@ -230,6 +236,34 @@ static void movep(uint32_t d, uint8_t *a)
 		:
 		: "d"(d), "a"(a)
 	);
+#endif
+#elif VIEWWINDOWWIDTH == 60
+	if (odd)
+	{
+		a[0] &= 0xf0;
+		a[2] &= 0xf0;
+		a[4] &= 0xf0;
+		a[6] &= 0xf0;
+		d &= 0x0f0f0f0f;
+		a[0] |= (d >> 24) & 0xff;
+		a[2] |= (d >> 16) & 0xff;
+		a[4] |= (d >>  8) & 0xff;
+		a[6] |= (d >>  0) & 0xff;
+	}
+	else
+	{
+		a[0] &= 0x0f;
+		a[2] &= 0x0f;
+		a[4] &= 0x0f;
+		a[6] &= 0x0f;
+		d &= 0xf0f0f0f0;
+		a[0] |= (d >> 24) & 0xff;
+		a[2] |= (d >> 16) & 0xff;
+		a[4] |= (d >>  8) & 0xff;
+		a[6] |= (d >>  0) & 0xff;
+	}
+#else
+#error unsupported VIEWWINDOWWIDTH value
 #endif
 }
 
@@ -246,7 +280,14 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 
 	const uint8_t *colmap = dcvars->colormap;
 
+#if VIEWWINDOWWIDTH == 30
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+#elif VIEWWINDOWWIDTH == 60
+	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 	const uint16_t fracstep = dcvars->fracstep;
 	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
@@ -320,7 +361,14 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
+#if VIEWWINDOWWIDTH == 30
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+#elif VIEWWINDOWWIDTH == 60
+	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 	int16_t l = count >> 4;
 
@@ -408,7 +456,14 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
+#if VIEWWINDOWWIDTH == 30
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
+#elif VIEWWINDOWWIDTH == 60
+	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
+	odd = dcvars->x & 1;
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 	static int16_t fuzzpos = 0;
 
