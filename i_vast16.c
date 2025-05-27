@@ -238,30 +238,43 @@ static void movep(uint32_t d, uint8_t *a)
 	);
 #endif
 #elif VIEWWINDOWWIDTH == 60
+	uint32_t andmask;
+
 	if (odd)
 	{
-		a[0] &= 0xf0;
-		a[2] &= 0xf0;
-		a[4] &= 0xf0;
-		a[6] &= 0xf0;
-		d &= 0x0f0f0f0f;
-		a[0] |= (d >> 24) & 0xff;
-		a[2] |= (d >> 16) & 0xff;
-		a[4] |= (d >>  8) & 0xff;
-		a[6] |= (d >>  0) & 0xff;
+		andmask = 0xf0f0f0f0;
+		d      &= 0x0f0f0f0f;
 	}
 	else
 	{
-		a[0] &= 0x0f;
-		a[2] &= 0x0f;
-		a[4] &= 0x0f;
-		a[6] &= 0x0f;
-		d &= 0xf0f0f0f0;
-		a[0] |= (d >> 24) & 0xff;
-		a[2] |= (d >> 16) & 0xff;
-		a[4] |= (d >>  8) & 0xff;
-		a[6] |= (d >>  0) & 0xff;
+		andmask = 0x0f0f0f0f;
+		d      &= 0xf0f0f0f0;
 	}
+
+#if defined C_ONLY
+	uint32_t dtemp = (a[0] << 24)
+	               | (a[2] << 16)
+	               | (a[4] <<  8)
+	               | (a[6] <<  0);
+
+	d |= (dtemp & andmask);
+
+	a[0] = (d >> 24) & 0xff;
+	a[2] = (d >> 16) & 0xff;
+	a[4] = (d >>  8) & 0xff;
+	a[6] = (d >>  0) & 0xff;
+#else
+	uint32_t dtemp = 0;
+	asm (
+		"movep.l 0(%2), %1\n"
+		"and.l %3, %1\n"
+		" or.l %1, %0\n"
+		"movep.l %0, 0(%2)"
+		:
+		: "d"(d), "d"(dtemp), "a"(a), "d"(andmask)
+		: "memory"
+	);
+#endif
 #else
 #error unsupported VIEWWINDOWWIDTH value
 #endif
