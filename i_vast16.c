@@ -232,9 +232,9 @@ static void movep(uint32_t d, uint8_t *a)
 	a[6] = (d >>  0) & 0xff;
 #else
 	asm (
-		"movep.l %0, 0(%1)"
+		"movep.l %[d], 0(%[a])"
 		:
-		: "d"(d), "a"(a)
+		: [d]"d"(d), [a]"a"(a)
 	);
 #endif
 #elif VIEWWINDOWWIDTH == 60
@@ -264,14 +264,17 @@ static void movep(uint32_t d, uint8_t *a)
 	a[4] = (d >>  8) & 0xff;
 	a[6] = (d >>  0) & 0xff;
 #else
-	uint32_t dtemp = 0;
+	uint32_t tmp = 0;
 	asm (
-		"movep.l 0(%2), %1\n"
-		"and.l %3, %1\n"
-		" or.l %1, %0\n"
-		"movep.l %0, 0(%2)"
+		"movep.l 0(%[dest]), %[tmp]\n"
+		"and.l %[andmask], %[tmp]\n"
+		" or.l %[tmp], %[d]\n"
+		"movep.l %[d], 0(%[dest])"
 		:
-		: "d"(d), "d"(dtemp), "a"(a), "d"(andmask)
+		: [d]       "d" (d),
+		  [tmp]     "d" (tmp),
+		  [dest]    "a" (a),
+		  [andmask] "d" (andmask)
 		: "memory"
 	);
 #endif
@@ -548,14 +551,17 @@ static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 	a[4] = (d >>  8) & 0xff;
 	a[6] = (d >>  0) & 0xff;
 #else
-	uint32_t d = 0;
+	uint32_t tmp = 0;
 	asm (
-		"movep.l 0(%1), %0\n"
-		"and.l %2, %0\n"
-		" or.l %3, %0\n"
-		"movep.l %0, 0(%1)"
+		"movep.l 0(%[dest]), %[tmp]\n"
+		"and.l %[andmask],   %[tmp]\n"
+		" or.l %[ormask],    %[tmp]\n"
+		"movep.l %[tmp], 0(%[dest])"
 		:
-		: "d"(d), "a"(a), "d"(andmask), "d"(ormask)
+		: [tmp]     "d" (tmp),
+		  [dest]    "a" (a),
+		  [andmask] "d" (andmask),
+		  [ormask]  "d" (ormask)
 	);
 #endif
 }
