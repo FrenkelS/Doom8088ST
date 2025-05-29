@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -647,13 +647,6 @@ static void G_DoCompleted (void)
     _g_gamestate = GS_INTERMISSION;
     automapmode &= ~am_active;
 
-    // lmpwatch.pl engine-side demo testing support
-    // print "FINISHED: <mapname>" when the player exits the current map
-    if (nodrawers && (_g_demoplayback || _g_timingdemo))
-    {
-        printf("FINISHED: E1M%d\n", _g_gamemap);
-    }
-
     WI_Start (&_g_wminfo);
 }
 
@@ -935,7 +928,6 @@ static void G_ReadDemoTiccmd (void)
         G_CheckDemoStatus();      // end of demo data stream
     else if (_g_demoplayback && demo_p + 4 > demobuffer + demolength)
     {
-        printf("G_ReadDemoTiccmd: missing DEMOMARKER\n");
         G_CheckDemoStatus();
     }
     else
@@ -968,7 +960,7 @@ static void CheckForOverrun(const byte __far* start_p, const byte __far* current
     size_t pos = current_p - start_p;
     if (pos + size > demolength)
     {
-        I_Error("CheckForOverrun: wrong demo header\n");
+        I_Error("CheckForOverrun: wrong demo header");
     }
 }
 
@@ -1089,7 +1081,7 @@ void G_CheckDemoStatus (void)
         // killough -- added fps information and made it work for longer demos:
         uint32_t realtics = endtime - starttime;
         uint32_t resultfps = TICRATE * 1000L * _g_gametic / realtics;
-        I_Error ("Timed %lu gametics in %lu realtics\n= %lu.%.3lu frames per second",
+        I_Error ("Timed %lu gametics in %lu realtics\r\n= %lu.%.3lu frames per second",
                  (uint32_t) _g_gametic,realtics,
                  resultfps / 1000, resultfps % 1000);
     }

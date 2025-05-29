@@ -114,7 +114,7 @@ void Z_Init (void)
 
 	uint32_t heapSize = (uint32_t)max * PARAGRAPH_SIZE;
 
-	printf("%ld bytes allocated for zone\n", heapSize);
+	printf("%ld bytes allocated for zone\r\n", heapSize);
 
 	// align blocklist
 	uint_fast8_t i = 0;
@@ -205,7 +205,7 @@ static void Z_FreeBlock(memblock_t __far* block)
 
 #if defined INSTRUMENTED
     running_count -= block->size;
-    printf("Free: %ld\n", running_count);
+    printf("Free: %ld\r\n", running_count);
 #endif
 
     memblock_t __far* other = segmentToPointer(block->prev);
@@ -384,7 +384,7 @@ static void __far* Z_TryMalloc(uint16_t size, int8_t tag, void __far*__far* user
 
 #if defined INSTRUMENTED
     running_count += base->size;
-    printf("Alloc: %ld (%ld)\n", base->size, running_count);
+    printf("Alloc: %ld (%ld)\r\n", base->size, running_count);
 #endif
 
 #if defined _M_I86
@@ -501,12 +501,12 @@ void Z_CheckHeap (void)
 #endif
 
         if (pointerToSegment(block) + (block->size / PARAGRAPH_SIZE) != block->next)
-            I_Error ("Z_CheckHeap: block size does not touch the next block\n");
+            I_Error ("Z_CheckHeap: block size does not touch the next block");
 
         if (segmentToPointer(block->next)->prev != pointerToSegment(block))
-            I_Error ("Z_CheckHeap: next block doesn't have proper back link\n");
+            I_Error ("Z_CheckHeap: next block doesn't have proper back link");
 
         if (!block->user && !segmentToPointer(block->next)->user)
-            I_Error ("Z_CheckHeap: two consecutive free blocks\n");
+            I_Error ("Z_CheckHeap: two consecutive free blocks");
     }
 }

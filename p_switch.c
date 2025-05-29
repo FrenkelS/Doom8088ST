@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -345,8 +345,6 @@ static void EV_VerticalDoor(line_t __far* line, mobj_t __far* thing)
         } else if (door->thinker.function == T_PlatRaise) {
           plat_t __far* p = (plat_t __far*)door;
           p->wait = outval;
-        } else {
-          printf("EV_VerticalDoor: unknown thinker.function in thinker corruption emulation\n");
         }
 
         return;
