@@ -18,20 +18,20 @@ then
   export OUTPUT=DOOMST2.TOS
 fi
 
-m68k-atari-mintelf-gcc -c i_vast2.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c p_mobj.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c p_sight.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c r_data.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c r_draw.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c r_plane.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c tables.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c w_wad.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
-m68k-atari-mintelf-gcc -c z_zone.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
+m68k-atari-mintelf-gcc -c i_vast2.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c p_mobj.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c p_sight.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c r_data.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c r_draw.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c r_plane.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c tables.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c w_wad.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c z_zone.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 
-export CFLAGS="-march=$CPU -Os -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mfastcall -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -funsafe-loop-optimizations -freorder-blocks-algorithm=stc -fno-tree-pre -fira-region=mixed"
+export CFLAGS="-march=$CPU -Os -fomit-frame-pointer -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -funsafe-loop-optimizations -freorder-blocks-algorithm=stc -fno-tree-pre"
 #export CFLAGS="$CFLAGS -Ofast -flto -fwhole-program -fomit-frame-pointer -funroll-loops -fgcse-sm -fgcse-las -fipa-pta -Wno-attributes -Wpedantic"
 #export CFLAGS="$CFLAGS -Wall -Wextra"
 
