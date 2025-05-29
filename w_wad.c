@@ -129,8 +129,8 @@ typedef struct
 
 void W_Init(void)
 {
-	printf("\tadding " WAD_FILE "\n");
-	printf("\tshareware version.\n");
+	printf("\tadding " WAD_FILE "\r\n");
+	printf("\tshareware version.\r\n");
 
 	fileWAD = fopen(WAD_FILE, "rb");
 	if (fileWAD == NULL)

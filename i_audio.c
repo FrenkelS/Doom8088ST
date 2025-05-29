@@ -105,7 +105,7 @@ void I_InitSound(void)
 	PCFX_Init();
 
 	// Finished initialization.
-	printf("I_InitSound: sound ready\n");
+	printf("I_InitSound: sound ready\r\n");
 }
 
 

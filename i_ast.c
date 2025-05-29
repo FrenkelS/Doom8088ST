@@ -465,7 +465,7 @@ void I_Quit(void)
 {
 	I_Shutdown();
 
-	printf("\n");
+	printf("\r\n");
 	exit(0);
 }
 
@@ -479,14 +479,14 @@ void I_Error(const char *error, ...)
 	va_start(argptr, error);
 	vprintf(error, argptr);
 	va_end(argptr);
-	printf("\n");
+	printf("\r\n");
 	exit(1);
 }
 
 
 int main(int argc, const char * const * argv)
 {
-	printf("Doom8088: Atari ST Edition\n");
+	printf("Doom8088: Atari ST Edition\r\n");
 
 	Super(0L);
 
