@@ -63,16 +63,23 @@ static uint16_t oldcolors[16];
 
 void I_ReloadPalette(void)
 {
-	char* lumpName;
-	if (_g_gamma == 0)
-		lumpName = "COLORMAP";
-	else
+	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
+	for (int16_t c = 1; c < 16; c++)
 	{
-		lumpName = "COLORMP0";
-		lumpName[7] = '0' + _g_gamma;
+		uint16_t p = playpal[c];
+		uint16_t r = p >> 8;
+		uint16_t g = (p >> 4) & 0x00f;
+		uint16_t b = p & 0x00f;
+		r += _g_gamma;
+		g += _g_gamma;
+		b += _g_gamma;
+		if (r > 7) r = 7;
+		if (g > 7) g = 7;
+		if (b > 7) b = 7;
+		p = (r << 8) | (g << 4) | b;
+		Setcolor(c, p);
 	}
-
-	W_ReadLumpByNum(W_GetNumForName(lumpName), (void *)fullcolormap);
+	Z_ChangeTagToCache(playpal);
 }
 
 
@@ -95,22 +102,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 {
 	oldrez = Getrez();
 	Setscreen(-1L, -1L, 0);
-	oldcolors[ 0] = Setcolor( 0, 0x000); //   0   0   0
-	oldcolors[ 1] = Setcolor( 1, 0x002); //   0   0  68
-	oldcolors[ 2] = Setcolor( 2, 0x121); //  51  68  34
-	oldcolors[ 3] = Setcolor( 3, 0x443); // 153 136 102
-	oldcolors[ 4] = Setcolor( 4, 0x300); // 119  17  17
-	oldcolors[ 5] = Setcolor( 5, 0x321); // 119  68  34
-	oldcolors[ 6] = Setcolor( 6, 0x432); // 136 102  85
-	oldcolors[ 7] = Setcolor( 7, 0x555); // 170 170 170
-	oldcolors[ 8] = Setcolor( 8, 0x333); // 102 102 102
-	oldcolors[ 9] = Setcolor( 9, 0x006); //   0   0 204
-	oldcolors[10] = Setcolor(10, 0x141); //  51 136  34
-	oldcolors[11] = Setcolor(11, 0x753); // 238 170 119
-	oldcolors[12] = Setcolor(12, 0x620); // 221  85   0
-	oldcolors[13] = Setcolor(13, 0x606); // 204   0 204
-	oldcolors[14] = Setcolor(14, 0x772); // 255 238  68
-	oldcolors[15] = Setcolor(15, 0x777); // 255 255 255
+
+	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
+	for (int16_t c = 0; c < 16; c++)
+		oldcolors[c] = Setcolor(c, playpal[c]);
+	Z_ChangeTagToCache(playpal);
 
 	pages[0] = Physbase();
 	pages[1] = (uint8_t *)(((uint32_t)mem_chunk | 0xff) + 1);
