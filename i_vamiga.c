@@ -271,6 +271,12 @@ void I_FinishUpdate(void)
 }
 
 
+void I_FinishViewWindow(void)
+{
+	// Do nothing
+}
+
+
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
