@@ -1,5 +1,5 @@
 ## Doom8088: Atari ST Edition
-![Doom8088: Atari ST Edition](readme_imgs/doomcgabw.png?raw=true)
+![Doom8088: Atari ST Edition](readme_imgs/doomstbw.png?raw=true)
 
 Doom was originally designed in 1993 for 32-bit DOS computers with 4 MB of RAM.
 It's mostly written in C code with very little assembly code.
@@ -28,6 +28,20 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 **Known bugs:**
  - When there's not enough memory for a texture, one color is drawn
  - When there's not enough memory for the intermission screen, the last few frames of gameplay are shown instead
+
+## Supported video modes
+
+### 320x200 16 color mode, effective resolution 120x128
+![Doom8088 in 16 colors, high mode](readme_imgs/doomstch.png?raw=true)
+
+### 320x200 16 color mode, effective resolution  60x128
+![Doom8088 in 16 colors, medium mode](readme_imgs/doomstcm.png?raw=true)
+
+### 320x200 16 color mode, effective resolution  30x128
+![Doom8088 in 16 colors, low mode](readme_imgs/doomstcl.png?raw=true)
+
+### 640x200  4 color mode, effective resolution  60x128 2 colors
+![Doom8088 in 2 colors](readme_imgs/doomstbw.png?raw=true)
 
 ## Controls:
 |Action                 |Keys         |
@@ -74,7 +88,10 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 ## Building:
 |Platform     |Platform specific code |Compiler                                                                      |Build script|Additional information                              |
 |-------------|-----------------------|------------------------------------------------------------------------------|------------|----------------------------------------------------|
-|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`  |640x200 4 colors mode, only 2 colors are used       |
+|Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`|320x200 16 color mode, high   detail mode           |
+|Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16m.sh`|320x200 16 color mode, medium detail mode           |
+|Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16l.sh`|320x200 16 color mode, low    detail mode           |
+|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`  |640x200  4 color mode, 2 colors are used            |
 |IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh` |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
