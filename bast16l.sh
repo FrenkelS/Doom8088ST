@@ -15,7 +15,7 @@ fi
 
 if [ -z "$OUTPUT" ]
 then
-  export OUTPUT=DOOMST16.TOS
+  export OUTPUT=DOOMSTCL.TOS
 fi
 
 m68k-atari-mintelf-gcc -c i_vast16.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
