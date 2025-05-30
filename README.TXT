@@ -48,6 +48,9 @@ Supported video modes:
 |640x200  4c|DOOMSTBW.TOS|Medium detail|
 |           |            |2 colors     |
 
+DOOMSTC?.TOS need DOOMST16.WAD.
+DOOMSTBW.TOS needs DOOMST2.WAD.
+
 Controls:
 |Action                 |Keys         |
 |-----------------------|-------------|
