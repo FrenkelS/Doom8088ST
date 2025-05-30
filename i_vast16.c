@@ -52,7 +52,13 @@ static uint8_t *pages[3];
 static uint8_t *_s_screen;
 
 
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120
+static uint8_t viewwindow[VIEWWINDOWWIDTH * VIEWWINDOWHEIGHT];
+static uint32_t lutc0[256];
+static uint32_t lutc1[256];
+static uint32_t lutc2[256];
+static uint32_t lutc3[256];
+#elif VIEWWINDOWWIDTH == 60
 static uint8_t viewwindow[VIEWWINDOWWIDTH * VIEWWINDOWHEIGHT];
 static uint32_t lutce[256];
 static uint32_t lutco[256];
@@ -144,7 +150,12 @@ void I_InitGraphicsHardwareSpecificCode(void)
 				plane <<= 1;
 			}
 
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120
+			lutc0[i] = c & 0xc0c0c0c0;
+			lutc1[i] = c & 0x30303030;
+			lutc2[i] = c & 0x0c0c0c0c;
+			lutc3[i] = c & 0x03030303;
+#elif VIEWWINDOWWIDTH == 60
 			lutce[i] = c & 0xf0f0f0f0;
 			lutco[i] = c & 0x0f0f0f0f;
 #elif VIEWWINDOWWIDTH == 30
@@ -252,7 +263,31 @@ static void movep(uint32_t d, uint8_t *a)
 
 void I_FinishViewWindow(void)
 {
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120
+	uint8_t *s = viewwindow;
+	uint8_t *a = _s_screen;
+	for (int16_t y = 0; y < VIEWWINDOWHEIGHT; y++)
+	{
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 8; x++)
+		{
+			uint32_t d;
+			d = lutc0[*s++]
+			  | lutc1[*s++]
+			  | lutc2[*s++]
+			  | lutc3[*s++];
+			movep(d, a);
+			a += 1;
+
+			d = lutc0[*s++]
+			  | lutc1[*s++]
+			  | lutc2[*s++]
+			  | lutc3[*s++];
+			movep(d, a);
+			a += 7;
+		}
+		a += 40;
+	}
+#elif VIEWWINDOWWIDTH == 60
 	uint8_t *s = viewwindow;
 	uint8_t *a = _s_screen;
 	for (int16_t y = 0; y < VIEWWINDOWHEIGHT; y++)
@@ -276,7 +311,7 @@ void I_FinishViewWindow(void)
 }
 
 
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120 || VIEWWINDOWWIDTH == 60
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -423,7 +458,7 @@ static uint8_t swapNibbles(uint8_t color)
 }
 
 
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120 || VIEWWINDOWWIDTH == 60
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -584,7 +619,7 @@ static const uint8_t fuzzcolors[FUZZTABLE] =
 };
 
 
-#if VIEWWINDOWWIDTH == 60
+#if VIEWWINDOWWIDTH == 120 || VIEWWINDOWWIDTH == 60
 void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
