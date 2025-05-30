@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2023-2024 Frenkel Smeijers
+ *  Copyright (C) 2023-2025 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -34,6 +34,7 @@ void I_ShutdownGraphics(void);
 void I_ReloadPalette(void);
 void I_SetPalette(int8_t pal);
 void I_FinishUpdate(void);
+void I_FinishViewWindow(void);
 
 
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars);

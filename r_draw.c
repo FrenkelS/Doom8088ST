@@ -2802,6 +2802,8 @@ void R_RenderPlayerView (player_t* player)
 #endif
 
     R_DrawMasked ();
+
+    I_FinishViewWindow();
 }
 
 

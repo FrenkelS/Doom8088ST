@@ -51,7 +51,17 @@ static int16_t page;
 static uint8_t *pages[3];
 static uint8_t *_s_screen;
 
+
+#if VIEWWINDOWWIDTH == 60
+static uint8_t viewwindow[VIEWWINDOWWIDTH * VIEWWINDOWHEIGHT];
+static uint32_t lutce[256];
+static uint32_t lutco[256];
+#elif VIEWWINDOWWIDTH == 30
 static uint32_t lutc[256];
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
+
 
 static int16_t lutx[THIRTY];
 static int16_t luty[SCREENHEIGHT];
@@ -134,7 +144,15 @@ void I_InitGraphicsHardwareSpecificCode(void)
 				plane <<= 1;
 			}
 
+#if VIEWWINDOWWIDTH == 60
+			lutce[i] = c & 0xf0f0f0f0;
+			lutco[i] = c & 0x0f0f0f0f;
+#elif VIEWWINDOWWIDTH == 30
 			lutc[i] = c;
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
+
 			i++;
 		}
 	}
@@ -214,13 +232,9 @@ void I_FinishUpdate(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-#if VIEWWINDOWWIDTH == 60
-static boolean odd;
-#endif
 
 static void movep(uint32_t d, uint8_t *a)
 {
-#if VIEWWINDOWWIDTH == 30
 #if defined C_ONLY
 	a[0] = (d >> 24) & 0xff;
 	a[2] = (d >> 16) & 0xff;
@@ -233,53 +247,35 @@ static void movep(uint32_t d, uint8_t *a)
 		: [d]"d"(d), [a]"a"(a)
 	);
 #endif
-#elif VIEWWINDOWWIDTH == 60
-	uint32_t andmask;
+}
 
-	if (odd)
+
+void I_FinishViewWindow(void)
+{
+#if VIEWWINDOWWIDTH == 60
+	uint8_t *a = _s_screen;
+	for (int16_t y = 0; y < VIEWWINDOWHEIGHT; y++)
 	{
-		andmask = 0xf0f0f0f0;
-		d      &= 0x0f0f0f0f;
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 4; x++)
+		{
+			uint32_t d;
+			d = lutce[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 0]]
+			  | lutco[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 1]];
+			movep(d, a);
+			a += 1;
+
+			d = lutce[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 2]]
+			  | lutco[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 3]];
+			movep(d, a);
+			a += 7;
+		}
+		a += 40;
 	}
-	else
-	{
-		andmask = 0x0f0f0f0f;
-		d      &= 0xf0f0f0f0;
-	}
-
-#if defined C_ONLY
-	uint32_t dtemp = (a[0] << 24)
-	               | (a[2] << 16)
-	               | (a[4] <<  8)
-	               | (a[6] <<  0);
-
-	d |= (dtemp & andmask);
-
-	a[0] = (d >> 24) & 0xff;
-	a[2] = (d >> 16) & 0xff;
-	a[4] = (d >>  8) & 0xff;
-	a[6] = (d >>  0) & 0xff;
-#else
-	uint32_t tmp = 0;
-	asm (
-		"movep.l 0(%[dest]), %[tmp]\n"
-		"and.l %[andmask], %[tmp]\n"
-		" or.l %[tmp], %[d]\n"
-		"movep.l %[d], 0(%[dest])"
-		:
-		: [d]       "d" (d),
-		  [tmp]     "d" (tmp),
-		  [dest]    "a" (a),
-		  [andmask] "d" (andmask)
-		: "memory"
-	);
-#endif
-#else
-#error unsupported VIEWWINDOWWIDTH value
 #endif
 }
 
 
+#if VIEWWINDOWWIDTH == 60
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -292,14 +288,72 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 
 	const uint8_t *colmap = dcvars->colormap;
 
-#if VIEWWINDOWWIDTH == 30
+	uint8_t *dest = &viewwindow[dcvars->x + dcvars->yl * VIEWWINDOWWIDTH];
+
+	const uint16_t fracstep = dcvars->fracstep;
+	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
+
+	// Inner loop that does the actual texture mapping,
+	//  e.g. a DDA-lile scaling.
+	// This is as fast as it gets.
+
+	int16_t l = count >> 4;
+	while (l--)
+	{
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+	}
+
+	switch (count & 15)
+	{
+		case 15: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 14: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 13: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 12: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 11: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 10: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  9: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  8: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  7: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  6: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  5: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  4: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  3: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  2: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  1: *dest = colmap[src[frac >> COLBITS]];
+	}
+}
+#elif VIEWWINDOWWIDTH == 30
+void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
+{
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	const uint8_t *src = dcvars->source;
+
+	const uint8_t *colmap = dcvars->colormap;
+
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
-#elif VIEWWINDOWWIDTH == 60
-	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
-	odd = dcvars->x & 1;
-#else
-#error unsupported VIEWWINDOWWIDTH value
-#endif
 
 	const uint16_t fracstep = dcvars->fracstep;
 	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
@@ -351,6 +405,9 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 		case  1: movep(lutc[colmap[src[frac >> COLBITS]]], dest);
 	}
 }
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 
 void R_DrawColumnWall(const draw_column_vars_t *dcvars)
@@ -365,6 +422,7 @@ static uint8_t swapNibbles(uint8_t color)
 }
 
 
+#if VIEWWINDOWWIDTH == 60
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -373,14 +431,76 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-#if VIEWWINDOWWIDTH == 30
+	uint8_t *dest = &viewwindow[dcvars->x + dcvars->yl * VIEWWINDOWWIDTH];
+
+	int16_t l = count >> 4;
+
+	uint8_t color0;
+	uint8_t color1;
+
+	if (dcvars->yl & 1)
+	{
+		color0 = swapNibbles(color);
+		color1 = color;
+	}
+	else
+	{
+		color0 = color;
+		color1 = swapNibbles(color);
+	}
+
+	while (l--)
+	{
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH;
+		*dest = color1; dest += VIEWWINDOWWIDTH;
+	}
+
+	switch (count & 15)
+	{
+		case 15: dest[VIEWWINDOWWIDTH * 14] = color0;
+		case 14: dest[VIEWWINDOWWIDTH * 13] = color1;
+		case 13: dest[VIEWWINDOWWIDTH * 12] = color0;
+		case 12: dest[VIEWWINDOWWIDTH * 11] = color1;
+		case 11: dest[VIEWWINDOWWIDTH * 10] = color0;
+		case 10: dest[VIEWWINDOWWIDTH *  9] = color1;
+		case  9: dest[VIEWWINDOWWIDTH *  8] = color0;
+		case  8: dest[VIEWWINDOWWIDTH *  7] = color1;
+		case  7: dest[VIEWWINDOWWIDTH *  6] = color0;
+		case  6: dest[VIEWWINDOWWIDTH *  5] = color1;
+		case  5: dest[VIEWWINDOWWIDTH *  4] = color0;
+		case  4: dest[VIEWWINDOWWIDTH *  3] = color1;
+		case  3: dest[VIEWWINDOWWIDTH *  2] = color0;
+		case  2: dest[VIEWWINDOWWIDTH *  1] = color1;
+		case  1: dest[VIEWWINDOWWIDTH *  0] = color0;
+	}
+}
+#elif VIEWWINDOWWIDTH == 30
+void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
+{
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
-#elif VIEWWINDOWWIDTH == 60
-	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
-	odd = dcvars->x & 1;
-#else
-#error unsupported VIEWWINDOWWIDTH value
-#endif
 
 	int16_t l = count >> 4;
 
@@ -440,6 +560,9 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 		case  1: movep(color0, &dest[PLANEWIDTH *  0]);
 	}
 }
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 
 #define FUZZCOLOR1 0x00
@@ -460,6 +583,7 @@ static const uint8_t fuzzcolors[FUZZTABLE] =
 };
 
 
+#if VIEWWINDOWWIDTH == 60
 void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -468,14 +592,30 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-#if VIEWWINDOWWIDTH == 30
+	uint8_t *dest = &viewwindow[dcvars->x + dcvars->yl * VIEWWINDOWWIDTH];
+
+	static int16_t fuzzpos = 0;
+
+	do
+	{
+		*dest = fuzzcolors[fuzzpos];
+		dest += VIEWWINDOWWIDTH;
+
+		fuzzpos++;
+		if (fuzzpos >= FUZZTABLE)
+			fuzzpos = 0;
+	} while(--count);
+}
+#elif VIEWWINDOWWIDTH == 30
+void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
+{
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
-#elif VIEWWINDOWWIDTH == 60
-	uint8_t *dest = &_s_screen[OFFSET(dcvars->x / 2, dcvars->yl)];
-	odd = dcvars->x & 1;
-#else
-#error unsupported VIEWWINDOWWIDTH value
-#endif
 
 	static int16_t fuzzpos = 0;
 
@@ -489,6 +629,9 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 			fuzzpos = 0;
 	} while(--count);
 }
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 
 void V_ClearViewWindow(void)
