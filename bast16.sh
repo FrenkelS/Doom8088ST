@@ -3,9 +3,9 @@ mkdir atarist
 unset CFLAGS
 
 
-export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
+export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=160 -DFLAT_SKY_COLOR=7 -DWAD_FILE=\"DOOMST16.WAD\" -DVIEWWINDOWWIDTH=$1 -DNR_OF_COLORS=16"
 
-export CPU=$1
+
 export OUTPUT=$2
 
 if [ -z "$CPU" ]
@@ -15,10 +15,10 @@ fi
 
 if [ -z "$OUTPUT" ]
 then
-  export OUTPUT=DOOMSTBW.TOS
+  export OUTPUT=DOOMST16.TOS
 fi
 
-m68k-atari-mintelf-gcc -c i_vast2.c  $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-atari-mintelf-gcc -c i_vast16.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 m68k-atari-mintelf-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -mfastcall -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
@@ -44,8 +44,8 @@ export GLOBOBJS+=" g_game.c"
 export GLOBOBJS+=" hu_stuff.c"
 export GLOBOBJS+=" i_audio.c"
 export GLOBOBJS+=" i_ast.c"
-#export GLOBOBJS+=" i_vast2.c"
-export GLOBOBJS+=" i_vast2.o"
+#export GLOBOBJS+=" i_vast16.c"
+export GLOBOBJS+=" i_vast16.o"
 export GLOBOBJS+=" info.c"
 export GLOBOBJS+=" m_cheat.c"
 export GLOBOBJS+=" m_menu.c"
@@ -100,7 +100,7 @@ export GLOBOBJS+=" z_zone.o"
 m68k-atari-mintelf-gcc -nostdlib libcmini/crt0.o $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT -s -Llibcmini -lcmini -lgcc
 m68k-atari-mintelf-strip -s atarist/$OUTPUT
 
-rm i_vast2.o
+rm i_vast16.o
 rm p_enemy2.o
 rm p_map.o
 rm p_maputl.o

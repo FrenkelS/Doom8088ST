@@ -60,6 +60,7 @@ void I_InitKeyboard(void);
 void I_InitGraphics(void);
 
 void I_FinishUpdate(void);
+void I_FinishViewWindow(void);
 
 void I_ReloadPalette(void);
 void I_SetPalette(int8_t pal);
