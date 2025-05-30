@@ -21,7 +21,7 @@ What's special?
  - Supports only Doom 1 Episode 1
  - Rotating overlaid automap
  - Only demo3 is supported
- - 2 color mode
+ - 16 and 2 color modes
  - PC speaker like sound effects
  - No music
  - No texture mapped floors and ceilings
@@ -38,6 +38,18 @@ Known bugs:
  - When there's not enough memory for
    the intermission screen, the last few
    frames of gameplay are shown instead
+
+Supported video modes:
+|Video mode |Executable  |Notes        |
+|-----------|------------|-------------|
+|320x200 16c|DOOMSTCH.TOS|High detail  |
+|320x200 16c|DOOMSTCM.TOS|Medium detail|
+|320x200 16c|DOOMSTCL.TOS|Low detail   |
+|640x200  4c|DOOMSTBW.TOS|Medium detail|
+|           |            |2 colors     |
+
+DOOMSTC?.TOS need DOOMST16.WAD.
+DOOMSTBW.TOS needs DOOMST2.WAD.
 
 Controls:
 |Action                 |Keys         |

@@ -100,15 +100,15 @@ static const uint8_t mapcolor_secr = MAGENTA;
 static const uint8_t mapcolor_unsn = WHITE;
 static const uint8_t mapcolor_sngl = WHITE;
 #elif NR_OF_COLORS == 16
-#define BLUE			0x11
-#define GREEN			0x22
-#define RED				0x44
-#define BROWN			0x66
-#define DARK_GRAY		0x88
-#define LIGHT_RED		0xcc
-#define LIGHT_MAGENTA	0xdd
-#define YELLOW			0xee
-#define WHITE			0xff
+#define BLUE			0x01
+#define GREEN			0x02
+#define RED				0x04
+#define BROWN			0x06
+#define DARK_GRAY		0x08
+#define LIGHT_RED		0x0c
+#define LIGHT_MAGENTA	0x0d
+#define YELLOW			0x0e
+#define WHITE			0x0f
 static const uint8_t mapcolor_wall = RED;
 static const uint8_t mapcolor_fchg = BROWN;
 static const uint8_t mapcolor_cchg = BROWN;

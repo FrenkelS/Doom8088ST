@@ -1,0 +1,1 @@
+./bast16.sh 60 DOOMSTCM.TOS
