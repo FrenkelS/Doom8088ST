@@ -253,19 +253,20 @@ static void movep(uint32_t d, uint8_t *a)
 void I_FinishViewWindow(void)
 {
 #if VIEWWINDOWWIDTH == 60
+	uint8_t *s = viewwindow;
 	uint8_t *a = _s_screen;
 	for (int16_t y = 0; y < VIEWWINDOWHEIGHT; y++)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 4; x++)
 		{
 			uint32_t d;
-			d = lutce[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 0]]
-			  | lutco[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 1]];
+			d = lutce[*s++]
+			  | lutco[*s++];
 			movep(d, a);
 			a += 1;
 
-			d = lutce[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 2]]
-			  | lutco[viewwindow[y * VIEWWINDOWWIDTH + x * 4 + 3]];
+			d = lutce[*s++]
+			  | lutco[*s++];
 			movep(d, a);
 			a += 7;
 		}
