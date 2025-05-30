@@ -32,13 +32,13 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 ## Supported video modes
 
 ### 320x200 16 color mode, effective resolution 120x128
-![Doom8088 in 16 colors, high mode](readme_imgs/doomstch.png?raw=true)
+![Doom8088 in 16 colors, high detail](readme_imgs/doomstch.png?raw=true)
 
 ### 320x200 16 color mode, effective resolution  60x128
-![Doom8088 in 16 colors, medium mode](readme_imgs/doomstcm.png?raw=true)
+![Doom8088 in 16 colors, medium detail](readme_imgs/doomstcm.png?raw=true)
 
 ### 320x200 16 color mode, effective resolution  30x128
-![Doom8088 in 16 colors, low mode](readme_imgs/doomstcl.png?raw=true)
+![Doom8088 in 16 colors, low detail](readme_imgs/doomstcl.png?raw=true)
 
 ### 640x200  4 color mode, effective resolution  60x128 2 colors
 ![Doom8088 in 2 colors](readme_imgs/doomstbw.png?raw=true)
