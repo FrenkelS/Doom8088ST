@@ -20,7 +20,7 @@
  *
  * DESCRIPTION:
  *      Video code for Atari ST 320x200 16 color
- *      30x128 and 60x128 effective resolution
+ *      30x128, 60x128 and 120x128 effective resolution
  *
  *-----------------------------------------------------------------------------*/
 
