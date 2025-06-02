@@ -500,8 +500,10 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	 int16_t bhw = b >> FRACBITS;
 
 	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t lh = ( int32_t) alw * bhw;
 	 int32_t hl = ( int32_t) ahw * blw;
-	return (a * bhw) + (ll >> FRACBITS) + hl;
+	 int32_t hh = ( int32_t) ahw * bhw;
+	return (ll >> FRACBITS) + lh + hl + (hh << FRACBITS);
 }
 
 
@@ -538,12 +540,17 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
+	boolean neg = a < 0;
+	if (neg) a = -a;
+
 	uint16_t alw = a;
-	 int16_t ahw = a >> FRACBITS;
+	uint16_t ahw = a >> FRACBITS;
 
 	uint32_t ll = (uint32_t) alw * blw;
-	 int32_t hl = ( int32_t) ahw * blw;
-	return (ll >> FRACBITS) + hl;
+	uint32_t hl = (uint32_t) ahw * blw;
+	fixed_t r = (ll >> FRACBITS) + hl;
+	if (neg) r = -r;
+	return r;
 }
 
 
