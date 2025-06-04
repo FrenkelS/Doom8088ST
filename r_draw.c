@@ -572,26 +572,13 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 	uint16_t alw = a;
 	uint16_t ahw = a >> FRACBITS;
 	uint16_t blw = b;
-	uint16_t bhw = b >> FRACBITS;
 
-	int32_t result;
-	if (bhw == 0) {
-		uint32_t hl = mulu(ahw, blw);
+	uint32_t hl = mulu(ahw, blw);
 
-		// Make sure we round towards -inf
-		uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
+	// Make sure we round towards -inf
+	uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
 
-		result = hl + ll;
-	} else {
-		uint32_t hh = (-ahw) << FRACBITS;
-		uint32_t hl = mulu(ahw, blw);
-		uint32_t lh = -alw;
-
-		// Make sure we round towards -inf
-		uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
-
-		result = hh + hl + lh + ll;
-	}
+	int32_t result = hl + ll;
 
 	if (neg) result = -result;
 	return result;
