@@ -495,8 +495,8 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
 	// Only work with unsigned numbers.
-	if (a < 0) a = -a;
-	if (b < 0) b = -b;
+	a = D_abs(a);
+	b = D_abs(b);
 	uint16_t alw = a;
 	uint16_t ahw = a >> FRACBITS;
 	uint16_t blw = b;
@@ -532,8 +532,8 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
 	// Only work with unsigned numbers.
-	if (a < 0) a = -a;
-	if (b < 0) b = -b;
+	a = D_abs(a);
+	b = D_abs(b);
 	uint16_t alw = a;
 	uint16_t ahw = a >> FRACBITS;
 	uint16_t blw = b;
@@ -567,8 +567,8 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
 	// Only work with unsigned numbers.
-	if (a < 0) a = -a;
-	if (b < 0) b = -b;
+	a = D_abs(a);
+	b = D_abs(b);
 	uint16_t alw = a;
 	uint16_t ahw = a >> FRACBITS;
 	uint16_t blw = b;
@@ -593,7 +593,7 @@ inline
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
 	boolean neg = a < 0;
-	if (neg) a = -a;
+	a = D_abs(a);
 
 	uint16_t alw = a;
 	uint16_t ahw = a >> FRACBITS;
