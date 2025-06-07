@@ -1,5 +1,5 @@
 ## Doom8088: Atari ST Edition
-![Doom8088: Atari ST Edition](readme_imgs/doomstcl.png?raw=true)
+![Doom8088: Atari ST Edition](readme_imgs/doomstch.png?raw=true)
 
 Doom was originally designed in 1993 for 32-bit DOS computers with 4 MB of RAM.
 It's mostly written in C code with very little assembly code.

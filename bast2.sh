@@ -98,7 +98,6 @@ export GLOBOBJS+=" z_zone.o"
 
 #m68k-atari-mintelf-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT
 m68k-atari-mintelf-gcc -nostdlib libcmini/crt0.o $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o atarist/$OUTPUT -s -Llibcmini -lcmini -lgcc
-m68k-atari-mintelf-strip -s atarist/$OUTPUT
 
 rm i_vast2.o
 rm p_enemy2.o

@@ -566,7 +566,7 @@ void G_PlayerReborn (void)
 // G_DoReborn
 //
 
-void G_DoReborn (void)
+static void G_DoReborn(void)
 {
     _g_gameaction = ga_loadlevel;      // reload the level from scratch
 }
