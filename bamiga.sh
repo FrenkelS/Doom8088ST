@@ -17,7 +17,7 @@ fi
 
 if [ -z "$OUTPUT" ]
 then
-  export OUTPUT=DOOMST2
+  export OUTPUT=DOOMSTBW
 fi
 
 m68k-amigaos-gcc -c i_vamiga.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
