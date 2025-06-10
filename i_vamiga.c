@@ -255,12 +255,13 @@ void I_FinishUpdate(void)
 
 			s += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
 			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
-			for (int16_t y = 0; y < ST_HEIGHT; y++)
-			{
-				memcpy(d, s, VIEWWINDOWWIDTH);
-				s += PLANEWIDTH;
-				d += PLANEWIDTH;
-			}
+
+			WaitBlit();
+
+			custom.bltapt = s;
+			custom.bltdpt = d;
+
+			custom.bltsize = (ST_HEIGHT << 6) | ((SCREENWIDTH * DW / 8) / 2);
 		}
 	}
 
