@@ -26,6 +26,7 @@
 #include <clib/exec_protos.h>
 #include <clib/intuition_protos.h>
 #include <clib/graphics_protos.h>
+#include <hardware/dmabits.h>
 
 #include <stdint.h>
 
@@ -96,16 +97,12 @@ static int16_t screenHeightAmiga;
 
 #define BPL1MOD	0x108
 
-#define COLOR00	0x180
-#define COLOR01	0x182
-
 #define BPL1PTH	0x0e0
 #define BPL1PTL	0x0e2
 
 #define COPLIST_IDX_DIWSTOP_VALUE 9
-#define COPLIST_IDX_COLOR00_VALUE 15
-#define COPLIST_IDX_BPL1PTH_VALUE 19
-#define COPLIST_IDX_BPL1PTL_VALUE 21
+#define COPLIST_IDX_BPL1PTH_VALUE 15
+#define COPLIST_IDX_BPL1PTL_VALUE 17
 
 
 static uint16_t __chip coplist[] = {
@@ -116,9 +113,6 @@ static uint16_t __chip coplist[] = {
 	DIWSTOP, DIWSTOP_VALUE_PAL,
 	BPLCON0, BPLCON0_VALUE,
 	BPL1MOD, 0,
-
-	COLOR00, 0x000,
-	COLOR01, 0xfff,
 
 	BPL1PTH, 0,
 	BPL1PTL, 0,
@@ -154,7 +148,7 @@ static const uint16_t colors[14] =
 
 static void I_UploadNewPalette(int8_t pal)
 {
-	coplist[COPLIST_IDX_COLOR00_VALUE] = colors[pal];
+	custom.color[0] = colors[pal];
 }
 
 
@@ -185,8 +179,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	coplist[COPLIST_IDX_BPL1PTH_VALUE] = addr >> 16;
 	coplist[COPLIST_IDX_BPL1PTL_VALUE] = addr;
 
-	custom.dmacon = 0x0020;
+	custom.dmacon = BITCLR|DMAF_SPRITE;
 	custom.cop1lc = (uint32_t) coplist;
+
+	custom.color[0] = 0x000;
+	custom.color[1] = 0xfff;
 
 	OwnBlitter();
 	WaitBlit();
