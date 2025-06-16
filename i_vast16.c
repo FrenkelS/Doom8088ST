@@ -1097,6 +1097,5 @@ void D_Wipe(void)
 
 	} while (!done);
 
-	Z_Free(frontbuffer);
 	Z_Free(wipe_y_lookup);
 }

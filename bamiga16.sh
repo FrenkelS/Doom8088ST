@@ -5,7 +5,7 @@ export PATH=~/amiga-gcc-build/bin:$PATH
 unset CFLAGS
 
 
-export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
+export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=160 -DFLAT_SKY_COLOR=7 -DWAD_FILE=\"DOOMAM16.WAD\" -DVIEWWINDOWWIDTH=30 -DNR_OF_COLORS=16"
 
 export CPU=$1
 export OUTPUT=$2
@@ -17,10 +17,10 @@ fi
 
 if [ -z "$OUTPUT" ]
 then
-  export OUTPUT=DOOMAMBW
+  export OUTPUT=DOOMAMCL
 fi
 
-m68k-amigaos-gcc -c i_vami2.c  $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
+m68k-amigaos-gcc -c i_vami16.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
@@ -46,8 +46,8 @@ export GLOBOBJS+=" g_game.c"
 export GLOBOBJS+=" hu_stuff.c"
 export GLOBOBJS+=" i_audio.c"
 export GLOBOBJS+=" i_amiga.c"
-#export GLOBOBJS+=" i_vami2.c"
-export GLOBOBJS+=" i_vami2.o"
+#export GLOBOBJS+=" i_vami16.c"
+export GLOBOBJS+=" i_vami16.o"
 export GLOBOBJS+=" info.c"
 export GLOBOBJS+=" m_cheat.c"
 export GLOBOBJS+=" m_menu.c"
@@ -101,7 +101,7 @@ export GLOBOBJS+=" z_zone.o"
 m68k-amigaos-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o amiga/$OUTPUT
 m68k-amigaos-strip -s amiga/$OUTPUT
 
-rm i_vami2.o
+rm i_vami16.o
 rm p_enemy2.o
 rm p_map.o
 rm p_maputl.o
