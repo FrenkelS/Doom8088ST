@@ -619,21 +619,29 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 void V_DrawBackground(int16_t backgroundnum)
 {
-	// TODO
 	const byte *src = W_GetLumpByNum(backgroundnum);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
-		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 8)
 		{
 			uint8_t *d = &_s_screen[y * PLANEWIDTH + x];
-			const byte *s = &src[((y & 63) * 16)];
+			const byte *s = &src[((y & 63) * 4 * 8)];
 
-			size_t len = 16;
+			size_t len = 8;
 
-			if (VIEWWINDOWWIDTH - x < 16)
+			if (VIEWWINDOWWIDTH - x < 8)
 				len = VIEWWINDOWWIDTH - x;
 
+			memcpy(d, s, len);
+			d += VIEWWINDOWWIDTH;
+			s +=  8;
+			memcpy(d, s, len);
+			d += VIEWWINDOWWIDTH;
+			s +=  8;
+			memcpy(d, s, len);
+			d += VIEWWINDOWWIDTH;
+			s +=  8;
 			memcpy(d, s, len);
 		}
 	}
