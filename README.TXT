@@ -56,7 +56,7 @@ DOOMSTC?.TOS need DOOMST16.WAD.
 DOOMSTBW.TOS needs DOOMST2.WAD.
 
 DOOM520.TOS also needs DOOMST2.WAD.
-It goes from the first level immediatly
+It goes from the first level immediately
 to the last level.
 
 Controls:
