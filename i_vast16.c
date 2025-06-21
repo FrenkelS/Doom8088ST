@@ -46,7 +46,6 @@
 extern const int16_t CENTERY;
 
 
-static uint8_t mem_chunk[2 * 320 * 200 / 2 + 256];
 static int16_t page;
 static uint8_t *pages[3];
 static uint8_t *_s_screen;
@@ -123,6 +122,11 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	for (int16_t c = 0; c < 16; c++)
 		oldcolors[c] = Setcolor(c, playpal[c]);
 	Z_ChangeTagToCache(playpal);
+
+	uint8_t *mem_chunk = (uint8_t *)Mxalloc(2 * 320 * 200 / 2 + 256, MX_STRAM);
+	if (!mem_chunk)
+		mem_chunk = Z_MallocStatic(2 * 320 * 200 / 2 + 256);
+	memset(mem_chunk, 0, 2 * 320 * 200 / 2 + 256);
 
 	pages[0] = Physbase();
 	pages[1] = (uint8_t *)(((uint32_t)mem_chunk | 0xff) + 1);
