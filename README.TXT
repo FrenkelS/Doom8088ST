@@ -13,7 +13,9 @@ Usually these systems are 32-bit or
 more and have a flat memory model.
 
 Doom8088: Atari ST Edition is
-a port for Atari ST computers.
+a port for Atari ST computers with
+at least 512 kB of RAM and
+a Motorola 68000 CPU.
 It's based on Doom8088,
 a port of Doom for 16-bit DOS computers.
 
@@ -47,9 +49,15 @@ Supported video modes:
 |320x200 16c|DOOMSTCL.TOS|Low detail   |
 |640x200  4c|DOOMSTBW.TOS|Medium detail|
 |           |            |2 colors     |
+|640x200  4c|DOOM520.TOS |For 512 kB   |
+|           |            |computers    |
 
 DOOMSTC?.TOS need DOOMST16.WAD.
 DOOMSTBW.TOS needs DOOMST2.WAD.
+
+DOOM520.TOS also needs DOOMST2.WAD.
+It goes from the first level immediatly
+to the last level.
 
 Controls:
 |Action                 |Keys         |
