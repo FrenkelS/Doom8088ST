@@ -86,13 +86,10 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 |`-timedemo demo3`    |Run benchmark        |
 
 ## Building:
-|Platform     |Platform specific code |Compiler                                                                      |Build script                            |Additional information                                   |
-|-------------|-----------------------|------------------------------------------------------------------------------|----------------------------------------|---------------------------------------------------------|
-|Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`, `bast16m.sh`, `bast16l.sh`|320x200 16 color mode, high/medium/low detail mode       |
-|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`                              |640x200  4 color mode, 2 colors are used                 |
-|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast520.sh`                            |640x200  4 color mode, 2 colors are used                 |
-|             |                       |                                                                              |                                        |For computers with 512 kB of RAM.                        |
-|             |                       |                                                                              |                                        |It goes from the first level immediatly to the last level|
-|IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)     |
+|Platform     |Platform specific code |Compiler                                                                      |Build script                            |Additional information                              |
+|-------------|-----------------------|------------------------------------------------------------------------------|----------------------------------------|----------------------------------------------------|
+|Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`, `bast16m.sh`, `bast16l.sh`|320x200 16 color mode, high/medium/low detail mode  |
+|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`, `bast520.sh`                |640x200  4 color mode, 2 colors are used</br>`DOOM520.TOS` is for computers with 512 kB of RAM. It goes from the first level immediatly to the last level.|
+|IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
