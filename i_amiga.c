@@ -290,7 +290,7 @@ unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 
 	if (__size == 0xffff)
 	{
-		uint32_t availableMemory = AvailMem(MEMF_PUBLIC);
+		uint32_t availableMemory = AvailMem(MEMF_ANY);
 		int32_t paragraphs = availableMemory < 1023 * 1024 ? availableMemory / PARAGRAPH_SIZE : 1023 * 1024L / PARAGRAPH_SIZE;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 		while (!ptr)
@@ -307,7 +307,6 @@ unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 			while ((m & (PARAGRAPH_SIZE - 1)) != 0)
 				m = (uint32_t) ++ptr;
 		}
-
 
 		*__seg = paragraphs;
 	}

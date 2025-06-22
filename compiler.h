@@ -1,6 +1,6 @@
 //
 //
-// Copyright (C) 2023-2024 Frenkel Smeijers
+// Copyright (C) 2023-2025 Frenkel Smeijers
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -43,6 +43,7 @@ typedef uint16_t segment_t;
 typedef uint32_t segment_t;
 #define SIZE_OF_SEGMENT_T 4
 
+#undef  __far
 #define __far
 
 #define _fmemchr	memchr

@@ -20,7 +20,7 @@ then
   export OUTPUT=DOOMAMCL
 fi
 
-m68k-amigaos-gcc -c i_vami16.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
+m68k-amigaos-gcc -c i_vami16.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -O3    -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
