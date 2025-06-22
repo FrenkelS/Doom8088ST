@@ -286,8 +286,6 @@ static void I_DrawBuffer(uint8_t *buffer)
 		custom.bltsize = ((4 * (SCREENHEIGHT - ST_HEIGHT)) << 6) | (VIEWWINDOWWIDTH / 2);
 
 	drawStatusBar = true;
-
-	//WaitBlit();
 }
 
 
@@ -297,6 +295,12 @@ static int8_t newpal;
 void I_SetPalette(int8_t p)
 {
 	newpal = p;
+}
+
+
+void I_StartUpdate(void)
+{
+	WaitBlit();
 }
 
 

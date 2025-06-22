@@ -221,6 +221,12 @@ void I_SetPalette(int8_t p)
 }
 
 
+void I_StartUpdate(void)
+{
+	// Do nothing
+}
+
+
 #define NO_PALETTE_CHANGE 100
 
 static uint16_t st_needrefresh = 0;

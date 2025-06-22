@@ -59,6 +59,7 @@ void I_InitKeyboard(void);
 
 void I_InitGraphics(void);
 
+void I_StartUpdate(void);
 void I_FinishUpdate(void);
 void I_FinishViewWindow(void);
 

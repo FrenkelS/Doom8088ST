@@ -155,6 +155,8 @@ static void D_Display (void)
 
     if (wipe)
         wipe_StartScreen();
+    else
+        I_StartUpdate();
 
     if (_g_gamestate != GS_LEVEL) { // Not a level
         if (oldgamestate == GS_LEVEL)
