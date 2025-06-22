@@ -6,7 +6,7 @@ It's mostly written in C code with very little assembly code.
 It has been ported to all kinds of systems.
 Usually these systems are 32-bit or more and have a flat memory model.
 
-Doom8088: Atari ST Edition is a port for Atari ST computers.
+Doom8088: Atari ST Edition is a port for Atari ST computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68000 CPU.
 It's based on [Doom8088](https://github.com/FrenkelS/Doom8088), a port of Doom for 16-bit DOS computers.
 Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088ST/releases).
 
@@ -89,7 +89,7 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 |Platform     |Platform specific code |Compiler                                                                      |Build script                            |Additional information                              |
 |-------------|-----------------------|------------------------------------------------------------------------------|----------------------------------------|----------------------------------------------------|
 |Atari ST     |`i_ast.c`, `i_vast16.c`|[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`, `bast16m.sh`, `bast16l.sh`|320x200 16 color mode, high/medium/low detail mode  |
-|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`                              |640x200  4 color mode, 2 colors are used            |
+|Atari ST     |`i_ast.c`, `i_vast2.c` |[m68k-atari-mintelf binutils, GCC, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`, `bast520.sh`                |640x200  4 color mode, 2 colors are used</br>`DOOM520.TOS` is for computers with 512 kB of RAM. It goes from the first level immediately to the last level.|
 |IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Atari ST Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).

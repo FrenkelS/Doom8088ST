@@ -614,16 +614,16 @@ static void G_DoCompleted (void)
     _g_wminfo.last = _g_gamemap -1;
 
     // wminfo.next is 0 biased, unlike gamemap
-    if (secretexit)
-        _g_wminfo.next = 8;  // go to secret level
-    else
-        if (_g_gamemap == 9)
-        {
-            // returning from secret level
-            _g_wminfo.next = 3;
-        }
-        else
-           _g_wminfo.next = _g_gamemap;          // go to next level
+    if (secretexit)           // go to secret level
+        _g_wminfo.next = 8;
+#if defined LOW_MEMORY
+    else if (_g_gamemap == 1)
+        _g_wminfo.next = 7;
+#endif
+    else if (_g_gamemap == 9) // returning from secret level
+        _g_wminfo.next = 3;
+    else                      // go to next level
+        _g_wminfo.next = _g_gamemap;
 
     _g_wminfo.maxkills = _g_totalkills;
     _g_wminfo.maxitems = _g_totalitems;

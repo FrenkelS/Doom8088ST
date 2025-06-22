@@ -376,8 +376,10 @@ static struct
 const demostates[] =
 {
     {D_DrawTitle1, NULL},
+#if !defined LOW_MEMORY
     {G_DeferedPlayDemo, "demo3"},
-    {NULL, NULL},
+#endif
+    {NULL, NULL}
 };
 
 static int16_t  demosequence;
