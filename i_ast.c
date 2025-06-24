@@ -414,7 +414,7 @@ unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
 	if (__size == 0xffff)
 	{
 		uint32_t availableMemory = Mxalloc(-1, MX_PREFTTRAM);
-		int32_t paragraphs = availableMemory < 1023 * 1024 ? availableMemory / PARAGRAPH_SIZE : 1023 * 1024L / PARAGRAPH_SIZE;
+		int32_t paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
 		ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_PREFTTRAM);
 		while (!ptr)
 		{
