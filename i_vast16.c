@@ -124,18 +124,13 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		oldcolors[c] = Setcolor(c, playpal[c]);
 	Z_ChangeTagToCache(playpal);
 
-	long fastRamBuffer;
 	uint8_t *mem_chunk;
+	long fastRamBuffer;
 	if (Getcookie(C__FRB, &fastRamBuffer) == C_FOUND)
-	{
 		mem_chunk = (uint8_t *)fastRamBuffer;
-	}
 	else
-	{
-		mem_chunk = malloc(2 * 320 * 200 / 2 + 256);
-		if (!mem_chunk)
-			mem_chunk = Z_MallocStatic(2 * 320 * 200 / 2 + 256);
-	}
+		mem_chunk = Z_MallocStatic(2 * 320 * 200 / 2 + 256);
+
 	memset(mem_chunk, 0, 2 * 320 * 200 / 2 + 256);
 
 	pages[0] = Physbase();
