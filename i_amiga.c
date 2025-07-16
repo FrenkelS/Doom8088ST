@@ -284,36 +284,28 @@ static void I_ShutdownTimer(void)
 // Memory
 //
 
-unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
+uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 {
-	static uint8_t* ptr;
-
-	if (__size == 0xffff)
+	uint32_t availableMemory = AvailMem(MEMF_ANY);
+	uint32_t paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
+	uint8_t *ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+	while (!ptr)
 	{
-		uint32_t availableMemory = AvailMem(MEMF_ANY);
-		int32_t paragraphs = availableMemory < 1023 * 1024 ? availableMemory / PARAGRAPH_SIZE : 1023 * 1024L / PARAGRAPH_SIZE;
+		paragraphs--;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
-		while (!ptr)
-		{
-			paragraphs--;
-			ptr = malloc(paragraphs * PARAGRAPH_SIZE);
-		}
-
-		// align ptr
-		uint32_t m = (uint32_t) ptr;
-		if ((m & (PARAGRAPH_SIZE - 1)) != 0)
-		{
-			paragraphs--;
-			while ((m & (PARAGRAPH_SIZE - 1)) != 0)
-				m = (uint32_t) ++ptr;
-		}
-
-		*__seg = paragraphs;
 	}
-	else
-		*__seg = D_FP_SEG(ptr);
 
-	return 0;
+	// align ptr
+	uint32_t m = (uint32_t) ptr;
+	if ((m & (PARAGRAPH_SIZE - 1)) != 0)
+	{
+		paragraphs--;
+		while ((m & (PARAGRAPH_SIZE - 1)) != 0)
+			m = (uint32_t) ++ptr;
+	}
+
+	*heapSize = paragraphs * PARAGRAPH_SIZE;
+	return ptr;
 }
 
 
