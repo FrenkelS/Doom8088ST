@@ -408,52 +408,45 @@ static void I_ShutdownTimer(void)
 // Memory
 //
 
-unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg)
+uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 {
-	static uint8_t* ptr;
+	uint8_t* ptr;
+	uint32_t paragraphs;
 
-	if (__size == 0xffff)
+	if (Getcookie(C__FRB, NULL) == C_FOUND)
 	{
-		int32_t paragraphs;
-
-		if (Getcookie(C__FRB, NULL) == C_FOUND)
-		{
-			uint32_t availableMemory = Mxalloc(-1, MX_TTRAM);
-			paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
-			ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_TTRAM);
-			while (!ptr)
-			{
-				paragraphs--;
-				ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_TTRAM);
-			}
-		}
-		else
-		{
-			uint32_t availableMemory = Malloc(-1);
-			paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
-			ptr = malloc(paragraphs * PARAGRAPH_SIZE);
-			while (!ptr)
-			{
-				paragraphs--;
-				ptr = malloc(paragraphs * PARAGRAPH_SIZE);
-			}
-		}
-
-		// align ptr
-		uint32_t m = (uint32_t) ptr;
-		if ((m & (PARAGRAPH_SIZE - 1)) != 0)
+		uint32_t availableMemory = Mxalloc(-1, MX_TTRAM);
+		paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
+		ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_TTRAM);
+		while (!ptr)
 		{
 			paragraphs--;
-			while ((m & (PARAGRAPH_SIZE - 1)) != 0)
-				m = (uint32_t) ++ptr;
+			ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_TTRAM);
 		}
-
-		*__seg = paragraphs;
 	}
 	else
-		*__seg = D_FP_SEG(ptr);
+	{
+		uint32_t availableMemory = Malloc(-1);
+		paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
+		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		while (!ptr)
+		{
+			paragraphs--;
+			ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+		}
+	}
 
-	return 0;
+	// align ptr
+	uint32_t m = (uint32_t) ptr;
+	if ((m & (PARAGRAPH_SIZE - 1)) != 0)
+	{
+		paragraphs--;
+		while ((m & (PARAGRAPH_SIZE - 1)) != 0)
+			m = (uint32_t) ++ptr;
+	}
+
+	*heapSize = paragraphs * PARAGRAPH_SIZE;
+	return ptr;
 }
 
 
