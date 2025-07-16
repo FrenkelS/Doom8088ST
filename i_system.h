@@ -36,14 +36,11 @@
 #ifndef __I_SYSTEM__
 #define __I_SYSTEM__
 
+#include "compiler.h"
 #include "config.h"
 
 
-#if defined _M_I86
-#include <dos.h>
-#else
-unsigned int _dos_allocmem(unsigned int __size, unsigned int *__seg);
-#endif
+uint8_t __far* I_ZoneBase(uint32_t *heapSize);
 
 
 #define PARAGRAPH_SIZE 16

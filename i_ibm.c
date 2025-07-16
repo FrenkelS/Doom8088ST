@@ -628,6 +628,21 @@ static void I_ShutdownTimer(void)
 
 //**************************************************************************************
 //
+// Memory
+//
+
+uint8_t __far* I_ZoneBase(uint32_t *heapSize)
+{
+	unsigned int max, segment;
+	_dos_allocmem(0xffff, &max);
+	_dos_allocmem(max, &segment);
+	*heapSize = (uint32_t)max * PARAGRAPH_SIZE;
+	return D_MK_FP(segment, 0);
+}
+
+
+//**************************************************************************************
+//
 // Exit code
 //
 

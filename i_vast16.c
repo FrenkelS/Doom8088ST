@@ -25,6 +25,7 @@
  *-----------------------------------------------------------------------------*/
 
 #include <stdint.h>
+#include <mint/cookie.h>
 #include <mint/osbind.h>
 
 #include "compiler.h"
@@ -123,9 +124,13 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		oldcolors[c] = Setcolor(c, playpal[c]);
 	Z_ChangeTagToCache(playpal);
 
-	uint8_t *mem_chunk = (uint8_t *)Mxalloc(2 * 320 * 200 / 2 + 256, MX_STRAM);
-	if (!mem_chunk)
+	uint8_t *mem_chunk;
+	long fastRamBuffer;
+	if (Getcookie(C__FRB, &fastRamBuffer) == C_FOUND)
+		mem_chunk = (uint8_t *)fastRamBuffer;
+	else
 		mem_chunk = Z_MallocStatic(2 * 320 * 200 / 2 + 256);
+
 	memset(mem_chunk, 0, 2 * 320 * 200 / 2 + 256);
 
 	pages[0] = Physbase();

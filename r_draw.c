@@ -660,15 +660,30 @@ static PUREFUNC int8_t R_PointOnSide(fixed_t x, fixed_t y, const mapnode_t __far
 
 subsector_t __far* R_PointInSubsector(fixed_t x, fixed_t y)
 {
-    int16_t nodenum = numnodes-1;
+	static fixed_t prevx;
+	static fixed_t prevy;
+	static subsector_t __far* prevr;
 
-    // special case for trivial maps (single subsector, no nodes)
-    if (numnodes == 0)
-        return _g_subsectors;
+	if (prevx == x && prevy == y)
+		return prevr;
 
-    while (!(nodenum & NF_SUBSECTOR))
-        nodenum = nodes[nodenum].children[R_PointOnSide(x, y, nodes+nodenum)];
-    return &_g_subsectors[(int16_t)(nodenum & ~NF_SUBSECTOR)];
+	prevx = x;
+	prevy = y;
+
+	int16_t nodenum = numnodes-1;
+
+	// special case for trivial maps (single subsector, no nodes)
+	if (numnodes == 0)
+	{
+		prevr = _g_subsectors;
+		return prevr;
+	}
+
+	while (!(nodenum & NF_SUBSECTOR))
+		nodenum = nodes[nodenum].children[R_PointOnSide(x, y, nodes+nodenum)];
+
+	prevr = &_g_subsectors[(int16_t)(nodenum & ~NF_SUBSECTOR)];
+	return prevr;
 }
 
 

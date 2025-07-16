@@ -107,12 +107,8 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 void Z_Init (void)
 {
 	// allocate all available conventional memory.
-	unsigned int max, segment;
-	_dos_allocmem(0xffff, &max);
-	_dos_allocmem(max, &segment);
-	static uint8_t __far* mainzone; mainzone = D_MK_FP(segment, 0);
-
-	uint32_t heapSize = (uint32_t)max * PARAGRAPH_SIZE;
+	uint32_t heapSize;
+	static uint8_t __far* mainzone; mainzone = I_ZoneBase(&heapSize);
 
 	printf("%ld bytes allocated for zone\r\n", heapSize);
 
