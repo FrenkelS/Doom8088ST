@@ -43,4 +43,6 @@ void Z_Free(const void __far* ptr);
 void Z_FreeTags(void);
 void Z_CheckHeap(void);
 
+boolean Z_EqualNames(const char __far* farName, const char* nearName);
+
 #endif

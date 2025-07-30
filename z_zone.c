@@ -101,6 +101,12 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 }
 
 
+boolean Z_EqualNames(const char __far* farName, const char* nearName)
+{
+	return *(uint64_t __far*)farName == *(uint64_t*)nearName;
+}
+
+
 //
 // Z_Init
 //

@@ -171,8 +171,8 @@ uint16_t PUREFUNC W_LumpLength(int16_t num)
 //
 int16_t PUREFUNC W_GetNumForName(const char *name)
 {
-	int64_t nameint;
-	strncpy((char*)&nameint, name, 8);
+	char name8[8];
+	strncpy(name8, name, sizeof(name8));
 
 #if BACKWARDS
 	for (int16_t i = numlumps - 1; i >= 0; i--)
@@ -180,7 +180,7 @@ int16_t PUREFUNC W_GetNumForName(const char *name)
 	for (int16_t i = 0; i < numlumps; i++)
 #endif
 	{
-		if (nameint == *(int64_t __far*)(fileinfo[i].name))
+		if (Z_EqualNames(fileinfo[i].name, name8))
 		{
 			return i;
 		}
