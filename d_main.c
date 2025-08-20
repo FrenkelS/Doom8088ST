@@ -155,6 +155,8 @@ static void D_Display (void)
 
     if (wipe)
         wipe_StartScreen();
+    else
+        I_StartUpdate();
 
     if (_g_gamestate != GS_LEVEL) { // Not a level
         if (oldgamestate == GS_LEVEL)
@@ -431,7 +433,7 @@ static const char * const * myargv;
 int16_t M_CheckParm(char *check)
 {
 	for (int16_t i = 1; i < myargc; i++)
-		if (!stricmp(check, myargv[i]))
+		if (!strcasecmp(check, myargv[i]))
 			return i;
 
 	return 0;
