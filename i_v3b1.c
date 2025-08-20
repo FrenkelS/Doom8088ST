@@ -19,7 +19,7 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for CGA 640x200 2 color
+ *      Video code for AT&T UNIX PC / PC 7300 / 3B1 720x348 2 color
  *
  *-----------------------------------------------------------------------------*/
 
@@ -65,102 +65,12 @@ void I_ReloadPalette(void)
 }
 
 
-typedef enum
-{
-	MDA,
-	CGA,
-	PCJR,
-	TANDY,
-	EGA,
-	VGA,
-	MCGA
-} videocardsenum_t;
-
-
-static videocardsenum_t videocard;
-
-
-static videocardsenum_t I_DetectVideoCard(void)
-{
-	// This code is based on Jason M. Knight's Paku Paku code
-
-	union REGS regs;
-	regs.w.ax = 0x1200;
-	regs.h.bl = 0x32;
-	int86(0x10, &regs, &regs);
-
-	if (regs.h.al == 0x12)
-	{
-		regs.w.ax = 0x1a00;
-		regs.h.bl = 0;
-		int86(0x10, &regs, &regs);
-		return (0x0a <= regs.h.bl && regs.h.bl <= 0x0c) ? MCGA : VGA;
-	}
-
-	regs.h.ah = 0x12;
-	regs.h.bl = 0x10;
-	int86(0x10, &regs, &regs);
-	if (regs.h.bl & 3)
-		return EGA;
-
-	regs.h.ah = 0x0f;
-	int86(0x10, &regs, &regs);
-	if (regs.h.al == 7)
-		return MDA;
-
-	uint8_t __far* fp;
-	fp = D_MK_FP(0xffff, 0x000e);
-	if (*fp == 0xfd)
-		return PCJR;
-
-	if (*fp == 0xff)
-	{
-		fp = D_MK_FP(0xfc00, 0);
-		if (*fp == 0x21)
-			return TANDY;
-	}
-
-	return CGA;
-}
-
-
-static const uint8_t colors[14] =
-{
-	15,							// normal
-	12, 12, 12, 12, 4, 4, 4, 4,	// red
-	14, 14, 6, 6,				// yellow
-	10							// green
-};
-
-
-static void I_UploadNewPalette(int8_t pal)
-{
-	uint8_t color = colors[pal];
-
-	if (videocard == CGA)
-		outp(0x3d9, color);
-	else
-	{
-		if (color > 7)
-			color |= 0x10;
-
-		union REGS regs;
-		regs.w.ax = 0x1000;
-		regs.h.bl = 1;
-		regs.h.bh = color;
-		int86(0x10, &regs, &regs);
-	}
-}
-
-
 void I_SetScreenMode(uint16_t mode);
 
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	__djgpp_nearptr_enable();
-
-	videocard = I_DetectVideoCard();
 
 	I_SetScreenMode(6);
 
@@ -213,25 +123,14 @@ static void I_DrawBuffer(uint8_t __far* buffer)
 }
 
 
-static int8_t newpal;
-
-
 void I_SetPalette(int8_t p)
 {
-	newpal = p;
+	UNUSED(p);
 }
 
 
-#define NO_PALETTE_CHANGE 100
-
 void I_FinishUpdate(void)
 {
-	if (newpal != NO_PALETTE_CHANGE)
-	{
-		I_UploadNewPalette(newpal);
-		newpal = NO_PALETTE_CHANGE;
-	}
-
 	I_DrawBuffer(_s_screen);
 }
 
