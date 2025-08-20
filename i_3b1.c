@@ -347,16 +347,6 @@ void I_Quit(void)
 {
 	I_Shutdown();
 
-	int16_t lumpnum = W_GetNumForName("ENDOOM");
-	W_ReadLumpByNum(lumpnum, D_MK_FP(0xb800, 0 + __djgpp_conventional_base));
-
-	union REGS regs;
-	regs.h.ah = 2;
-	regs.h.bh = 0;
-	regs.h.dl = 0;
-	regs.h.dh = 23;
-	int86(0x10, &regs, &regs);
-
 	printf("\n");
 	exit(0);
 }
@@ -376,35 +366,11 @@ void I_Error (const char *error, ...)
 }
 
 
-static void tprintf(void)
-{
-	union REGS regs;
-
-	char* msg = "                          DOOM8088 System Startup                           ";
-
-	for (size_t i = 0; i < strlen(msg); )
-	{
-		regs.h.ah = 9;
-		regs.h.al = msg[i];
-		regs.w.cx = 1;
-		regs.w.bx = (7 << 4) | 4;
-		int86(0x10, &regs, &regs);
-
-		regs.h.ah = 2;
-		regs.h.bh = 0;
-		regs.w.dx = ++i;
-		int86(0x10, &regs, &regs);
-	}
-
-	printf("\n");
-}
-
-
 int main(int argc, const char * const * argv)
 {
 	I_SetScreenMode(3);
 
-	tprintf();
+	printf("Doom8088: AT&T UNIX PC Edition\n");
 
 	D_DoomMain(argc, argv);
 	return 0;
