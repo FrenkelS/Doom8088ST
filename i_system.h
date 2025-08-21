@@ -49,8 +49,8 @@ uint8_t __far* I_ZoneBase(uint32_t *heapSize);
 void I_InitTimer(void);
 int32_t I_GetTime(void);
 
-_Noreturn void I_Quit(void);
-_Noreturn void I_Error(const char *error, ...);
+void NORETURN_PRE I_Quit(void) NORETURN_POST;
+void NORETURN_PRE I_Error(const char *error, ...) NORETURN_POST;
 
 void I_InitKeyboard(void);
 
