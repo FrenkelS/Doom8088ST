@@ -38,11 +38,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
 
 #include <stdint.h>
+#include <unistd.h>
 
 #include "compiler.h"
 #include "d_player.h"
