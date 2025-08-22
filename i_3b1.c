@@ -131,6 +131,10 @@ static void I_ShutdownKeyboard(void)
 
 void I_StartTic(void)
 {
+	static time_t gamekeytimestamps[NUMKEYS];
+
+	struct tms temp;
+
 	uint8_t buf[16];
 	int n = read(0, buf, sizeof(buf));
 	int i = 0;
@@ -159,8 +163,23 @@ void I_StartTic(void)
 			case 'Q': I_Quit();                      break;
 			default:  ev.data1 = buf[i];             break;
 		}
+
+		if (ev.data1 < NUMKEYS)
+			gamekeytimestamps[ev.data1] = times(&temp);
 		D_PostEvent(&ev);
 		i++;
+	}
+
+	for (i = 0; i < NUMKEYS; i++)
+	{
+		if (gamekeytimestamps[i] != 0 && times(&temp) - gamekeytimestamps[i] > 3)
+		{
+			gamekeytimestamps[i] = 0;
+			event_t ev;
+			ev.type = ev_keyup;
+			ev.data1 = i;
+			D_PostEvent(&ev);
+		}
 	}
 }
 
