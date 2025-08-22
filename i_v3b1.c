@@ -23,31 +23,20 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <conio.h>
-#include <dos.h>
-#include <stdint.h>
-
-#include "compiler.h"
+#include <sys/iohw.h>
 
 #include "i_system.h"
 #include "i_video.h"
 #include "m_random.h"
-#include "r_defs.h"
-#include "v_video.h"
-#include "w_wad.h"
 
 #include "globdata.h"
-
-
-#define PLANEWIDTH        80
-#define SCREENHEIGHT_CGA 200
 
 
 extern const int16_t CENTERY;
 
 
-static uint8_t __far* _s_screen;
-static uint8_t __far* videomemory;
+static uint8_t _s_screen[VIEWWINDOWWIDTH * SCREENHEIGHT];
+static uint8_t *videomemory;
 
 
 void I_ReloadPalette(void)
@@ -61,62 +50,95 @@ void I_ReloadPalette(void)
 		lumpName[7] = '0' + _g_gamma;
 	}
 
-	W_ReadLumpByNum(W_GetNumForName(lumpName), (void __far*)fullcolormap);
+	W_ReadLumpByNum(W_GetNumForName(lumpName), (void *)fullcolormap);
 }
-
-
-void I_SetScreenMode(uint16_t mode);
 
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
-	__djgpp_nearptr_enable();
-
-	I_SetScreenMode(6);
-
-	videomemory = D_MK_FP(0xb800, (((SCREENHEIGHT_CGA - SCREENHEIGHT) / 2) / 2) * PLANEWIDTH + (PLANEWIDTH - VIEWWINDOWWIDTH) / 2 + __djgpp_conventional_base);
-
-	_s_screen = Z_MallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
-	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	videomemory = (uint8_t*)VIDMEM;
+	videomemory += (VIDBYTES - VIEWWINDOWWIDTH) / 2 - 1;			// center horizontally
+	videomemory += ((VIDHEIGHT - SCREENHEIGHT * 2) / 2) * VIDBYTES;	// center vertically
 }
 
 
 void I_ShutdownGraphics(void)
 {
-	I_SetScreenMode(3);
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	I_FinishUpdate();
 }
 
 
 static boolean drawStatusBar = true;
 
-
-static void I_DrawBuffer(uint8_t __far* buffer)
+static const uint8_t lut[256] =
 {
-	uint8_t __far* src = buffer;
-	uint8_t __far* dst = videomemory;
+	0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
+	0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
+	0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
+	0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8,
+	0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
+	0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4,
+	0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec,
+	0x1c, 0x9c, 0x5c, 0xdc, 0x3c, 0xbc, 0x7c, 0xfc,
+	0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2,
+	0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2,
+	0x0a, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea,
+	0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa,
+	0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6,
+	0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6,
+	0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
+	0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe,
+	0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1,
+	0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1,
+	0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9,
+	0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9,
+	0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5,
+	0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5,
+	0x0d, 0x8d, 0x4d, 0xcd, 0x2d, 0xad, 0x6d, 0xed,
+	0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd,
+	0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3,
+	0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3,
+	0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb,
+	0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb,
+	0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7,
+	0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
+	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
+	0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff,
+};
 
-	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT) / 2; y++)
+
+static void I_DrawBuffer(uint8_t *buffer)
+{
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
+
+	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
 	{
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst += 0x2000;
-		src += VIEWWINDOWWIDTH;
-
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst -= 0x2000 - PLANEWIDTH;
-		src += VIEWWINDOWWIDTH;
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
+		{
+			dst[1] = lut[*src++];
+			dst[0] = lut[*src++];
+			dst += 2;
+		}
+		dst += VIDBYTES - VIEWWINDOWWIDTH;
+		memcpy(dst, dst - VIDBYTES, VIEWWINDOWWIDTH);
+		dst += VIDBYTES;
 	}
 
 	if (drawStatusBar)
 	{
-		for (int16_t y = 0; y < ST_HEIGHT / 2; y++)
+		for (int16_t y = 0; y < ST_HEIGHT; y++)
 		{
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst += 0x2000;
-			src += VIEWWINDOWWIDTH;
-
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst -= 0x2000 - PLANEWIDTH;
-			src += VIEWWINDOWWIDTH;
+			for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
+			{
+				dst[1] = lut[*src++];
+				dst[0] = lut[*src++];
+				dst += 2;
+			}
+			dst += VIDBYTES - VIEWWINDOWWIDTH;
+			memcpy(dst, dst - VIDBYTES, VIEWWINDOWWIDTH);
+			dst += VIDBYTES;
 		}
 	}
 	drawStatusBar = true;
@@ -144,15 +166,27 @@ void I_FinishViewWindow(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-static const uint8_t* colormap;
 
-static const uint8_t __far* source;
-static       uint8_t __far* dst;
-
-
-static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
+void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	uint8_t __far* dest = dst;
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	const uint8_t *source = dcvars->source;
+
+	const uint8_t *colormap = dcvars->colormap;
+
+	const uint16_t fracstep = dcvars->fracstep;
+	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
+
+	// Inner loop that does the actual texture mapping,
+	//  e.g. a DDA-lile scaling.
+	// This is as fast as it gets.
+
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];;
 	int16_t l = count >> 4;
 	while (l--)
 	{
@@ -198,31 +232,6 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 }
 
 
-void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	source = dcvars->source;
-
-	colormap = dcvars->colormap;
-
-	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
-
-	const uint16_t fracstep = dcvars->fracstep;
-	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
-
-	// Inner loop that does the actual texture mapping,
-	//  e.g. a DDA-lile scaling.
-	// This is as fast as it gets.
-
-	R_DrawColumn2(fracstep, frac, count);
-}
-
-
 void R_DrawColumnWall(const draw_column_vars_t *dcvars)
 {
 	R_DrawColumnSprite(dcvars);
@@ -235,13 +244,19 @@ static uint8_t swapNibbles(uint8_t color)
 }
 
 
-static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
+void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
 	uint8_t color0;
 	uint8_t color1;
-	uint8_t __far* dest = dst;
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
-	if (yl & 1)
+	if (dcvars->yl & 1)
 	{
 		color0 = swapNibbles(color);
 		color1 = color;
@@ -260,20 +275,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 
 	if (count & 1)
 		*dest = color0;
-}
-
-
-void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
-
-	R_DrawColumnFlat2(color, dcvars->yl, count);
 }
 
 
@@ -303,7 +304,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t __far* dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
 
 	static int16_t fuzzpos = 0;
 
@@ -321,7 +322,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
-	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
 }
 
 
@@ -382,21 +383,21 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 void V_DrawBackground(int16_t backgroundnum)
 {
-	const byte __far* src = W_GetLumpByNum(backgroundnum);
+	const byte *src = W_GetLumpByNum(backgroundnum);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
 		{
-			uint8_t __far* d = &_s_screen[y * VIEWWINDOWWIDTH + x];
-			const byte __far* s = &src[((y & 63) * 16)];
+			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH + x];
+			const byte *s = &src[((y & 63) * 16)];
 
 			size_t len = 16;
 
 			if (VIEWWINDOWWIDTH - x < 16)
 				len = VIEWWINDOWWIDTH - x;
 
-			_fmemcpy(d, s, len);
+			memcpy(d, s, len);
 		}
 	}
 
@@ -406,14 +407,14 @@ void V_DrawBackground(int16_t backgroundnum)
 
 void V_DrawRaw(int16_t num, uint16_t offset)
 {
-	const uint8_t __far* lump = W_TryGetLumpByNum(num);
+	const uint8_t *lump = W_TryGetLumpByNum(num);
 
 	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH;
 
 	if (lump != NULL)
 	{
 		uint16_t lumpLength = W_LumpLength(num);
-		_fmemcpy(&_s_screen[offset], lump, lumpLength);
+		memcpy(&_s_screen[offset], lump, lumpLength);
 		Z_ChangeTagToCache(lump);
 	}
 	else
@@ -438,7 +439,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte __far* desttop = _s_screen + (y * VIEWWINDOWWIDTH) + (x >> 2);
+	byte *desttop = _s_screen + (y * VIEWWINDOWWIDTH) + (x >> 2);
 
 	int16_t width = patch->width;
 
@@ -447,13 +448,13 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (int16_t col = 0; col < width; col++)
 	{
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col]);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
 		{
-			const byte __far* source = (const byte __far*)column + 3;
-			byte __far* dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
+			const byte *source = (const byte*)column + 3;
+			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
 
 			uint16_t count = column->length;
 
@@ -501,7 +502,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				}
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t*)((const byte*)column + column->length + 4);
 		}
 
 		p++;
@@ -538,7 +539,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		else if (dc_x >= SCREENWIDTH)
 			break;
 
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col >> 8]);
+		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col >> 8]);
 
 		int16_t p = dc_x & 3;
 		uint8_t bitmask = bitmasks4[p];
@@ -553,11 +554,11 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte __far* dest = _s_screen + (dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2);
+			byte *dest = _s_screen + (dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2);
 
 			int16_t frac = 0;
 
-			const byte __far* source = (const byte __far*)column + 3;
+			const byte *source = (const byte*)column + 3;
 
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
@@ -569,21 +570,21 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				frac += DYI;
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t*)((const byte*)column + column->length + 4);
 		}
 	}
 }
 
 
-static uint8_t __far* frontbuffer;
-static int16_t __far* wipe_y_lookup;
+static uint8_t *frontbuffer;
+static int16_t *wipe_y_lookup;
 
 
 void wipe_StartScreen(void)
 {
 	frontbuffer = Z_TryMallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
 	if (frontbuffer)
-		_fmemcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT);
+		memcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT);
 }
 
 
@@ -591,7 +592,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint8_t __far* backbuffer = _s_screen;
+	uint8_t *backbuffer = _s_screen;
 
 	while (ticks--)
 	{
@@ -613,9 +614,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				uint8_t __far* s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
-
-				uint8_t __far* d = &frontbuffer[i] + ((SCREENHEIGHT - 1) * VIEWWINDOWWIDTH);
+				uint8_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
+				uint8_t *d = &frontbuffer[i] + ((SCREENHEIGHT      - 1) * VIEWWINDOWWIDTH);
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy
