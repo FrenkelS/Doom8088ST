@@ -232,12 +232,12 @@ void I_InitTimer(void)
 
 uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 {
-	uint32_t availableMemory = 2 * 1024 * 1024L; // TODO 4 MB
+	uint32_t availableMemory = 4 * 1024 * 1024L;
 	uint32_t paragraphs = availableMemory / PARAGRAPH_SIZE;
 	uint8_t *ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 	while (!ptr)
 	{
-		paragraphs--;
+		paragraphs -= NBPC / PARAGRAPH_SIZE;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 	}
 
