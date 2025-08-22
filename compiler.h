@@ -1,6 +1,6 @@
 //
 //
-// Copyright (C) 2023-2024 Frenkel Smeijers
+// Copyright (C) 2023-2025 Frenkel Smeijers
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,6 +18,13 @@
 
 #ifndef __COMPILER__
 #define __COMPILER__
+
+#if __GNUC__ <= 3
+void exit(int _status) __attribute__((__noreturn__));
+int toupper(int c);
+#endif
+
+
 
 #if defined _M_I86
 //16-bit
