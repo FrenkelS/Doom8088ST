@@ -439,7 +439,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte *desttop = _s_screen + (y * VIEWWINDOWWIDTH) + (x >> 2);
+	byte *desttop = &_s_screen[(y * VIEWWINDOWWIDTH) + (x >> 2)];
 
 	int16_t width = patch->width;
 
@@ -554,7 +554,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte *dest = _s_screen + (dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2);
+			byte *dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2)];
 
 			int16_t frac = 0;
 
