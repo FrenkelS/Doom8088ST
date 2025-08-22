@@ -34,8 +34,6 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <stdint.h>
-
 #include "d_player.h"
 #include "g_game.h"
 #include "w_wad.h"

@@ -40,7 +40,6 @@
 #endif
 
 
-#include <stdint.h>
 #include <unistd.h>
 
 #include "compiler.h"

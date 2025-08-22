@@ -25,7 +25,6 @@
 
 #include <conio.h>
 #include <dos.h>
-#include <stdint.h>
 
 #include "compiler.h"
 

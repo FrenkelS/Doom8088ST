@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <stdint.h>
 #include "compiler.h"
 #include "z_zone.h"
 #include "doomdef.h"

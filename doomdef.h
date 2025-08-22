@@ -42,8 +42,6 @@
 #include "config.h"
 #endif
 
-#include <stdint.h>
-
 // This must come first, since it redefines malloc(), free(), etc. -- killough:
 #include "z_zone.h"
 

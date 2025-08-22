@@ -37,8 +37,6 @@
  *-----------------------------------------------------------------------------
  */
 
-#include <stdint.h>
-
 #include "doomdef.h"
 #include "doomtype.h"
 #include "d_player.h"
