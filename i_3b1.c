@@ -25,6 +25,7 @@
 
 #include <malloc.h>
 #include <stdarg.h>
+#include <termio.h>
 
 #include "doomdef.h"
 #include "a_pcfx.h"
@@ -33,6 +34,8 @@
 #include "i_system.h"
 
 
+int ioctl( int fd, int cmd, ...);
+int read(int _fildes, void *_buf, size_t _nbyte);
 int vprintf(const char *_format, va_list _ap);
 
 
@@ -94,18 +97,68 @@ void I_InitGraphics(void)
 // Keyboard code
 //
 
+static struct termio oldt;
+
 static boolean isKeyboardIsrSet = false;
 
 
 void I_InitKeyboard(void)
 {
+	struct termio newt;
+
+	// Save old terminal settings
+	ioctl(0, TCGETA, &oldt);
+	newt = oldt;
+
+	// Disable canonical mode & echo
+	newt.c_lflag &= ~(ICANON | ECHO);
+	newt.c_cc[VMIN]  = 0;
+	newt.c_cc[VTIME] = 0;
+	ioctl(0, TCSETA, &newt);
+
 	isKeyboardIsrSet = true;
+}
+
+
+static void I_ShutdownKeyboard(void)
+{
+	ioctl(0, TCSETA, &oldt);
 }
 
 
 void I_StartTic(void)
 {
+	uint8_t buf[16];
+	int n = read(0, buf, sizeof(buf));
+	int i = 0;
+	while (i < n)
+	{
+		event_t ev;
+		ev.type = ev_keydown;
 
+		switch (buf[i])
+		{
+			case  27: ev.data1 = KEYD_START;         break;
+			case 0x0a:
+			case ' ': ev.data1 = KEYD_A;             break;
+			case '8': ev.data1 = KEYD_UP;            break;
+			case '2': ev.data1 = KEYD_DOWN;          break;
+			case '4': ev.data1 = KEYD_LEFT;          break;
+			case '6': ev.data1 = KEYD_RIGHT;         break;
+			case   9: ev.data1 = KEYD_SELECT;        break;
+			case '/': ev.data1 = KEYD_B;             break;
+			case ',': ev.data1 = KEYD_L;             break;
+			case '.': ev.data1 = KEYD_R;             break;
+			case '-': ev.data1 = KEYD_MINUS;         break;
+			case '=': ev.data1 = KEYD_PLUS;          break;
+			case '[': ev.data1 = KEYD_BRACKET_LEFT;  break;
+			case ']': ev.data1 = KEYD_BRACKET_RIGHT; break;
+			case 'Q': I_Quit();                      break;
+			default:  ev.data1 = buf[i];             break;
+		}
+		D_PostEvent(&ev);
+		i++;
+	}
 }
 
 
@@ -206,9 +259,7 @@ static void I_Shutdown(void)
 		I_ShutdownTimer();
 
 	if (isKeyboardIsrSet)
-	{
-
-	}
+		I_ShutdownKeyboard();
 }
 
 
@@ -221,7 +272,7 @@ void I_Quit(void)
 }
 
 
-void I_Error (const char *error, ...)
+void I_Error(const char *error, ...)
 {
 	va_list argptr;
 
