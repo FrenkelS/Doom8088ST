@@ -20,17 +20,22 @@
 #define __COMPILER__
 
 #if __GNUC__ <= 3
+#include <memory.h>
 #include <stddef.h>
 #include <stdio.h>
 
+int abs(int x);
 void *calloc(size_t _nelem, size_t _size);
 void exit(int _status) __attribute__((__noreturn__));
 size_t fread(void *_ptr, size_t _size, size_t _nelem, FILE *_stream);
 int fseek(FILE *_stream, long _offset, int _mode);
+long labs(long x);
 int printf(const char *_format, ...);
 int sprintf(char *_s, const char *_format, ...);
 int stricmp(const char *_s1, const char *_s2);
 int toupper(int c);
+#else
+#include <stdlib.h>
 #endif
 
 

@@ -55,7 +55,6 @@ typedef int32_t fixed_t;
  *
  */
 
-#include <stdlib.h>
 #define D_abs labs
 
 

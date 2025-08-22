@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <stdlib.h>
 #include <stdint.h>
 #include "compiler.h"
 #include "z_zone.h"
