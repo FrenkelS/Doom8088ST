@@ -26,6 +26,8 @@
 #include <malloc.h>
 #include <stdarg.h>
 #include <termio.h>
+#include <sys/param.h>
+#include <sys/times.h>
 
 #include "doomdef.h"
 #include "a_pcfx.h"
@@ -36,6 +38,7 @@
 
 int ioctl( int fd, int cmd, ...);
 int read(int _fildes, void *_buf, size_t _nbyte);
+time_t times(struct tms *buffer);
 int vprintf(const char *_format, va_list _ap);
 
 
@@ -190,24 +193,14 @@ void PCFX_Shutdown(void)
 // Returns time in 1/35th second tics.
 //
 
-static int32_t ticcount;
-
-static boolean isTimerSet;
-
-
 int32_t I_GetTime(void)
 {
-	return ticcount++;
+	struct tms temp;
+	return times(&temp) * TICRATE / HZ;
 }
 
 
 void I_InitTimer(void)
-{
-	isTimerSet = true;
-}
-
-
-static void I_ShutdownTimer(void)
 {
 
 }
@@ -254,9 +247,6 @@ static void I_Shutdown(void)
 		I_ShutdownGraphics();
 
 	I_ShutdownSound();
-
-	if (isTimerSet)
-		I_ShutdownTimer();
 
 	if (isKeyboardIsrSet)
 		I_ShutdownKeyboard();
