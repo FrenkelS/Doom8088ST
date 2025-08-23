@@ -37,10 +37,7 @@
  *-----------------------------------------------------------------------------
  */
 
-#include <stdint.h>
-#include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

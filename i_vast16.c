@@ -24,7 +24,6 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <stdint.h>
 #include <mint/cookie.h>
 #include <mint/osbind.h>
 

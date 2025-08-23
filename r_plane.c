@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2023-2024 Frenkel Smeijers
+ *  Copyright (C) 2023-2025 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -22,8 +22,6 @@
  *      Render floor and ceilings
  *
  *-----------------------------------------------------------------------------*/
-
-#include <stdint.h>
 
 #include "compiler.h"
 #include "r_defs.h"

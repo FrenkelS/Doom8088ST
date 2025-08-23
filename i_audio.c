@@ -39,7 +39,6 @@
 #include "config.h"
 #endif
 
-#include <stdint.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

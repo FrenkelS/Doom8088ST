@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2024 Frenkel Smeijers
+ *  Copyright (C) 2024-2025 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -22,8 +22,6 @@
  *      Does palette indicators (red pain/berserk, bright pickup)
  *
  *-----------------------------------------------------------------------------*/
-
-#include <stdint.h>
 
 #include "compiler.h"
 #include "doomdef.h"
