@@ -165,31 +165,69 @@ void I_StartTic(void)
 		event_t ev;
 		ev.type = ev_keydown;
 
-		switch (buf[i])
+		if (buf[i] == 27)
 		{
-			case  27: ev.data1 = KEYD_START;         break;
-			case 0x0a:
-			case ' ': ev.data1 = KEYD_A;             break;
-			case '8': ev.data1 = KEYD_UP;            break;
-			case '2': ev.data1 = KEYD_DOWN;          break;
-			case '4': ev.data1 = KEYD_LEFT;          break;
-			case '6': ev.data1 = KEYD_RIGHT;         break;
-			case   9: ev.data1 = KEYD_SELECT;        break;
-			case '/': ev.data1 = KEYD_B;             break;
-			case ',': ev.data1 = KEYD_L;             break;
-			case '.': ev.data1 = KEYD_R;             break;
-			case '-': ev.data1 = KEYD_MINUS;         break;
-			case '=': ev.data1 = KEYD_PLUS;          break;
-			case '[': ev.data1 = KEYD_BRACKET_LEFT;  break;
-			case ']': ev.data1 = KEYD_BRACKET_RIGHT; break;
-			case 'Q': I_Quit();                      break;
-			default:  ev.data1 = buf[i];             break;
+			if (i + 2 < n && buf[i + 1] == '[')
+			{
+				switch (buf[i + 2])
+				{
+					case 'A': ev.data1 = KEYD_UP;    break;
+					case 'B': ev.data1 = KEYD_DOWN;  break;
+					case 'C': ev.data1 = KEYD_RIGHT; break;
+					case 'D': ev.data1 = KEYD_LEFT;  break;
+					default: i += 3; continue;
+				}
+				i += 3;
+			}
+			else if (i + 2 < n && buf[i + 1] == 'N')
+			{
+				i += 3;
+				continue;
+			}
+			else if (i + 2 < n && buf[i + 1] == 'O')
+			{
+				i += 3;
+				continue;
+			}
+			else if (i + 1 < n)
+			{
+				i += 2;
+				continue;
+			}
+			else
+			{
+				ev.data1 = KEYD_START;
+				i++;
+			}
+		}
+		else
+		{
+			switch (buf[i])
+			{
+				case 0x0a:
+				case ' ': ev.data1 = KEYD_A;             break;
+				case '8': ev.data1 = KEYD_UP;            break;
+				case '2': ev.data1 = KEYD_DOWN;          break;
+				case '4': ev.data1 = KEYD_LEFT;          break;
+				case '6': ev.data1 = KEYD_RIGHT;         break;
+				case   9: ev.data1 = KEYD_SELECT;        break;
+				case '/': ev.data1 = KEYD_B;             break;
+				case ',': ev.data1 = KEYD_L;             break;
+				case '.': ev.data1 = KEYD_R;             break;
+				case '-': ev.data1 = KEYD_MINUS;         break;
+				case '=': ev.data1 = KEYD_PLUS;          break;
+				case '[': ev.data1 = KEYD_BRACKET_LEFT;  break;
+				case ']': ev.data1 = KEYD_BRACKET_RIGHT; break;
+				case 'Q': I_Quit();                      break;
+				default:  ev.data1 = buf[i];             break;
+			}
+			i++;
 		}
 
 		if (ev.data1 < NUMKEYS)
 			gamekeytimestamps[ev.data1] = clock();
+
 		D_PostEvent(&ev);
-		i++;
 	}
 
 	for (i = 0; i < NUMKEYS; i++)
@@ -198,7 +236,7 @@ void I_StartTic(void)
 		{
 			gamekeytimestamps[i] = 0;
 			event_t ev;
-			ev.type = ev_keyup;
+			ev.type  = ev_keyup;
 			ev.data1 = i;
 			D_PostEvent(&ev);
 		}
