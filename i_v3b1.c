@@ -54,6 +54,40 @@ void I_ReloadPalette(void)
 }
 
 
+static const uint8_t leftcolors[8] =
+{
+	0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+};
+
+static const uint8_t rightcolors[8] =
+{
+	0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff
+};
+
+
+static void I_UploadNewPalette(int8_t pal)
+{
+	uint8_t *leftPtr  = videomemory - 2;
+	uint8_t *rightPtr = videomemory + 1 + VIEWWINDOWWIDTH;
+	uint8_t leftColor  = 0;
+	uint8_t rightColor = 0;
+
+	if (1 <= pal && pal <= 9)
+	{
+		leftColor  = leftcolors[ pal - 1];
+		rightColor = rightcolors[pal - 1];
+	}
+
+	for (int16_t y = 0; y < SCREENHEIGHT * 2; y++)
+	{
+		*leftPtr  = leftColor;
+		*rightPtr = rightColor;
+		leftPtr  += VIDBYTES;
+		rightPtr += VIDBYTES;
+	}
+}
+
+
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	videomemory = (uint8_t*)VIDMEM;
@@ -145,14 +179,25 @@ static void I_DrawBuffer(uint8_t *buffer)
 }
 
 
+static int8_t newpal;
+
+
 void I_SetPalette(int8_t p)
 {
-	UNUSED(p);
+	newpal = p;
 }
 
 
+#define NO_PALETTE_CHANGE 100
+
 void I_FinishUpdate(void)
 {
+	if (newpal != NO_PALETTE_CHANGE)
+	{
+		I_UploadNewPalette(newpal);
+		newpal = NO_PALETTE_CHANGE;
+	}
+
 	I_DrawBuffer(_s_screen);
 }
 
