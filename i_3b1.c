@@ -97,6 +97,30 @@ void I_InitGraphics(void)
 
 //**************************************************************************************
 //
+// Returns time in 1/35th second tics.
+//
+
+static time_t clock(void)
+{
+	struct tms temp;
+	return times(&temp);
+}
+
+
+int32_t I_GetTime(void)
+{
+	return clock() * TICRATE / HZ;
+}
+
+
+void I_InitTimer(void)
+{
+
+}
+
+
+//**************************************************************************************
+//
 // Keyboard code
 //
 
@@ -133,8 +157,6 @@ void I_StartTic(void)
 {
 	static time_t gamekeytimestamps[NUMKEYS];
 
-	struct tms temp;
-
 	uint8_t buf[16];
 	int n = read(0, buf, sizeof(buf));
 	int i = 0;
@@ -165,14 +187,14 @@ void I_StartTic(void)
 		}
 
 		if (ev.data1 < NUMKEYS)
-			gamekeytimestamps[ev.data1] = times(&temp);
+			gamekeytimestamps[ev.data1] = clock();
 		D_PostEvent(&ev);
 		i++;
 	}
 
 	for (i = 0; i < NUMKEYS; i++)
 	{
-		if (gamekeytimestamps[i] != 0 && times(&temp) - gamekeytimestamps[i] > 3)
+		if (gamekeytimestamps[i] != 0 && clock() - gamekeytimestamps[i] > 3)
 		{
 			gamekeytimestamps[i] = 0;
 			event_t ev;
@@ -202,24 +224,6 @@ void PCFX_Init(void)
 
 
 void PCFX_Shutdown(void)
-{
-
-}
-
-
-//**************************************************************************************
-//
-// Returns time in 1/35th second tics.
-//
-
-int32_t I_GetTime(void)
-{
-	struct tms temp;
-	return times(&temp) * TICRATE / HZ;
-}
-
-
-void I_InitTimer(void)
 {
 
 }
