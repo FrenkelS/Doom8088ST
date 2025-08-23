@@ -64,6 +64,11 @@ static const uint8_t rightcolors[8] =
 	0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
 };
 
+static const uint8_t yellowcolors[4] =
+{
+	0x18, 0x3c, 0x7e, 0xff
+};
+
 
 static void I_UploadNewPalette(int8_t pal)
 {
@@ -72,10 +77,20 @@ static void I_UploadNewPalette(int8_t pal)
 	uint8_t leftColor  = 0;
 	uint8_t rightColor = 0;
 
-	if (1 <= pal && pal <= 9)
+	if (1 <= pal && pal <= 8)
 	{
 		leftColor  = leftcolors[ pal - 1];
 		rightColor = rightcolors[pal - 1];
+	}
+	else if (9 <= pal && pal <= 12)
+	{
+		leftColor  = yellowcolors[pal - 9];
+		rightColor = yellowcolors[pal - 9];
+	}
+	else if (pal == 13)
+	{
+		leftColor  = 0xaa;
+		rightColor = 0x55;
 	}
 
 	for (int16_t y = 0; y < SCREENHEIGHT * 2; y++)
