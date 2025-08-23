@@ -451,7 +451,7 @@ void ST_Drawer(void)
 static const uint8_t bitmasks4[4] = {0xfc, 0xf3, 0xcf, 0x3f};
 
 
-// TODO
+// TODO preprocess data
 void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 {
 	y -= patch->topoffset;
@@ -536,7 +536,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 }
 
 
-// TODO
+// TODO preprocess data
 void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 {
 	static const int32_t   DX  = (((int32_t)SCREENWIDTH)<<FRACBITS) / SCREENWIDTH_VGA;
@@ -575,7 +575,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte *dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2)];
+			byte *dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + ((dc_x >> 2) ^ 1)];
 
 			int16_t frac = 0;
 
@@ -586,7 +586,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			{
 				uint8_t c = *dest;
 				uint8_t color = source[frac >> 8];
-				*dest = (c & bitmask) | (color >> (p * 2));
+				*dest = (c & bitmask) | ((color >> 6) << (p * 2));
 				dest += VIEWWINDOWWIDTH;
 				frac += DYI;
 			}
