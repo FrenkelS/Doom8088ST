@@ -232,7 +232,11 @@ extern uint16_t validcount;         // increment every time a check is made
 //
 // sky mapping
 //
+#if defined FLAT_SPAN
+extern const int16_t skyflatnum;
+#else
 extern int16_t skyflatnum;
+#endif
 
 
 // variables used to look up and range check thing_t sprites patches

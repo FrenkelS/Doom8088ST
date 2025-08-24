@@ -1,14 +1,14 @@
 mkdir 3b1
 
-unset CFLAGS
-
 
 export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOM3B1.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
 
 
+export CC=/home/frenkel/gcc-for-unixpc/bin/unixpc-gcc
 export CFLAGS="-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN -std=c99"
 
 export GLOBOBJS=""
+export GLOBOBJS+=" r_draw.c"
 export GLOBOBJS+=" i_v3b1.c"
 export GLOBOBJS+=" p_enemy2.c"
 export GLOBOBJS+=" p_map.c"
@@ -16,13 +16,12 @@ export GLOBOBJS+=" p_maputl.c"
 export GLOBOBJS+=" p_mobj.c"
 export GLOBOBJS+=" p_sight.c"
 export GLOBOBJS+=" r_data.c"
-export GLOBOBJS+=" r_draw.c"
 export GLOBOBJS+=" r_plane.c"
 export GLOBOBJS+=" tables.c"
 export GLOBOBJS+=" w_wad.c"
 export GLOBOBJS+=" z_zone.c"
 
-/home/frenkel/gcc-for-unixpc/bin/unixpc-gcc -c -O3 -fgcse-sm $GLOBOBJS $CFLAGS $RENDER_OPTIONS
+cat $GLOBOBJS | $CC -x c -c -O3 -fgcse-sm $CFLAGS $RENDER_OPTIONS -o 3b1/speed.o -
 
 
 export GLOBOBJS=""
@@ -63,7 +62,4 @@ export GLOBOBJS+=" wi_lib.c"
 export GLOBOBJS+=" wi_stuff.c"
 export GLOBOBJS+=" z_bmallo.c"
 
-/home/frenkel/gcc-for-unixpc/bin/unixpc-gcc -c -Os $GLOBOBJS $CFLAGS $RENDER_OPTIONS
-
-
-mv *.o 3b1
+cat $GLOBOBJS | $CC -x c -c -Os $CFLAGS $RENDER_OPTIONS -o 3b1/space.o -
