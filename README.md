@@ -9,7 +9,7 @@ Usually these systems are 32-bit or more and have a flat memory model.
 Doom8088: Atari ST Edition     is a port for Atari ST     computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68000 CPU.
 Doom8088: AT&T UNIX PC Edition is a port for AT&T UNIX PC computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68010 CPU.
 It's based on [Doom8088](https://github.com/FrenkelS/Doom8088), a port of Doom for 16-bit DOS computers.
-Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088ST/releases).
+Download Doom8088: Atari ST Edition & AT&T UNIX PC Edition[here](https://github.com/FrenkelS/Doom8088ST/releases).
 
 **What's special?:**
  - Supports only Doom 1 Episode 1
@@ -33,23 +33,23 @@ Download Doom8088: Atari ST Edition [here](https://github.com/FrenkelS/Doom8088S
 
 ## Supported video modes
 
-### 320x200 16 color mode, effective resolution 120x128
+### Atari ST 320x200 16 color mode, effective resolution 120x128
 ![Doom8088 in 16 colors, high detail](readme_imgs/doomstch.png?raw=true)
 
-### 320x200 16 color mode, effective resolution  60x128
+### Atari ST 320x200 16 color mode, effective resolution  60x128
 ![Doom8088 in 16 colors, medium detail](readme_imgs/doomstcm.png?raw=true)
 
-### 320x200 16 color mode, effective resolution  30x128
+### Atari ST 320x200 16 color mode, effective resolution  30x128
 ![Doom8088 in 16 colors, low detail](readme_imgs/doomstcl.png?raw=true)
 
-### 640x200  4 color mode, effective resolution  60x128 2 colors
+### Atari ST 640x200  4 color mode, effective resolution  60x128 2 colors
 ![Doom8088 in 2 colors](readme_imgs/doomstbw.png?raw=true)
 
-### 720x348  2 color mode, effective resolution  60x128 2 colors
+### AT&T UNIX PC 720x348  2 color mode, effective resolution  60x128 2 colors
 ![Doom8088 in 2 colors](readme_imgs/doom3b1.png?raw=true)
 
 ## Controls:
-|Action                 |Atari ST Keys|AT&T UNIX PC Keys         |
+|Action                 |Atari ST     |AT&T UNIX PC              |
 |-----------------------|-------------|--------------------------|
 |Fire                   |Ctrl         |/                         |
 |Use                    |Enter & Space|Enter & Space             |
