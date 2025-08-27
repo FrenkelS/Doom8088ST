@@ -530,7 +530,6 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 }
 
 
-// TODO preprocess data
 void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 {
 	static const int32_t   DX  = (((int32_t)SCREENWIDTH)<<FRACBITS) / SCREENWIDTH_VGA;
