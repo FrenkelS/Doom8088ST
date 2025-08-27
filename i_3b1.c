@@ -232,7 +232,7 @@ void I_StartTic(void)
 
 	for (i = 0; i < NUMKEYS; i++)
 	{
-		if (gamekeytimestamps[i] != 0 && clock() - gamekeytimestamps[i] > 3)
+		if (gamekeytimestamps[i] != 0 && clock() - gamekeytimestamps[i] > (42 * HZ + 500) / 1000)
 		{
 			gamekeytimestamps[i] = 0;
 			event_t ev;
