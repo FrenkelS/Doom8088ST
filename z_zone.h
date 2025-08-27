@@ -26,7 +26,6 @@
 #ifndef __Z_ZONE__
 #define __Z_ZONE__
 
-#include <stddef.h>
 #include "doomtype.h"
 
 void Z_Init(void);

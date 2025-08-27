@@ -35,8 +35,6 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <stdint.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -159,10 +157,9 @@ static const angle_t tantoangleTable[2049];
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 static const angle16_t* tantoangle16Table = ((angle16_t*)&tantoangleTable[0]) + 1;
-#elif BYTE_ORDER == BIG_ENDIAN
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
 static const angle16_t* tantoangle16Table = ((angle16_t*)&tantoangleTable[0]);
-#else
-#error unknown byte order
 #endif
 
 #define tantoangle(t) tantoangleTable[t]
@@ -474,7 +471,7 @@ static uint32_t mulu(uint16_t a, uint16_t b) {
 	return (uint32_t)a * b;
 #else
 	uint32_t result = a;
-	asm (
+	__asm__ (
 		"mulu.w %[b], %[result]"
 		: [result] "+d" (result)
 		: [b] "d" (b)

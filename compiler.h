@@ -1,6 +1,6 @@
 //
 //
-// Copyright (C) 2023-2024 Frenkel Smeijers
+// Copyright (C) 2023-2025 Frenkel Smeijers
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,6 +18,49 @@
 
 #ifndef __COMPILER__
 #define __COMPILER__
+
+#if __GNUC__ <= 3
+#include <limits.h>
+#include <memory.h>
+#include <stddef.h>
+#include <stdio.h>
+
+#define INT16_MIN SHRT_MIN
+#define INT16_MAX SHRT_MAX
+
+#define INT32_MIN LONG_MIN
+#define INT32_MAX LONG_MAX
+
+typedef          char        int8_t;
+typedef unsigned char       uint8_t;
+
+typedef          int    int_fast8_t;
+typedef unsigned int   uint_fast8_t;
+
+typedef          short      int16_t;
+typedef unsigned short     uint16_t;
+
+typedef          long       int32_t;
+typedef unsigned long      uint32_t;
+
+typedef unsigned long long uint64_t;
+
+int abs(int x);
+void *calloc(size_t _nelem, size_t _size);
+void exit(int _status) __attribute__((__noreturn__));
+size_t fread(void *_ptr, size_t _size, size_t _nelem, FILE *_stream);
+int fseek(FILE *_stream, long _offset, int _mode);
+long labs(long x);
+int printf(const char *_format, ...);
+int sprintf(char *_s, const char *_format, ...);
+int stricmp(const char *_s1, const char *_s2);
+int toupper(int c);
+#else
+#include <stdint.h>
+#include <stdlib.h>
+#endif
+
+
 
 #if defined _M_I86
 //16-bit

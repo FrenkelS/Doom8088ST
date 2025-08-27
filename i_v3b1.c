@@ -19,192 +19,129 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for CGA 640x200 2 color
+ *      Video code for AT&T UNIX PC / PC 7300 / 3B1 720x348 2 color
  *
  *-----------------------------------------------------------------------------*/
 
-#include <conio.h>
-#include <dos.h>
-
-#include "compiler.h"
+#include <sys/iohw.h>
 
 #include "i_system.h"
 #include "i_video.h"
 #include "m_random.h"
-#include "r_defs.h"
-#include "v_video.h"
-#include "w_wad.h"
 
 #include "globdata.h"
-
-
-#define PLANEWIDTH        80
-#define SCREENHEIGHT_CGA 200
 
 
 extern const int16_t CENTERY;
 
 
-static uint8_t __far* _s_screen;
-static uint8_t __far* videomemory;
+static uint8_t _s_screen[VIEWWINDOWWIDTH * SCREENHEIGHT];
+static uint8_t *videomemory;
 
 
 void I_ReloadPalette(void)
 {
-	char* lumpName;
-	if (_g_gamma == 0)
-		lumpName = "COLORMAP";
-	else
+	char lumpName[8] = "COLORMAP";
+	if (_g_gamma != 0)
 	{
-		lumpName = "COLORMP0";
+		lumpName[6] = 'P';
 		lumpName[7] = '0' + _g_gamma;
 	}
 
-	W_ReadLumpByNum(W_GetNumForName(lumpName), (void __far*)fullcolormap);
+	W_ReadLumpByNum(W_GetNumForName(lumpName), (void *)fullcolormap);
 }
 
 
-typedef enum
+static const uint8_t leftcolors[8] =
 {
-	MDA,
-	CGA,
-	PCJR,
-	TANDY,
-	EGA,
-	VGA,
-	MCGA
-} videocardsenum_t;
+	0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff
+};
 
-
-static videocardsenum_t videocard;
-
-
-static videocardsenum_t I_DetectVideoCard(void)
+static const uint8_t rightcolors[8] =
 {
-	// This code is based on Jason M. Knight's Paku Paku code
+	0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+};
 
-	union REGS regs;
-	regs.w.ax = 0x1200;
-	regs.h.bl = 0x32;
-	int86(0x10, &regs, &regs);
-
-	if (regs.h.al == 0x12)
-	{
-		regs.w.ax = 0x1a00;
-		regs.h.bl = 0;
-		int86(0x10, &regs, &regs);
-		return (0x0a <= regs.h.bl && regs.h.bl <= 0x0c) ? MCGA : VGA;
-	}
-
-	regs.h.ah = 0x12;
-	regs.h.bl = 0x10;
-	int86(0x10, &regs, &regs);
-	if (regs.h.bl & 3)
-		return EGA;
-
-	regs.h.ah = 0x0f;
-	int86(0x10, &regs, &regs);
-	if (regs.h.al == 7)
-		return MDA;
-
-	uint8_t __far* fp;
-	fp = D_MK_FP(0xffff, 0x000e);
-	if (*fp == 0xfd)
-		return PCJR;
-
-	if (*fp == 0xff)
-	{
-		fp = D_MK_FP(0xfc00, 0);
-		if (*fp == 0x21)
-			return TANDY;
-	}
-
-	return CGA;
-}
-
-
-static const uint8_t colors[14] =
+static const uint8_t yellowcolors[4] =
 {
-	15,							// normal
-	12, 12, 12, 12, 4, 4, 4, 4,	// red
-	14, 14, 6, 6,				// yellow
-	10							// green
+	0x18, 0x24, 0x5a, 0xa5
 };
 
 
 static void I_UploadNewPalette(int8_t pal)
 {
-	uint8_t color = colors[pal];
+	uint8_t *leftPtr  = videomemory - 2;
+	uint8_t *rightPtr = videomemory + 1 + VIEWWINDOWWIDTH;
+	uint8_t leftColor  = 0;
+	uint8_t rightColor = 0;
 
-	if (videocard == CGA)
-		outp(0x3d9, color);
-	else
+	if (1 <= pal && pal <= 8)
 	{
-		if (color > 7)
-			color |= 0x10;
+		leftColor  = leftcolors[ pal - 1];
+		rightColor = rightcolors[pal - 1];
+	}
+	else if (9 <= pal && pal <= 12)
+	{
+		leftColor  = yellowcolors[pal - 9];
+		rightColor = yellowcolors[pal - 9];
+	}
+	else if (pal == 13)
+	{
+		leftColor  = 0xaa;
+		rightColor = 0x55;
+	}
 
-		union REGS regs;
-		regs.w.ax = 0x1000;
-		regs.h.bl = 1;
-		regs.h.bh = color;
-		int86(0x10, &regs, &regs);
+	for (int16_t y = 0; y < SCREENHEIGHT * 2; y++)
+	{
+		*leftPtr  = leftColor;
+		*rightPtr = rightColor;
+		leftPtr  += VIDBYTES;
+		rightPtr += VIDBYTES;
 	}
 }
 
 
-void I_SetScreenMode(uint16_t mode);
-
-
 void I_InitGraphicsHardwareSpecificCode(void)
 {
-	__djgpp_nearptr_enable();
-
-	videocard = I_DetectVideoCard();
-
-	I_SetScreenMode(6);
-
-	videomemory = D_MK_FP(0xb800, (((SCREENHEIGHT_CGA - SCREENHEIGHT) / 2) / 2) * PLANEWIDTH + (PLANEWIDTH - VIEWWINDOWWIDTH) / 2 + __djgpp_conventional_base);
-
-	_s_screen = Z_MallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
-	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	videomemory = (uint8_t*)VIDMEM;
+	videomemory += (VIDBYTES - VIEWWINDOWWIDTH) / 2 - 1;			// center horizontally
+	videomemory += ((VIDHEIGHT - SCREENHEIGHT * 2) / 2) * VIDBYTES;	// center vertically
 }
 
 
 void I_ShutdownGraphics(void)
 {
-	I_SetScreenMode(3);
+	I_SetPalette(0);
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	I_FinishUpdate();
 }
 
 
 static boolean drawStatusBar = true;
 
 
-static void I_DrawBuffer(uint8_t __far* buffer)
+static void I_DrawBuffer(uint8_t *buffer)
 {
-	uint8_t __far* src = buffer;
-	uint8_t __far* dst = videomemory;
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
 
-	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT) / 2; y++)
+	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
 	{
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst += 0x2000;
-		src += VIEWWINDOWWIDTH;
-
-		_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-		dst -= 0x2000 - PLANEWIDTH;
+		memcpy(dst, src, VIEWWINDOWWIDTH);
+		dst += VIDBYTES;
+		memcpy(dst, src, VIEWWINDOWWIDTH);
+		dst += VIDBYTES;
 		src += VIEWWINDOWWIDTH;
 	}
 
 	if (drawStatusBar)
 	{
-		for (int16_t y = 0; y < ST_HEIGHT / 2; y++)
+		for (int16_t y = 0; y < ST_HEIGHT; y++)
 		{
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst += 0x2000;
-			src += VIEWWINDOWWIDTH;
-
-			_fmemcpy(dst, src, VIEWWINDOWWIDTH);
-			dst -= 0x2000 - PLANEWIDTH;
+			memcpy(dst, src, VIEWWINDOWWIDTH);
+			dst += VIDBYTES;
+			memcpy(dst, src, VIEWWINDOWWIDTH);
+			dst += VIDBYTES;
 			src += VIEWWINDOWWIDTH;
 		}
 	}
@@ -244,15 +181,26 @@ void I_FinishViewWindow(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-static const uint8_t* colormap;
 
-static const uint8_t __far* source;
-static       uint8_t __far* dst;
-
-
-static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
+void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	uint8_t __far* dest = dst;
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	const uint8_t *source   = dcvars->source;
+	const uint8_t *colormap = dcvars->colormap;
+
+	const uint16_t fracstep = dcvars->fracstep;
+	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
+
+	// Inner loop that does the actual texture mapping,
+	//  e.g. a DDA-lile scaling.
+	// This is as fast as it gets.
+
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + (dcvars->x ^ 1)];
 	int16_t l = count >> 4;
 	while (l--)
 	{
@@ -298,31 +246,6 @@ static void R_DrawColumn2(uint16_t fracstep, uint16_t frac, int16_t count)
 }
 
 
-void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	source = dcvars->source;
-
-	colormap = dcvars->colormap;
-
-	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
-
-	const uint16_t fracstep = dcvars->fracstep;
-	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
-
-	// Inner loop that does the actual texture mapping,
-	//  e.g. a DDA-lile scaling.
-	// This is as fast as it gets.
-
-	R_DrawColumn2(fracstep, frac, count);
-}
-
-
 void R_DrawColumnWall(const draw_column_vars_t *dcvars)
 {
 	R_DrawColumnSprite(dcvars);
@@ -335,13 +258,19 @@ static uint8_t swapNibbles(uint8_t color)
 }
 
 
-static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
+void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
 	uint8_t color0;
 	uint8_t color1;
-	uint8_t __far* dest = dst;
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + (dcvars->x ^ 1)];
 
-	if (yl & 1)
+	if (dcvars->yl & 1)
 	{
 		color0 = swapNibbles(color);
 		color1 = color;
@@ -360,20 +289,6 @@ static void R_DrawColumnFlat2(uint8_t color, int16_t yl, int16_t count)
 
 	if (count & 1)
 		*dest = color0;
-}
-
-
-void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
-{
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
-
-	// Zero length, column does not exceed a pixel.
-	if (count <= 0)
-		return;
-
-	dst = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
-
-	R_DrawColumnFlat2(color, dcvars->yl, count);
 }
 
 
@@ -403,7 +318,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t __far* dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
+	uint8_t *dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + (dcvars->x ^ 1)];
 
 	static int16_t fuzzpos = 0;
 
@@ -421,7 +336,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
-	_fmemset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
 }
 
 
@@ -449,12 +364,12 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	int16_t err = dx + dy;
 
-	uint8_t bitmask = 0b10000000 >> (x0 & 7);
+	uint8_t bitmask = 1 << (x0 & 7);
 
 	while (true)
 	{
-		uint8_t c = _s_screen[y0 * VIEWWINDOWWIDTH + (x0 >> 3)];
-		_s_screen[y0 * VIEWWINDOWWIDTH + (x0 >> 3)] = (c & ~bitmask) | bitmask;
+		uint8_t c = _s_screen[y0 * VIEWWINDOWWIDTH + ((x0 >> 3) ^ 1)];
+		_s_screen[y0 * VIEWWINDOWWIDTH + ((x0 >> 3) ^ 1)] = (c & ~bitmask) | bitmask;
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -466,7 +381,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 			err += dy;
 			x0  += sx;
 
-			bitmask = 0b10000000 >> (x0 & 7);
+			bitmask = 1 << (x0 & 7);
 		}
 
 		if (e2 <= dx)
@@ -480,21 +395,21 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 void V_DrawBackground(int16_t backgroundnum)
 {
-	const byte __far* src = W_GetLumpByNum(backgroundnum);
+	const byte *src = W_GetLumpByNum(backgroundnum);
 
 	for (int16_t y = 0; y < SCREENHEIGHT; y++)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
 		{
-			uint8_t __far* d = &_s_screen[y * VIEWWINDOWWIDTH + x];
-			const byte __far* s = &src[((y & 63) * 16)];
+			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH + x];
+			const byte *s = &src[((y & 63) * 16)];
 
 			size_t len = 16;
 
 			if (VIEWWINDOWWIDTH - x < 16)
 				len = VIEWWINDOWWIDTH - x;
 
-			_fmemcpy(d, s, len);
+			memcpy(d, s, len);
 		}
 	}
 
@@ -504,14 +419,14 @@ void V_DrawBackground(int16_t backgroundnum)
 
 void V_DrawRaw(int16_t num, uint16_t offset)
 {
-	const uint8_t __far* lump = W_TryGetLumpByNum(num);
+	const uint8_t *lump = W_TryGetLumpByNum(num);
 
 	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH;
 
 	if (lump != NULL)
 	{
 		uint16_t lumpLength = W_LumpLength(num);
-		_fmemcpy(&_s_screen[offset], lump, lumpLength);
+		memcpy(&_s_screen[offset], lump, lumpLength);
 		Z_ChangeTagToCache(lump);
 	}
 	else
@@ -528,7 +443,7 @@ void ST_Drawer(void)
 }
 
 
-static const uint8_t bitmasks4[4] = {0x3f, 0xcf, 0xf3, 0xfc};
+static const uint8_t bitmasks4[4] = {0xfc, 0xf3, 0xcf, 0x3f};
 
 
 void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
@@ -536,7 +451,8 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte __far* desttop = _s_screen + (y * VIEWWINDOWWIDTH) + (x >> 2);
+	byte *desttop = &_s_screen[(y * VIEWWINDOWWIDTH) + ((x >> 2) ^ 1)];
+	boolean odd = (x >> 2) & 1;
 
 	int16_t width = patch->width;
 
@@ -545,13 +461,13 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (int16_t col = 0; col < width; col++)
 	{
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col]);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
 		{
-			const byte __far* source = (const byte __far*)column + 3;
-			byte __far* dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
+			const byte *source = (const byte*)column + 3;
+			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
 
 			uint16_t count = column->length;
 
@@ -560,53 +476,54 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2));
 			}
 			else if (count == 3)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2));
 			}
 			else if (count == 5)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2));
 			}
 			else if (count == 6)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2));
 			}
 			else
 			{
 				while (count--)
 				{
-					c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+					c = *dest; color = *source++; *dest = (c & bitmask) | (color << (p * 2)); dest += VIEWWINDOWWIDTH;
 				}
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t*)((const byte*)column + column->length + 4);
 		}
 
 		p++;
 		if (p == 4)
 		{
 			p = 0;
-			desttop++;
+			desttop += odd ? +3 : -1;
+			odd = !odd;
 		}
 		bitmask = bitmasks4[p];
 	}
@@ -636,7 +553,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		else if (dc_x >= SCREENWIDTH)
 			break;
 
-		const column_t __far* column = (const column_t __far*)((const byte __far*)patch + (uint16_t)patch->columnofs[col >> 8]);
+		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col >> 8]);
 
 		int16_t p = dc_x & 3;
 		uint8_t bitmask = bitmasks4[p];
@@ -651,37 +568,37 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte __far* dest = _s_screen + (dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2);
+			byte *dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + ((dc_x >> 2) ^ 1)];
 
 			int16_t frac = 0;
 
-			const byte __far* source = (const byte __far*)column + 3;
+			const byte *source = (const byte*)column + 3;
 
 			int16_t count = dc_yh - dc_yl;
 			while (count--)
 			{
 				uint8_t c = *dest;
 				uint8_t color = source[frac >> 8];
-				*dest = (c & bitmask) | (color >> (p * 2));
+				*dest = (c & bitmask) | (color << (p * 2));
 				dest += VIEWWINDOWWIDTH;
 				frac += DYI;
 			}
 
-			column = (const column_t __far*)((const byte __far*)column + column->length + 4);
+			column = (const column_t*)((const byte*)column + column->length + 4);
 		}
 	}
 }
 
 
-static uint8_t __far* frontbuffer;
-static int16_t __far* wipe_y_lookup;
+static uint8_t *frontbuffer;
+static int16_t *wipe_y_lookup;
 
 
 void wipe_StartScreen(void)
 {
 	frontbuffer = Z_TryMallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
 	if (frontbuffer)
-		_fmemcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT);
+		memcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT);
 }
 
 
@@ -689,7 +606,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint8_t __far* backbuffer = _s_screen;
+	uint8_t *backbuffer = _s_screen;
 
 	while (ticks--)
 	{
@@ -711,9 +628,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				uint8_t __far* s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
-
-				uint8_t __far* d = &frontbuffer[i] + ((SCREENHEIGHT - 1) * VIEWWINDOWWIDTH);
+				uint8_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
+				uint8_t *d = &frontbuffer[i] + ((SCREENHEIGHT      - 1) * VIEWWINDOWWIDTH);
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy
