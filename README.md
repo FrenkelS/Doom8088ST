@@ -9,7 +9,7 @@ Usually these systems are 32-bit or more and have a flat memory model.
 Doom8088: Atari ST Edition     is a port for Atari ST     computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68000 CPU.
 Doom8088: AT&T UNIX PC Edition is a port for AT&T UNIX PC computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68010 CPU.
 It's based on [Doom8088](https://github.com/FrenkelS/Doom8088), a port of Doom for 16-bit DOS computers.
-Download Doom8088: Atari ST Edition & AT&T UNIX PC Edition[here](https://github.com/FrenkelS/Doom8088ST/releases).
+Download Doom8088: Atari ST Edition & AT&T UNIX PC Edition [here](https://github.com/FrenkelS/Doom8088ST/releases).
 
 **What's special?:**
  - Supports only Doom 1 Episode 1
