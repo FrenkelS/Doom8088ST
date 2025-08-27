@@ -111,6 +111,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
+	I_SetPalette(0);
 	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
 	I_FinishUpdate();
 }
