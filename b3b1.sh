@@ -7,6 +7,7 @@ export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -D
 export CC=/home/frenkel/gcc-for-unixpc/bin/unixpc-gcc
 export CFLAGS="-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN -std=c99"
 
+
 export GLOBOBJS=""
 export GLOBOBJS+=" r_draw.c"
 export GLOBOBJS+=" i_v3b1.c"
@@ -63,3 +64,6 @@ export GLOBOBJS+=" wi_stuff.c"
 export GLOBOBJS+=" z_bmallo.c"
 
 cat $GLOBOBJS | $CC -x c -c -Os $CFLAGS $RENDER_OPTIONS -o 3b1/space.o -
+
+
+echo TODO gcc speed.o space.o -o doom8088
