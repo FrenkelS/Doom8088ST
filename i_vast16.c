@@ -260,7 +260,7 @@ static void movep(uint32_t d, uint8_t *a)
 	a[4] = (d >>  8) & 0xff;
 	a[6] = (d >>  0) & 0xff;
 #else
-	asm (
+	__asm__ (
 		"movep.l %[d], 0(%[a])"
 		:
 		: [d]"d"(d), [a]"a"(a)
@@ -735,7 +735,7 @@ static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 	a[6] = (d >>  0) & 0xff;
 #else
 	uint32_t tmp = 0;
-	asm (
+	__asm__ (
 		"movep.l 0(%[dest]), %[tmp]\n"
 		"and.l %[andmask],   %[tmp]\n"
 		" or.l %[ormask],    %[tmp]\n"
