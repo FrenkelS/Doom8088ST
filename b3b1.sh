@@ -66,4 +66,4 @@ export GLOBOBJS+=" z_bmallo.c"
 cat $GLOBOBJS | $CC -x c -c -Os $CFLAGS $RENDER_OPTIONS -o 3b1/space.o -
 
 
-echo TODO gcc speed.o space.o -o doom8088
+echo TODO gcc speed.o space.o -o doom8088 -s
