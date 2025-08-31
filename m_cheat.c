@@ -74,7 +74,7 @@ static boolean cht_CheckCheat(cheatseq_t *cht, char data1)
 }
 
 
-boolean C_Responder (event_t *ev)
+boolean C_Responder(d_event_t *ev)
 {
 	if (ev->type == ev_keydown)
 	{

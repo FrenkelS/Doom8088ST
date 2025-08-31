@@ -161,7 +161,7 @@ void I_StartTic(void)
 			continue;
 		}
 
-		event_t ev;
+		d_event_t ev;
 		if (k & 0x80)
 			ev.type = ev_keyup;
 		else

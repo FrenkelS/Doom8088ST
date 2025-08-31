@@ -473,7 +473,7 @@ static void AM_maxOutWindowScale(void)
 //
 // Passed an input event, returns true if its handled
 //
-boolean AM_Responder(event_t*  ev)
+boolean AM_Responder(d_event_t* ev)
 {
     boolean rc;
     int16_t ch;

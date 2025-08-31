@@ -162,7 +162,7 @@ void I_StartTic(void)
 	int i = 0;
 	while (i < n)
 	{
-		event_t ev;
+		d_event_t ev;
 		ev.type = ev_keydown;
 
 		if (buf[i] == 27)
@@ -235,7 +235,7 @@ void I_StartTic(void)
 		if (gamekeytimestamps[i] != 0 && clock() - gamekeytimestamps[i] > (42 * HZ + 999) / 1000)
 		{
 			gamekeytimestamps[i] = 0;
-			event_t ev;
+			d_event_t ev;
 			ev.type  = ev_keyup;
 			ev.data1 = i;
 			D_PostEvent(&ev);

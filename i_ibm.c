@@ -138,7 +138,7 @@ void I_StartTic(void)
 	// process keyboard events
 	//
 	byte k;
-	event_t ev;
+	d_event_t ev;
 
 	while (kbdtail < kbdhead)
 	{

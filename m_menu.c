@@ -807,7 +807,7 @@ static void M_InitDefaults(void)
 // action based on the state of the system.
 //
 
-boolean M_Responder (event_t* ev)
+boolean M_Responder(d_event_t* ev)
 {
     int16_t    ch;
 

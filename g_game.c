@@ -345,7 +345,7 @@ static void G_DoLoadLevel (void)
 // Get info needed to make ticcmd_ts for the players.
 //
 
-void G_Responder (event_t* ev)
+void G_Responder(d_event_t* ev)
 {
     // any other key pops up menu if in demos
     //

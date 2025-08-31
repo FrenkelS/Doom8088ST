@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -52,7 +52,7 @@ enum automapmode_e {
 
 
 // Called by main loop.
-boolean AM_Responder (event_t* ev);
+boolean AM_Responder(d_event_t* ev);
 
 // Called by main loop.
 void AM_Ticker (void);

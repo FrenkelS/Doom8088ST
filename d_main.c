@@ -103,7 +103,7 @@ static int16_t titlepicnum;
  *  short ciruit operator madness begin!
  */
 
-void D_PostEvent(event_t *ev)
+void D_PostEvent(d_event_t *ev)
 {
     /* cph - suppress all input events at game start
    * FIXME: This is a lousy kludge */
