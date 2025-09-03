@@ -154,9 +154,11 @@ void F_Drawer (void)
 {
 	if (!finalestage)
 	{
+		int32_t count;
+
 		V_DrawBackground(backgroundnum);
 
-		int32_t count = (finalecount - 10) * 100 / Get_TextSpeed();
+		count = (finalecount - 10) * 100 / Get_TextSpeed();
 		if (count < 0)
 			count = 0;
 
