@@ -12,7 +12,7 @@ qdos-gcc -c m_menu.c
 qdos-gcc -c m_random.c
 qdos-gcc -c p_doors.c
 qdos-gcc -c p_enemy.c
-@rem qdos-gcc -c p_enemy2.c
+qdos-gcc -c p_enemy2.c
 qdos-gcc -c p_floor.c
 qdos-gcc -c p_inter.c
 qdos-gcc -c p_lights.c
