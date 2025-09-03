@@ -8,7 +8,7 @@ qdos-gcc -c hu_stuff.c
 qdos-gcc -c i_audio.c
 qdos-gcc -c info.c
 qdos-gcc -c m_cheat.c
-@rem qdos-gcc -c m_menu.c
+qdos-gcc -c m_menu.c
 qdos-gcc -c m_random.c
 qdos-gcc -c p_doors.c
 qdos-gcc -c p_enemy.c
