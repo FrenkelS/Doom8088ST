@@ -78,7 +78,8 @@ boolean C_Responder(d_event_t *ev)
 {
 	if (ev->type == ev_keydown)
 	{
-		for (int16_t i = 0; i < num_cheats; i++)
+		int16_t i;
+		for (i = 0; i < num_cheats; i++)
 		{
 			if (cht_CheckCheat(&cheat_def[i], ev->data1))
 			{
