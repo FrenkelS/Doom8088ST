@@ -56,7 +56,7 @@ void G_ReloadDefaults(void);     // killough 3/1/98: loads game defaults
 void G_PlayerReborn(void);
 void G_BuildTiccmd (void);
 
-void G_UpdateSaveGameStrings();
+void G_UpdateSaveGameStrings(void);
 
 void G_LoadSettings();
 void G_SaveSettings();
