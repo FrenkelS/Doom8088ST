@@ -5,7 +5,7 @@ qdos-gcc -c f_finale.c
 qdos-gcc -c f_lib.c
 qdos-gcc -c g_game.c
 qdos-gcc -c hu_stuff.c
-@rem qdos-gcc -c i_audio.c
+qdos-gcc -c i_audio.c
 qdos-gcc -c info.c
 @rem qdos-gcc -c m_cheat.c
 @rem qdos-gcc -c m_menu.c
