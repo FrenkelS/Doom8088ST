@@ -1,6 +1,6 @@
 qdos-gcc -c am_map.c
 qdos-gcc -c d_items.c
-@rem qdos-gcc -c d_main.c
+qdos-gcc -c d_main.c
 @rem qdos-gcc -c f_finale.c
 qdos-gcc -c f_lib.c
 @rem qdos-gcc -c g_game.c
