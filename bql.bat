@@ -16,7 +16,7 @@ qdos-gcc -c p_enemy2.c
 qdos-gcc -c p_floor.c
 qdos-gcc -c p_inter.c
 qdos-gcc -c p_lights.c
-@rem qdos-gcc -c p_map.c
+qdos-gcc -c p_map.c
 @rem qdos-gcc -c p_maputl.c
 @rem qdos-gcc -c p_mobj.c
 qdos-gcc -c p_plats.c
