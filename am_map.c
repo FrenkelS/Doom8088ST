@@ -894,16 +894,15 @@ static void AM_drawWalls(void)
     // draw the unclipped visible portions of all lines
     for (i=0;i<_g_numlines;i++)
     {
+        const sector_t __far* backsector  = LN_BACKSECTOR( &_g_lines[i]);
+        const sector_t __far* frontsector = LN_FRONTSECTOR(&_g_lines[i]);
+
+        const int16_t line_special = LN_SPECIAL(&_g_lines[i]);
+
         l.a.x = (fixed_t)_g_lines[i].v1.x << MAPBITS;
         l.a.y = (fixed_t)_g_lines[i].v1.y << MAPBITS;
         l.b.x = (fixed_t)_g_lines[i].v2.x << MAPBITS;
         l.b.y = (fixed_t)_g_lines[i].v2.y << MAPBITS;
-
-
-        const sector_t __far* backsector = LN_BACKSECTOR(&_g_lines[i]);
-        const sector_t __far* frontsector = LN_FRONTSECTOR(&_g_lines[i]);
-
-        const int16_t line_special =  LN_SPECIAL(&_g_lines[i]);
 
         if (automapmode & am_rotate)
         {
