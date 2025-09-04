@@ -22,7 +22,7 @@ qdos-gcc -c p_mobj.c
 qdos-gcc -c p_plats.c
 qdos-gcc -c p_pspr.c
 qdos-gcc -c p_setup.c
-@rem qdos-gcc -c p_sight.c
+qdos-gcc -c p_sight.c
 @rem qdos-gcc -c p_spec.c
 @rem qdos-gcc -c p_switch.c
 qdos-gcc -c p_telept.c
