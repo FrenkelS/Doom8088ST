@@ -249,8 +249,8 @@ void R_InitSprites(void)
 
 void R_InitSpriteLumps(void)
 {
-	firstspritelump        = W_GetNumForName("S_START") + 1;
 	int16_t lastspritelump = W_GetNumForName("S_END")   - 1;
+	firstspritelump        = W_GetNumForName("S_START") + 1;
 
 	numentries = lastspritelump - firstspritelump + 1;
 }

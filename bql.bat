@@ -29,14 +29,14 @@ qdos-gcc -c p_telept.c
 qdos-gcc -c p_tick.c
 qdos-gcc -c p_user.c
 qdos-gcc -c r_data.c
-@rem qdos-gcc -c r_draw.c
+@rem qdos-gcc -c r_draw.c -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN
 @rem qdos-gcc -c r_plane.c
 @rem qdos-gcc -c r_sky.c
-@rem qdos-gcc -c r_things.c
+qdos-gcc -c r_things.c
 qdos-gcc -c sounds.c
 qdos-gcc -c st_pal.c
 @rem qdos-gcc -c st_stuff.c
-@rem qdos-gcc -c s_sound.c
+qdos-gcc -c s_sound.c
 qdos-gcc -c tables.c
 qdos-gcc -c v_video.c
 @rem qdos-gcc -c wi_lib.c
