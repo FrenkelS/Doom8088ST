@@ -20,7 +20,7 @@ qdos-gcc -c p_map.c
 qdos-gcc -c p_maputl.c
 qdos-gcc -c p_mobj.c
 qdos-gcc -c p_plats.c
-@rem qdos-gcc -c p_pspr.c
+qdos-gcc -c p_pspr.c
 @rem qdos-gcc -c p_setup.c
 @rem qdos-gcc -c p_sight.c
 @rem qdos-gcc -c p_spec.c
