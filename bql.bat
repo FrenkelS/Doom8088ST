@@ -28,7 +28,7 @@ qdos-gcc -c p_switch.c
 qdos-gcc -c p_telept.c
 qdos-gcc -c p_tick.c
 qdos-gcc -c p_user.c
-@rem qdos-gcc -c r_data.c
+qdos-gcc -c r_data.c
 @rem qdos-gcc -c r_draw.c
 @rem qdos-gcc -c r_plane.c
 @rem qdos-gcc -c r_sky.c
