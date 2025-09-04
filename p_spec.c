@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -284,19 +284,22 @@ boolean P_CheckTag(const line_t __far* line)
 static void P_UpdateAnimatedTexture(void)
 {
 	int16_t pic = animated_texture_basepic + ((_g_leveltime >> 3) % 3);
+	int16_t i;
 
-	for (int16_t i = animated_texture_basepic; i < animated_texture_basepic + 3; i++)
+	for (i = animated_texture_basepic; i < animated_texture_basepic + 3; i++)
 		texturetranslation[i] = pic;
 }
 
 void P_UpdateSpecials (void)
 {
+    int8_t i;
+
     // Animate flats and textures globally
     P_UpdateAnimatedFlat();
     P_UpdateAnimatedTexture();
 
     // Check buttons (retriggerable switches) and change texture on timeout
-    for (int8_t i = 0; i < MAXBUTTONS; i++)
+    for (i = 0; i < MAXBUTTONS; i++)
     {
         if (_g_buttonlist[i].btimer)
         {
@@ -453,8 +456,9 @@ static void Add_Scroller(int16_t affectee)
 static void P_SpawnScrollers(void)
 {
 	const line_t __far* line = _g_lines;
+	int16_t i;
 
-	for (int16_t i = 0; i < _g_numlines; i++)
+	for (i = 0; i < _g_numlines; i++)
 	{
 		if (LN_SPECIAL(line) == 48)
 			Add_Scroller(line->sidenum[0]);
