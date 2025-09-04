@@ -472,9 +472,9 @@ static uint32_t mulu(uint16_t a, uint16_t b) {
 #else
 	uint32_t result = a;
 	__asm__ (
-		"mulu.w %[b], %[result]"
-		: [result] "+d" (result)
-		: [b] "d" (b)
+		"mulu.w %1, %0"
+		: "+d" (result)
+		: "d" (b)
 	);
 	return result;
 #endif
