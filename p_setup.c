@@ -260,10 +260,11 @@ static void P_LoadNodes (int16_t lump)
 
 static void P_LoadThings(int16_t lump)
 {
+	int16_t i;
 	_g_thingPoolSize = W_LumpLength(lump) / sizeof(mapthing_t);
 	_g_thingPool     = Z_CallocLevel(_g_thingPoolSize * sizeof(mobj_t));
 
-	for (int16_t i = 0; i < _g_thingPoolSize; i++)
+	for (i = 0; i < _g_thingPoolSize; i++)
 		_g_thingPool[i].type = MT_NOTHING;
 }
 
@@ -271,8 +272,9 @@ static void P_LoadThings(int16_t lump)
 static void P_LoadThings2(int16_t lump)
 {
     const mapthing_t __far* data = W_GetLumpByNum(lump);
+    int16_t i;
 
-    for (int16_t i = 0; i < _g_thingPoolSize; i++)
+    for (i = 0; i < _g_thingPoolSize; i++)
     {
         const mapthing_t __far* mt = &data[i];
 
@@ -308,12 +310,15 @@ typedef char assertLineSize[sizeof(packed_line_t) == 15 ? 1 : -1];
 
 static void P_LoadLineDefs (int16_t lump)
 {
+	const packed_line_t __far* lines;
+	int16_t i;
+
 	_g_numlines = W_LumpLength(lump) / sizeof(packed_line_t);
 	_g_lines    = Z_MallocLevel(_g_numlines * sizeof(line_t), NULL);
 
-	const packed_line_t __far* lines = W_GetLumpByNum(lump);
+	lines = W_GetLumpByNum(lump);
 
-	for (int16_t i = 0; i < _g_numlines; i++)
+	for (i = 0; i < _g_numlines; i++)
 	{
 		_g_lines[i].v1              = lines[i].v1;
 		_g_lines[i].v2              = lines[i].v2;
@@ -368,12 +373,15 @@ typedef char assertMapsidedefSize[sizeof(mapsidedef_t) == 7 ? 1 : -1];
 
 static void P_LoadSideDefs (int16_t lump)
 {
-  numsides = W_LumpLength(lump) / sizeof(mapsidedef_t);
-  _g_sides = Z_CallocLevel(numsides * sizeof(side_t));
+    const mapsidedef_t __far* data;
+    int16_t i;
 
-    const mapsidedef_t __far* data = W_GetLumpByNum(lump);
+    numsides = W_LumpLength(lump) / sizeof(mapsidedef_t);
+    _g_sides = Z_CallocLevel(numsides * sizeof(side_t));
 
-    for (int16_t i = 0; i < numsides; i++)
+    data = W_GetLumpByNum(lump);
+
+    for (i = 0; i < numsides; i++)
     {
         const mapsidedef_t __far* msd = data + i;
         side_t __far* sd = _g_sides + i;
@@ -519,10 +527,11 @@ static void P_GroupLines (void)
 
     for (i=0, sector = _g_sectors; i<_g_numsectors; i++, sector++)
     {
+        int16_t l;
         fixed_t bbox[4];
         M_ClearBox(bbox);
 
-        for(int16_t l = 0; l < sector->linecount; l++)
+        for (l = 0; l < sector->linecount; l++)
         {
             M_AddToBox (bbox, (fixed_t)sector->lines[l]->v1.x<<FRACBITS, (fixed_t)sector->lines[l]->v1.y<<FRACBITS);
             M_AddToBox (bbox, (fixed_t)sector->lines[l]->v2.x<<FRACBITS, (fixed_t)sector->lines[l]->v2.y<<FRACBITS);
