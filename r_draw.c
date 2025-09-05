@@ -1224,13 +1224,15 @@ static PUREFUNC boolean R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t __far
 
 static void R_DrawSprite (const vissprite_t* spr)
 {
+    int16_t x;
     int16_t* clipbot = floorclip;
     int16_t* cliptop = ceilingclip;
+    const drawseg_t* ds;
 
     fixed_t scale;
     fixed_t lowscale;
 
-    for (int16_t x = spr->x1; x <= spr->x2; x++)
+    for (x = spr->x1; x <= spr->x2; x++)
     {
         clipbot[x] = VIEWWINDOWHEIGHT;
         cliptop[x] = -1;
@@ -1246,7 +1248,7 @@ static void R_DrawSprite (const vissprite_t* spr)
 
     const drawseg_t* drawsegs  =_s_drawsegs;
 
-    for (const drawseg_t* ds = ds_p; ds-- > drawsegs; )  // new -- killough
+    for (ds = ds_p; ds-- > drawsegs; )  // new -- killough
     {
         // determine if the drawseg obscures the sprite
         if (ds->x1 > spr->x2 || ds->x2 < spr->x1 || (!ds->silhouette && !ds->maskedtexturecol))
@@ -1279,7 +1281,7 @@ static void R_DrawSprite (const vissprite_t* spr)
 
         if (ds->silhouette & SIL_BOTTOM && spr->gz < ds->bsilheight) //bottom sil
         {
-            for (int16_t x = r1; x <= r2; x++)
+            for (x = r1; x <= r2; x++)
             {
                 if (clipbot[x] == VIEWWINDOWHEIGHT)
                     clipbot[x] = ds->sprbottomclip[x];
@@ -1290,7 +1292,7 @@ static void R_DrawSprite (const vissprite_t* spr)
 
         if (ds->silhouette & SIL_TOP && gzt > ds->tsilheight)   // top sil
         {
-            for (int16_t x = r1; x <= r2; x++)
+            for (x = r1; x <= r2; x++)
             {
                 if (cliptop[x] == -1)
                     cliptop[x] = ds->sprtopclip[x];
@@ -1419,7 +1421,8 @@ static void R_DrawPlayerSprites(void)
 // insertion sort
 static void isort(vissprite_t **s, int16_t n)
 {
-	for (int16_t i = 1; i < n; i++)
+	int16_t i;
+	for (i = 1; i < n; i++)
 	{
 		vissprite_t *temp = s[i];
 		if (s[i - 1]->scale < temp->scale)
@@ -1458,12 +1461,12 @@ static void R_DrawMasked(void)
 {
     drawseg_t *ds;
     drawseg_t* drawsegs = _s_drawsegs;
-
+    int16_t i;
 
     R_SortVisSprites();
 
     // draw all vissprites back to front
-    for (int16_t i = num_vissprite; --i >= 0; )
+    for (i = num_vissprite; --i >= 0; )
         R_DrawSprite(vissprite_ptrs[i]);
 
     // render any remaining masked mid textures
@@ -1754,7 +1757,9 @@ static uint16_t FindColumnCacheItem(int16_t texture, int16_t column)
 
 	uint16_t cx = CACHE_ENTRY(column, texture);
 
-	for (int16_t i = 0; i < MAX_CACHE_TRIES; i++)
+	int16_t i;
+
+	for (i = 0; i < MAX_CACHE_TRIES; i++)
 	{
 		if (columnCacheEntries[key] == 0 || columnCacheEntries[key] == cx)
 			return key;
@@ -2079,7 +2084,8 @@ static boolean R_CheckOpenings(const int16_t start)
 static void R_ClearOpeningClippingDetermination(void)
 {
 	// opening / clipping determination
-	for (int8_t i = 0; i < VIEWWINDOWWIDTH; i++)
+	int8_t i;
+	for (i = 0; i < VIEWWINDOWWIDTH; i++)
 		floorclip[i] = VIEWWINDOWHEIGHT, ceilingclip[i] = -1;
 }
 
