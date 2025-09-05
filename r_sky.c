@@ -74,6 +74,9 @@ void R_DrawSky(draw_column_vars_t *dcvars)
 		R_DrawColumnFlat(FLAT_SKY_COLOR, dcvars);
 	else
 	{
+		int16_t xc;
+		const column_t __far* column;
+
 		dcvars->texturemid = (SCREENHEIGHT_VGA / 2) * FRACUNIT;
 
 		if (!(dcvars->colormap = fixedcolormap))
@@ -81,12 +84,12 @@ void R_DrawSky(draw_column_vars_t *dcvars)
 
 		dcvars->fracstep = ((FRACUNIT * SCREENHEIGHT_VGA) / (VIEWWINDOWHEIGHT + 16)) >> COLEXTRABITS;
 
-		int16_t xc = viewangle >> FRACBITS;
+		xc = viewangle >> FRACBITS;
 		xc += xtoviewangleTable[dcvars->x];
 		xc >>= ANGLETOSKYSHIFT - FRACBITS;
 		xc &= skywidthmask;
 
-		const column_t __far* column = (const column_t __far*) ((const byte __far*)skypatch + (uint16_t)skypatch->columnofs[xc]);
+		column = (const column_t __far*) ((const byte __far*)skypatch + (uint16_t)skypatch->columnofs[xc]);
 
 		dcvars->source = (const byte __far*)column + 3;
 		R_DrawColumnWall(dcvars);
