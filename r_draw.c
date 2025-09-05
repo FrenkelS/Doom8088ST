@@ -706,23 +706,27 @@ subsector_t __far* R_PointInSubsector(fixed_t x, fixed_t y)
 
 static CONSTFUNC int16_t SlopeDiv(uint32_t num, uint32_t den)
 {
-    den = den >> 8;
+	uint16_t ans;
 
-    if (den == 0)
-        return SLOPERANGE;
+	den = den >> 8;
 
-    const uint16_t ans = (num << 3) / den;//FixedApproxDiv(num << 3, den) >> FRACBITS;
+	if (den == 0)
+		return SLOPERANGE;
 
-    return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
+	ans = (num << 3) / den;//FixedApproxDiv(num << 3, den) >> FRACBITS;
+
+	return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
 }
 
 
 static CONSTFUNC int16_t SlopeDiv16(uint16_t n, uint16_t d)
 {
+	uint16_t ans;
+
 	if (d == 0)
 		return SLOPERANGE;
 
-	const uint16_t ans = ((uint32_t)n * SLOPERANGE) / d;
+	ans = ((uint32_t)n * SLOPERANGE) / d;
 
 	return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
 }
@@ -944,6 +948,8 @@ const uint8_t* R_LoadColorMap(int16_t lightlevel)
         return fixedcolormap;
     else
     {
+        int16_t cm;
+
         if (curline)
         {
             if (curline->v1.y == curline->v2.y)
@@ -954,11 +960,11 @@ const uint8_t* R_LoadColorMap(int16_t lightlevel)
 
         lightlevel += (extralight +_g_gamma) << LIGHTSEGSHIFT;
 
-        int16_t cm = ((256-lightlevel)>>2) - 24;
+        cm = ((256-lightlevel)>>2) - 24;
 
-        if(cm >= NUMCOLORMAPS)
+        if (cm >= NUMCOLORMAPS)
             cm = NUMCOLORMAPS-1;
-        else if(cm < 0)
+        else if (cm < 0)
             cm = 0;
 
         return fullcolormap + cm*256;
@@ -1063,6 +1069,7 @@ void R_DrawFuzzColumn (const draw_column_vars_t *dcvars);
 static void R_DrawVisSprite(const vissprite_t *vis)
 {
     fixed_t  frac;
+    const patch_t __far* patch;
 
     R_DrawColumn_f colfunc = R_DrawColumnSprite;
     draw_column_vars_t dcvars;
@@ -1083,7 +1090,7 @@ static void R_DrawVisSprite(const vissprite_t *vis)
     sprtopscreen = CENTERY * FRACUNIT - FixedMul(dcvars.texturemid, spryscale);
 
 
-    const patch_t __far* patch = W_GetLumpByNum(vis->lump_num);
+    patch = W_GetLumpByNum(vis->lump_num);
 
     dcvars.x = vis->x1;
 
@@ -1094,7 +1101,7 @@ static void R_DrawVisSprite(const vissprite_t *vis)
 
         frac += vis->xiscale;
 
-        if(((frac >> FRACBITS) >= patch->width) || frac < 0)
+        if (((frac >> FRACBITS) >= patch->width) || frac < 0)
             break;
 
         dcvars.x++;
@@ -1143,6 +1150,9 @@ static void R_GetColumn(const texture_t __far* texture, int16_t texcolumn, int16
 static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 {
 	draw_column_vars_t dcvars;
+	int16_t texnum;
+	const texture_t __far* texture;
+	const patch_t __far* patch;
 
 	// Calculate light table.
 	// Use different light tables
@@ -1153,7 +1163,7 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 	frontsector = &_g_sectors[curline->frontsectornum];
 	backsector  = &_g_sectors[curline->backsectornum];
 
-	int16_t texnum = texturetranslation[_g_sides[curline->sidenum].midtexture];
+	texnum = texturetranslation[_g_sides[curline->sidenum].midtexture];
 
 	// killough 4/13/98: get correct lightlevel for 2s normal textures
 	rw_lightlevel = frontsector->lightlevel;
@@ -1180,13 +1190,11 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 
 	dcvars.colormap = R_LoadColorMap(rw_lightlevel);
 
-	const texture_t __far* texture = R_GetTexture(texnum);
-
-	const uint16_t widthmask = texture->widthmask;
+	texture = R_GetTexture(texnum);
 
 	// draw the columns
 	// simple texture == 1 patch
-	const patch_t __far* patch = W_GetLumpByNum(texture->patches[0].patch_num);
+	patch = W_GetLumpByNum(texture->patches[0].patch_num);
 
 	for (dcvars.x = x1 ; dcvars.x <= x2 ; dcvars.x++, spryscale += rw_scalestep)
 	{
@@ -1194,14 +1202,16 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 
 		if (xc != SHRT_MAX) // dropoff overflow
 		{
-			xc &= widthmask;
+			const column_t __far* column;
+
+			xc &= texture->widthmask;
 
 			sprtopscreen = CENTERY * FRACUNIT - FixedMul(dcvars.texturemid, spryscale);
 
 			dcvars.fracstep = FixedReciprocal((uint32_t)spryscale) >> COLEXTRABITS;
 
 			// draw the texture
-			const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[xc]);
+			column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[xc]);
 
 			R_DrawMaskedColumn(R_DrawColumnWall, &dcvars, column);
 			maskedtexturecol[dcvars.x] = SHRT_MAX; // dropoff overflow
@@ -1252,6 +1262,8 @@ static void R_DrawSprite (const vissprite_t* spr)
     fixed_t scale;
     fixed_t lowscale;
 
+    const drawseg_t* drawsegs;
+
     for (x = spr->x1; x <= spr->x2; x++)
     {
         clipbot[x] = VIEWWINDOWHEIGHT;
@@ -1266,7 +1278,7 @@ static void R_DrawSprite (const vissprite_t* spr)
     // (pointer check was originally nonportable
     // and buggy, by going past LEFT end of array):
 
-    const drawseg_t* drawsegs  =_s_drawsegs;
+    drawsegs = _s_drawsegs;
 
     for (ds = ds_p; ds-- > drawsegs; )  // new -- killough
     {
@@ -1352,15 +1364,17 @@ static void R_DrawPSprite (pspdef_t *psp, int16_t lightlevel)
     vissprite_t   *vis;
     vissprite_t   avis;
     fixed_t       topoffset;
+    const patch_t __far* patch;
+    int16_t tx;
 
     // decide which patch to use
     sprdef = &sprites[psp->state->sprite];
 
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
-    const patch_t __far* patch = W_GetLumpByNum(sprframe->lump[0]);
+    patch = W_GetLumpByNum(sprframe->lump[0]);
     // calculate edges of the shape
-    int16_t tx = psp->sx - BASEXCENTER;
+    tx = psp->sx - BASEXCENTER;
 
     tx -= patch->leftoffset;
     hl = (uint32_t) tx * PSPRITESCALE;
@@ -1819,10 +1833,12 @@ static const byte __far* R_ComposeColumn(const int16_t texture, const texture_t 
 
             const int16_t x1 = patch->originx;
 
+            const patch_t __far* realpatch;
+
             if (xc < x1)
                 continue;
 
-            const patch_t __far* realpatch = W_TryGetLumpByNum(patch->patch_num);
+            realpatch = W_TryGetLumpByNum(patch->patch_num);
             if (realpatch == NULL)
                 return NULL;
 
@@ -1852,9 +1868,11 @@ static void R_DrawSegTextureColumn(const texture_t __far* tex, int16_t texture, 
     {
         int16_t patch_num;
         int16_t x_c;
+        const patch_t __far* patch;
+
         R_GetColumn(tex, texcolumn, &patch_num, &x_c);
 
-        const patch_t __far* patch = W_TryGetLumpByNum(patch_num);
+        patch = W_TryGetLumpByNum(patch_num);
         if (patch == NULL)
             R_DrawColumnFlat(texture, dcvars);
         else
