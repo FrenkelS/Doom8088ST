@@ -1832,6 +1832,7 @@ static const byte __far* R_ComposeColumn(const int16_t texture, const texture_t 
             const texpatch_t __far* patch = &tex->patches[i];
 
             const int16_t x1 = patch->originx;
+            int16_t x2;
 
             const patch_t __far* realpatch;
 
@@ -1842,7 +1843,7 @@ static const byte __far* R_ComposeColumn(const int16_t texture, const texture_t 
             if (realpatch == NULL)
                 return NULL;
 
-            const int16_t x2 = x1 + realpatch->width;
+            x2 = x1 + realpatch->width;
 
             if (xc < x2)
             {
