@@ -491,15 +491,17 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw, bhw;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
-	uint16_t bhw = b >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
+	bhw = b >> FRACBITS;
 
-	int32_t result;
 	if (bhw == 0) {
 		uint32_t hl = mulu(ahw, blw);
 
@@ -528,22 +530,26 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw, bhw;
+	uint32_t hh, hl, lh, ll;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
-	uint16_t bhw = b >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
+	bhw = b >> FRACBITS;
 
-	uint32_t hh = mulu(ahw, bhw) << FRACBITS;
-	uint32_t hl = mulu(ahw, blw);
-	uint32_t lh = mulu(alw, bhw);
+	hh = mulu(ahw, bhw) << FRACBITS;
+	hl = mulu(ahw, blw);
+	lh = mulu(alw, bhw);
 
 	// Make sure we round towards -inf
-	uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
+	ll = (mulu(alw, blw) + neg) >> FRACBITS;
 
-	int32_t result = hh + hl + lh + ll;
+	result = hh + hl + lh + ll;
 	if (neg) result = -result;
 	return result;
 }
@@ -563,19 +569,23 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw;
+	uint32_t hl, ll;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
 
-	uint32_t hl = mulu(ahw, blw);
+	hl = mulu(ahw, blw);
 
 	// Make sure we round towards -inf
-	uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
+	ll = (mulu(alw, blw) + neg) >> FRACBITS;
 
-	int32_t result = hl + ll;
+	result = hl + ll;
 
 	if (neg) result = -result;
 	return result;
@@ -590,14 +600,19 @@ inline
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
 	boolean neg = a < 0;
+
+	uint16_t alw, ahw;
+	uint32_t ll, hl;
+	fixed_t r;
+
 	a = D_abs(a);
 
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
 
-	uint32_t ll = (uint32_t) alw * blw;
-	uint32_t hl = (uint32_t) ahw * blw;
-	fixed_t r = (ll >> FRACBITS) + hl;
+	ll = (uint32_t) alw * blw;
+	hl = (uint32_t) ahw * blw;
+	r = (ll >> FRACBITS) + hl;
 	if (neg) r = -r;
 	return r;
 }
@@ -628,11 +643,12 @@ fixed_t CONSTFUNC FixedApproxDiv(fixed_t a, fixed_t b)
 static PUREFUNC int8_t R_PointOnSide(fixed_t x, fixed_t y, const mapnode_t __far* node)
 {
 	int16_t ix = x >> FRACBITS;
+	int16_t iy;
 
 	if (!node->dx)
 		return ix <= node->x ? node->dy > 0 : node->dy < 0;
 
-	int16_t iy = y >> FRACBITS;
+	iy = y >> FRACBITS;
 
 	if (!node->dy)
 		return iy <= node->y ? node->dx < 0 : node->dx > 0;
@@ -661,13 +677,15 @@ subsector_t __far* R_PointInSubsector(fixed_t x, fixed_t y)
 	static fixed_t prevy;
 	static subsector_t __far* prevr;
 
+	int16_t nodenum;
+
 	if (prevx == x && prevy == y)
 		return prevr;
 
 	prevx = x;
 	prevy = y;
 
-	int16_t nodenum = numnodes-1;
+	nodenum = numnodes-1;
 
 	// special case for trivial maps (single subsector, no nodes)
 	if (numnodes == 0)
@@ -890,11 +908,13 @@ static angle16_t R_PointToAngle16(int16_t x, int16_t y)
 
 static CONSTFUNC int16_t R_PointToDist(int16_t x, int16_t y)
 {
+    fixed_t dx, dy;
+
     if (viewx == (fixed_t)x << FRACBITS && viewy == (fixed_t)y << FRACBITS)
         return 0;
 
-    fixed_t dx = D_abs(((fixed_t)x << FRACBITS) - viewx);
-    fixed_t dy = D_abs(((fixed_t)y << FRACBITS) - viewy);
+    dx = D_abs(((fixed_t)x << FRACBITS) - viewx);
+    dy = D_abs(((fixed_t)y << FRACBITS) - viewy);
 
     if (dy > dx)
     {
