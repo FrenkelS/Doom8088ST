@@ -1282,12 +1282,15 @@ static void R_DrawSprite (const vissprite_t* spr)
 
     for (ds = ds_p; ds-- > drawsegs; )  // new -- killough
     {
+        int16_t r1, r2;
+        fixed_t gzt;
+
         // determine if the drawseg obscures the sprite
         if (ds->x1 > spr->x2 || ds->x2 < spr->x1 || (!ds->silhouette && !ds->maskedtexturecol))
             continue;      // does not cover sprite
 
-        const int16_t r1 = ds->x1 < spr->x1 ? spr->x1 : ds->x1;
-        const int16_t r2 = ds->x2 > spr->x2 ? spr->x2 : ds->x2;
+        r1 = ds->x1 < spr->x1 ? spr->x1 : ds->x1;
+        r2 = ds->x2 > spr->x2 ? spr->x2 : ds->x2;
 
         if (ds->scale1 > ds->scale2)
         {
@@ -1320,7 +1323,7 @@ static void R_DrawSprite (const vissprite_t* spr)
             }
         }
 
-        fixed_t gzt = spr->gz + (((int32_t)spr->patch_topoffset) << FRACBITS);
+        gzt = spr->gz + (((int32_t)spr->patch_topoffset) << FRACBITS);
 
         if (ds->silhouette & SIL_TOP && gzt > ds->tsilheight)   // top sil
         {
