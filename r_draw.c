@@ -1592,6 +1592,14 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     fixed_t ys = FixedMulAngle(tr_y, viewsin);
     const fixed_t tz = xc - (-ys);
 
+    fixed_t yc, xs, tx, xscale, xl, x1, x2, xr, iscale;
+    const spritedef_t __far* sprdef;
+    const spriteframe_t __far* sprframe;
+    uint16_t rot;
+    boolean flip;
+    const patch_t __far* patch;
+    vissprite_t* vis;
+
     // thing is behind view plane?
     if (tz < MINZ)
         return;
@@ -1600,19 +1608,19 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     if(tz > MAXZ)
         return;
 
-    fixed_t yc = FixedMulAngle(tr_y, viewcos);
-    fixed_t xs = FixedMulAngle(tr_x, viewsin);
-    fixed_t tx = -(yc + (-xs));
+    yc = FixedMulAngle(tr_y, viewcos);
+    xs = FixedMulAngle(tr_x, viewsin);
+    tx = -(yc + (-xs));
 
     // too far off the side?
     if (D_abs(tx)>(tz<<2))
         return;
 
     // decide which patch to use for sprite relative to player
-    const spritedef_t __far*   sprdef   = &sprites[thing->sprite];
-    const spriteframe_t __far* sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
+    sprdef   = &sprites[thing->sprite];
+    sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
-    uint16_t rot = 0;
+    rot = 0;
 
     if (sprframe->rotate)
     {
@@ -1621,8 +1629,8 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
         rot = (angle16_t)(ang - (angle16_t)(thing->angle >> FRACBITS) + (angle16_t)(ANG45_16 / 2) * 9) >> 13;
     }
 
-    const boolean flip = (boolean)SPR_FLIPPED(sprframe, rot);
-    const patch_t __far* patch = W_GetLumpByNum(sprframe->lump[rot]);
+    flip = (boolean)SPR_FLIPPED(sprframe, rot);
+    patch = W_GetLumpByNum(sprframe->lump[rot]);
 
     /* calculate edges of the shape
      * cph 2003/08/1 - fraggle points out that this offset must be flipped
@@ -1633,10 +1641,10 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
         tx -= ((int32_t)patch->leftoffset) << FRACBITS;
 
     //const fixed_t xscale = FixedDiv(PROJECTION, tz);
-    const fixed_t xscale = PROJECTION / (tz >> FRACBITS);
+    xscale = PROJECTION / (tz >> FRACBITS);
 
-    fixed_t xl = CENTERX * FRACUNIT + FixedMul(tx,xscale);
-    const int16_t x1 = (xl >> FRACBITS);
+    xl = CENTERX * FRACUNIT + FixedMul(tx,xscale);
+    x1 = (xl >> FRACBITS);
 
     // off the side?
     if (x1 > VIEWWINDOWWIDTH)
@@ -1645,8 +1653,8 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
         return;
     }
 
-    fixed_t xr = CENTERX * FRACUNIT - FRACUNIT + FixedMul(tx + (((int32_t)patch->width) << FRACBITS), xscale);
-    const int16_t x2 = (xr >> FRACBITS);
+    xr = CENTERX * FRACUNIT - FRACUNIT + FixedMul(tx + (((int32_t)patch->width) << FRACBITS), xscale);
+    x2 = (xr >> FRACBITS);
 
     // off the side?
     if (xr < 0)
@@ -1664,7 +1672,7 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
 
 
     // store information in a vissprite
-    vissprite_t* vis = R_NewVisSprite ();
+    vis = R_NewVisSprite();
 
     //No more vissprites.
     if(!vis)
@@ -1686,7 +1694,7 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     vis->x2              = x2 >= VIEWWINDOWWIDTH ? VIEWWINDOWWIDTH - 1 : x2;
 
 
-    const fixed_t iscale = FixedReciprocal(xscale);
+    iscale = FixedReciprocal(xscale);
 
     if (flip)
     {
