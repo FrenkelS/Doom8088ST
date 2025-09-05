@@ -32,7 +32,7 @@ qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_telept.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_tick.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_user.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_data.c
-@rem qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_draw.c -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN
+qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_draw.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_plane.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_sky.c
 qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_things.c

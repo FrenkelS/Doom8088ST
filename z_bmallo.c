@@ -48,8 +48,14 @@
 typedef struct bmalpool_s {
 	struct bmalpool_s __far* nextpool;
 	size_t             blocks;
-	byte               used[];
+	byte               used[0];
 } bmalpool_t;
+
+#if defined _M_I86
+typedef char assertBmalpoolSize[sizeof(bmalpool_t) == 6 ? 1 : -1];
+#else
+typedef char assertBmalpoolSize[sizeof(bmalpool_t) == 8 ? 1 : -1];
+#endif
 
 
 inline static void __far* getelem(bmalpool_t __far* p, size_t size, size_t n)
