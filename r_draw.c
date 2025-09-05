@@ -1950,8 +1950,9 @@ static void R_RenderSegLoop(int16_t rw_x, boolean segtextured, boolean markfloor
         {
             // calculate texture offset
 #if !defined FLAT_WALL
+			int16_t ang;
 			texturecolumn = rw_offset;
-			int16_t ang = (angle16_t)(rw_centerangle + xtoviewangleTable[rw_x]) >> ANGLETOFINESHIFT_16;
+			ang = (angle16_t)(rw_centerangle + xtoviewangleTable[rw_x]) >> ANGLETOFINESHIFT_16;
 			if (ang < 1024) {			//    0 <= ang < 1024
 				fixed_t tan = finetangentTable_part_4[1023 - ang];
 				texturecolumn += (rw_distance * tan) >> FRACBITS;
@@ -2123,6 +2124,10 @@ inline static int16_t CONSTFUNC Mod(int16_t a, int16_t b)
 //
 static void R_StoreWallRange(const int16_t start, const int16_t stop)
 {
+    angle16_t offsetangle;
+    int16_t hyp, rw_x;
+    boolean markfloor, markceiling, segtextured;
+
     // don't overflow and crash
     if (ds_p == &_s_drawsegs[MAXDRAWSEGS])
     {
@@ -2142,7 +2147,7 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle;
 
-    angle16_t offsetangle = rw_normalangle - rw_angle1;
+    offsetangle = rw_normalangle - rw_angle1;
 
 #if defined _M_I86
     if (abs(offsetangle) > ANG90_16)
@@ -2152,11 +2157,11 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
         offsetangle = ANG90_16;
 #endif
 
-    int16_t hyp = R_PointToDist(curline->v1.x, curline->v1.y);
+    hyp = R_PointToDist(curline->v1.x, curline->v1.y);
 
     rw_distance = (hyp * finecosineapprox(offsetangle >> ANGLETOFINESHIFT_16)) >> FRACBITS;
 
-    int16_t rw_x = ds_p->x1 = start;
+    rw_x = ds_p->x1 = start;
     ds_p->x2 = stop;
     ds_p->curline = curline;
     rw_stopx = stop+1;
@@ -2184,8 +2189,6 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
 
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
-
-    boolean markfloor, markceiling;
 
     if (!backsector)
     {
@@ -2310,7 +2313,7 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
     }
 
     // calculate rw_offset (only needed for textured lines)
-    boolean segtextured = ((midtexture | toptexture | bottomtexture | maskedtexture) > 0);
+    segtextured = ((midtexture | toptexture | bottomtexture | maskedtexture) > 0);
 
     if (segtextured)
     {
