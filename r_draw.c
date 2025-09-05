@@ -2542,13 +2542,18 @@ static void R_ClipWallSegment(int16_t first, int16_t last, const boolean solid)
 
 static void R_AddLine(const seg_t __far* line)
 {
+    angle16_t angle1, angle2, span, tspan;
+    int8_t x1, x2;
+
     curline = line;
 
-    angle16_t angle1 = R_PointToAngle16(line->v1.x, line->v1.y);
-    angle16_t angle2 = R_PointToAngle16(line->v2.x, line->v2.y);
+    angle1 = R_PointToAngle16(line->v1.x, line->v1.y);
+    angle2 = R_PointToAngle16(line->v2.x, line->v2.y);
 
     // Clip to view edges.
-    angle16_t span = angle1 - angle2;
+    span = angle1 - angle2;
+
+    x1, x2;
 
     // Back side, i.e. backface culling
     if (span >= ANG180_16)
@@ -2559,7 +2564,7 @@ static void R_AddLine(const seg_t __far* line)
     angle1 -= viewangle16;
     angle2 -= viewangle16;
 
-    angle16_t tspan = angle1 + clipangle;
+    tspan = angle1 + clipangle;
     if (tspan > 2 * clipangle)
     {
         tspan -= 2 * clipangle;
@@ -2586,8 +2591,8 @@ static void R_AddLine(const seg_t __far* line)
     // but not necessarily visible.
 
     // killough 1/31/98: Here is where "slime trails" can SOMETIMES occur:
-    int8_t x1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
-    int8_t x2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    x1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    x2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
 
     // Does not cross a pixel?
     if (x1 >= x2)       // killough 1/31/98 -- change == to >= for robustness
@@ -2706,12 +2711,16 @@ static boolean R_CheckBBox(const int16_t __far* bspcoord)
     int16_t boxpos = (viewx <= ((fixed_t)bspcoord[BOXLEFT]<<FRACBITS) ? 0 : viewx < ((fixed_t)bspcoord[BOXRIGHT]<<FRACBITS) ? 1 : 2) +
             (viewy >= ((fixed_t)bspcoord[BOXTOP]<<FRACBITS) ? 0 : viewy > ((fixed_t)bspcoord[BOXBOTTOM]<<FRACBITS) ? 4 : 8);
 
+    const byte* check;
+    angle16_t angle1, angle2;
+    int8_t sx1, sx2;
+
     if (boxpos == 5)
         return true;
 
-    const byte* check = checkcoord[boxpos];
-    angle16_t angle1 = R_PointToAngle16(bspcoord[check[0]], bspcoord[check[1]]) - viewangle16;
-    angle16_t angle2 = R_PointToAngle16(bspcoord[check[2]], bspcoord[check[3]]) - viewangle16;
+    check = checkcoord[boxpos];
+    angle1 = R_PointToAngle16(bspcoord[check[0]], bspcoord[check[1]]) - viewangle16;
+    angle2 = R_PointToAngle16(bspcoord[check[2]], bspcoord[check[3]]) - viewangle16;
 
 
     // cph - replaced old code, which was unclear and badly commented
@@ -2736,8 +2745,8 @@ static boolean R_CheckBBox(const int16_t __far* bspcoord)
     //  that touches the source post
     //  (adjacent pixels are touching).
 
-    int8_t sx1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
-    int8_t sx2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    sx1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    sx2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
     //    const cliprange_t *start;
 
     // Does not cross a pixel.
