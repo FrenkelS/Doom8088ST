@@ -2606,8 +2606,6 @@ static void R_AddLine(const seg_t __far* line)
     // Clip to view edges.
     span = angle1 - angle2;
 
-    x1, x2;
-
     // Back side, i.e. backface culling
     if (span >= ANG180_16)
         return;

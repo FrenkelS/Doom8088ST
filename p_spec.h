@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -85,13 +85,13 @@ typedef enum
 {
   up,
   down,
-  waiting,
+  waiting
 } plat_e;
 
 typedef enum
 {
   downWaitUpStay,
-  raiseToNearestAndChange,
+  raiseToNearestAndChange
 } plattype_e;
 
 // p_doors
@@ -100,7 +100,7 @@ typedef enum
 {
   normal,
   close30ThenOpen,
-  dopen,
+  dopen
 } vldoor_e;
 
 
@@ -125,7 +125,7 @@ typedef enum
 
   donutRaise,
 
-  buildStair,
+  buildStair
 } floor_e;
 
 

@@ -49,7 +49,7 @@
 typedef enum
 {
   ev_keydown,
-  ev_keyup,
+  ev_keyup
 } evtype_t;
 
 // Event structure.
@@ -70,7 +70,7 @@ typedef enum
   ga_playdemo,
   ga_completed,
   ga_victory,
-  ga_worlddone,
+  ga_worlddone
 } gameaction_t;
 
 
@@ -93,7 +93,7 @@ typedef enum
   // The 4bit weapon mask and shift, convenience.
 //BT_WEAPONMASK   = (8+16+32),
   BT_WEAPONMASK   = (8+16+32+64), // extended to pick up SSG        // phares
-  BT_WEAPONSHIFT  = 3,
+  BT_WEAPONSHIFT  = 3
 
 } buttoncode_t;
 
