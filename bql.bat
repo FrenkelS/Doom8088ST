@@ -1,49 +1,62 @@
-set RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2"
-set CFLAGS="-DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN"
+md ql
 
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c am_map.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c d_items.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c d_main.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c f_finale.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c f_lib.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c g_game.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c hu_stuff.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c i_audio.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c info.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c m_cheat.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c m_menu.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c m_random.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_doors.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_enemy.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_enemy2.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_floor.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_inter.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_lights.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_map.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_maputl.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_mobj.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_plats.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_pspr.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_setup.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_sight.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_spec.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_switch.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_telept.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_tick.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c p_user.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_data.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_draw.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_plane.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_sky.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c r_things.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c sounds.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c st_pal.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c st_stuff.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c s_sound.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c tables.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c v_video.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c wi_lib.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c wi_stuff.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c w_wad.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c z_bmallo.c
-qdos-gcc %CFLAGS% %RENDER_OPTIONS% -c z_zone.c
+@set PATH=C:\qdos-gcc\bin;%PATH%
+
+set RENDER_OPTIONS=-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2
+set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
+
+
+@set GLOBOBJS=
+@set GLOBOBJS=%GLOBOBJS% r_draw.c
+@set GLOBOBJS=%GLOBOBJS% i_vql.c
+@set GLOBOBJS=%GLOBOBJS% p_enemy2.c
+@set GLOBOBJS=%GLOBOBJS% p_map.c
+@set GLOBOBJS=%GLOBOBJS% p_maputl.c
+@set GLOBOBJS=%GLOBOBJS% p_mobj.c
+@set GLOBOBJS=%GLOBOBJS% p_sight.c
+@set GLOBOBJS=%GLOBOBJS% r_data.c
+@set GLOBOBJS=%GLOBOBJS% r_plane.c
+@set GLOBOBJS=%GLOBOBJS% tables.c
+@set GLOBOBJS=%GLOBOBJS% w_wad.c
+@set GLOBOBJS=%GLOBOBJS% z_zone.c
+
+
+@set GLOBOBJS=%GLOBOBJS% am_map.c
+@set GLOBOBJS=%GLOBOBJS% d_items.c
+@set GLOBOBJS=%GLOBOBJS% d_main.c
+@set GLOBOBJS=%GLOBOBJS% f_finale.c
+@set GLOBOBJS=%GLOBOBJS% f_lib.c
+@set GLOBOBJS=%GLOBOBJS% g_game.c
+@set GLOBOBJS=%GLOBOBJS% hu_stuff.c
+@set GLOBOBJS=%GLOBOBJS% i_audio.c
+@set GLOBOBJS=%GLOBOBJS% i_ql.c
+@set GLOBOBJS=%GLOBOBJS% info.c
+@set GLOBOBJS=%GLOBOBJS% m_cheat.c
+@set GLOBOBJS=%GLOBOBJS% m_menu.c
+@set GLOBOBJS=%GLOBOBJS% m_random.c
+@set GLOBOBJS=%GLOBOBJS% p_doors.c
+@set GLOBOBJS=%GLOBOBJS% p_enemy.c
+@set GLOBOBJS=%GLOBOBJS% p_floor.c
+@set GLOBOBJS=%GLOBOBJS% p_inter.c
+@set GLOBOBJS=%GLOBOBJS% p_lights.c
+@set GLOBOBJS=%GLOBOBJS% p_plats.c
+@set GLOBOBJS=%GLOBOBJS% p_pspr.c
+@set GLOBOBJS=%GLOBOBJS% p_setup.c
+@set GLOBOBJS=%GLOBOBJS% p_spec.c
+@set GLOBOBJS=%GLOBOBJS% p_switch.c
+@set GLOBOBJS=%GLOBOBJS% p_telept.c
+@set GLOBOBJS=%GLOBOBJS% p_tick.c
+@set GLOBOBJS=%GLOBOBJS% p_user.c
+@set GLOBOBJS=%GLOBOBJS% r_sky.c
+@set GLOBOBJS=%GLOBOBJS% r_things.c
+@set GLOBOBJS=%GLOBOBJS% s_sound.c
+@set GLOBOBJS=%GLOBOBJS% sounds.c
+@set GLOBOBJS=%GLOBOBJS% st_pal.c
+@set GLOBOBJS=%GLOBOBJS% st_stuff.c
+@set GLOBOBJS=%GLOBOBJS% v_video.c
+@set GLOBOBJS=%GLOBOBJS% wi_lib.c
+@set GLOBOBJS=%GLOBOBJS% wi_stuff.c
+@set GLOBOBJS=%GLOBOBJS% z_bmallo.c
+
+
+qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.x

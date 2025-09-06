@@ -115,7 +115,7 @@ int32_t I_GetTime(void)
 
 void I_InitTimer(void)
 {
-
+	// Do nothing
 }
 
 
@@ -257,13 +257,13 @@ void PCFX_Play(int16_t lumpnum)
 
 void PCFX_Init(void)
 {
-
+	// Do nothing
 }
 
 
 void PCFX_Shutdown(void)
 {
-
+	// Do nothing
 }
 
 
