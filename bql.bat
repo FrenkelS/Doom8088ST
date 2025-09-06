@@ -2,8 +2,9 @@ md ql
 
 @set PATH=C:\qdos-gcc\bin;%PATH%
 
-set RENDER_OPTIONS=-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2
-set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
+set RENDER_OPTIONS=-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"WIN2_DOOMST2.WAD\" -DMAPWIDTH=480 -DNR_OF_COLORS=2
+@rem set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
+set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
 
 
 @set GLOBOBJS=
@@ -59,4 +60,6 @@ set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_
 @set GLOBOBJS=%GLOBOBJS% z_bmallo.c
 
 
-qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.x
+qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.out
+del ql\doom8088
+rename ql\doom8088.out doom8088
