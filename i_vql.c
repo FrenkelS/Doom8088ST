@@ -50,9 +50,6 @@ static uint8_t _s_screen[VIEWWINDOWWIDTH * SCREENHEIGHT];
 static uint8_t *videomemory;
 
 
-static uint8_t oldrez;
-
-
 void I_ReloadPalette(void)
 {
 	char lumpName[8] = "COLORMAP";
@@ -147,7 +144,6 @@ static void I_UploadNewPalette(int8_t pal)
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	uint8_t *rezPtr = (uint8_t*)0x18063;
-	oldrez = *rezPtr;
 	*rezPtr = SCREENMODE;
 
 	videomemory = (uint8_t*)0x20000;
@@ -161,9 +157,6 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
-	uint8_t *rezPtr = (uint8_t*)0x18063;
-	*rezPtr = oldrez;
-
 	I_SetPalette(0);
 	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
 	I_FinishUpdate();
