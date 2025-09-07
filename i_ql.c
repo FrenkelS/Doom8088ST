@@ -26,7 +26,6 @@
 #include <qdos.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "doomdef.h"
 #include "a_pcfx.h"
@@ -64,7 +63,9 @@ void I_InitGraphics(void)
 
 int32_t I_GetTime(void)
 {
-	return clock() * TICRATE / CLOCKS_PER_SEC;
+	// TODO implement timer
+	static int32_t ticcount;
+	return ticcount++;
 }
 
 
