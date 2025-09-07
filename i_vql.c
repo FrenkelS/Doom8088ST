@@ -39,7 +39,7 @@
 #define SCREENMODE_HI	(0<<3)
 
 #if !defined SCREENMODE
-#define SCREENMODE SCREENMODE_LO
+#define SCREENMODE SCREENMODE_HI
 #endif
 
 
@@ -67,39 +67,45 @@ void I_ReloadPalette(void)
 
 
 #if SCREENMODE == SCREENMODE_HI
-static const uint16_t leftcolors[8] =
+static const uint16_t redColorsLeft[8] =
 {
 	0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f, 0x00ff
 };
 
-static const uint16_t rightcolors[8] =
+static const uint16_t redColorsRight[8] =
 {
 	0x0080, 0x00c0, 0x00e0, 0x00f0, 0x00f8, 0x00fc, 0x00fe, 0x00ff
 };
 
-static const uint16_t yellowcolors[4] =
+static const uint16_t yellowColorsLeft[4] =
 {
 	0x1818, 0x2424, 0x5a5a, 0xa5a5
 };
-#define RADIATION_LEFT	0x5500
-#define RADIATION_RIGHT	0xaa00
+#define yellowColorsRight yellowColorsLeft
+#define GREEN_LEFT	0x5500
+#define GREEN_RIGHT	0xaa00
 #else
-static const uint16_t leftcolors[8] =
+static const uint16_t redColorsLeft[8] =
 {
 	0x0002, 0x0002, 0x000a, 0x000a, 0x002a, 0x002a, 0x00aa, 0x00aa
 };
 
-static const uint16_t rightcolors[8] =
+static const uint16_t redColorsRight[8] =
 {
 	0x0080, 0x0080, 0x00a0, 0x00a0, 0x00a8, 0x00a8, 0x00aa, 0x00aa
 };
 
-static const uint16_t yellowcolors[4] =
+static const uint16_t yellowColorsLeft[4] =
 {
-	0x0808, 0x2828, 0x2a2a, 0xaaaa
+	0x0202, 0x0a0a, 0x2a2a, 0xaaaa
 };
-#define RADIATION_LEFT	0x2200
-#define RADIATION_RIGHT	0x8800
+
+static const uint16_t yellowColorsRight[4] =
+{
+	0x8080, 0xa0a0, 0x8a8a, 0xaaaa
+};
+#define GREEN_LEFT	0x2200
+#define GREEN_RIGHT	0x8800
 #endif
 
 
@@ -114,18 +120,18 @@ static void I_UploadNewPalette(int8_t pal)
 
 	if (1 <= pal && pal <= 8)
 	{
-		leftColor  = leftcolors[ pal - 1];
-		rightColor = rightcolors[pal - 1];
+		leftColor  = redColorsLeft[ pal - 1];
+		rightColor = redColorsRight[pal - 1];
 	}
 	else if (9 <= pal && pal <= 12)
 	{
-		leftColor  = yellowcolors[pal - 9];
-		rightColor = yellowcolors[pal - 9];
+		leftColor  = yellowColorsLeft[ pal - 9];
+		rightColor = yellowColorsRight[pal - 9];
 	}
 	else if (pal == 13)
 	{
-		leftColor  = RADIATION_LEFT;
-		rightColor = RADIATION_RIGHT;
+		leftColor  = GREEN_LEFT;
+		rightColor = GREEN_RIGHT;
 	}
 
 	for (y = 0; y < SCREENHEIGHT; y++)
