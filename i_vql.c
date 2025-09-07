@@ -20,6 +20,7 @@
  *
  * DESCRIPTION:
  *      Video code for Sinclair QL 512x256 4 color (2 colors used)
+ *                                 256x256 8 color (4 colors used)
  *
  *-----------------------------------------------------------------------------*/
 
@@ -28,6 +29,18 @@
 #include "m_random.h"
 
 #include "globdata.h"
+
+
+#define PLANEWIDTH		128
+#define SCREENHEIGHT_QL	256
+
+
+#define SCREENMODE_LO	(1<<3)
+#define SCREENMODE_HI	(0<<3)
+
+#if !defined SCREENMODE
+#define SCREENMODE SCREENMODE_LO
+#endif
 
 
 extern const int16_t CENTERY;
@@ -53,20 +66,41 @@ void I_ReloadPalette(void)
 }
 
 
+#if SCREENMODE == SCREENMODE_HI
 static const uint16_t leftcolors[8] =
 {
-	0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+	0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f, 0x00ff
 };
 
 static const uint16_t rightcolors[8] =
 {
-	0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff
+	0x0080, 0x00c0, 0x00e0, 0x00f0, 0x00f8, 0x00fc, 0x00fe, 0x00ff
 };
 
 static const uint16_t yellowcolors[4] =
 {
 	0x1818, 0x2424, 0x5a5a, 0xa5a5
 };
+#define RADIATION_LEFT	0x5500
+#define RADIATION_RIGHT	0xaa00
+#else
+static const uint16_t leftcolors[8] =
+{
+	0x0002, 0x0002, 0x000a, 0x000a, 0x002a, 0x002a, 0x00aa, 0x00aa
+};
+
+static const uint16_t rightcolors[8] =
+{
+	0x0080, 0x0080, 0x00a0, 0x00a0, 0x00a8, 0x00a8, 0x00aa, 0x00aa
+};
+
+static const uint16_t yellowcolors[4] =
+{
+	0x0808, 0x2828, 0x2a2a, 0xaaaa
+};
+#define RADIATION_LEFT	0x2200
+#define RADIATION_RIGHT	0x8800
+#endif
 
 
 static void I_UploadNewPalette(int8_t pal)
@@ -90,16 +124,16 @@ static void I_UploadNewPalette(int8_t pal)
 	}
 	else if (pal == 13)
 	{
-		leftColor  = 0xaa00;
-		rightColor = 0x5500;
+		leftColor  = RADIATION_LEFT;
+		rightColor = RADIATION_RIGHT;
 	}
 
 	for (y = 0; y < SCREENHEIGHT; y++)
 	{
 		*leftPtr  = leftColor;
 		*rightPtr = rightColor;
-		leftPtr  += 128 / sizeof(uint16_t);
-		rightPtr += 128 / sizeof(uint16_t);
+		leftPtr  += PLANEWIDTH / sizeof(uint16_t);
+		rightPtr += PLANEWIDTH / sizeof(uint16_t);
 	}
 }
 
@@ -108,11 +142,14 @@ void I_InitGraphicsHardwareSpecificCode(void)
 {
 	uint8_t *rezPtr = (uint8_t*)0x18063;
 	oldrez = *rezPtr;
-	*rezPtr = 0;
+	*rezPtr = SCREENMODE;
 
 	videomemory = (uint8_t*)0x20000;
-	videomemory += ((128 / 2) - VIEWWINDOWWIDTH) / 2;	// center horizontally
-	videomemory += ((256 - SCREENHEIGHT) / 2) * 128;	// center vertically
+
+	memset(videomemory, 0, PLANEWIDTH * SCREENHEIGHT_QL);
+
+	videomemory += (((PLANEWIDTH / 2) - VIEWWINDOWWIDTH) / 2) * sizeof(uint16_t);	// center horizontally
+	videomemory += ((SCREENHEIGHT_QL - SCREENHEIGHT) / 2) * PLANEWIDTH;				// center vertically
 }
 
 
@@ -141,10 +178,15 @@ static void I_DrawBuffer(uint8_t *buffer)
 	{
 		for (x = 0; x < VIEWWINDOWWIDTH; x++)
 		{
+#if SCREENMODE == SCREENMODE_HI
 			*dst++ = *src;
 			*dst++ = *src++;
+#else
+			dst++;
+			*dst++ = *src++;
+#endif
 		}
-		dst += 128 - (VIEWWINDOWWIDTH * 2);
+		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
 	}
 
 	if (drawStatusBar)
@@ -153,10 +195,15 @@ static void I_DrawBuffer(uint8_t *buffer)
 		{
 			for (x = 0; x < VIEWWINDOWWIDTH; x++)
 			{
+#if SCREENMODE == SCREENMODE_HI
 				*dst++ = *src;
 				*dst++ = *src++;
+#else
+				dst++;
+				*dst++ = *src++;
+#endif
 			}
-			dst += 128 - (VIEWWINDOWWIDTH * 2);
+			dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
 		}
 	}
 	drawStatusBar = true;
@@ -378,8 +425,7 @@ void V_ShutdownDrawLine(void)
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
-	//TODO UNUSED(color);
-
+#if SCREENMODE == SCREENMODE_HI
 	int16_t dx = abs(x1 - x0);
 	int16_t sx = x0 < x1 ? 1 : -1;
 
@@ -389,6 +435,8 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 	int16_t err = dx + dy;
 
 	uint8_t bitmask = 0x80 >> (x0 & 7);
+
+	UNUSED(color);
 
 	while (true)
 	{
@@ -415,6 +463,9 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 			y0  += sy;
 		}
 	}
+#else
+// TODO SCREENMODE_LO not implemented yet
+#endif
 }
 
 
