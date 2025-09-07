@@ -97,7 +97,40 @@ static void I_ShutdownKeyboard(void)
 
 void I_StartTic(void)
 {
-	// TODO
+	static uint8_t keys_cur;
+	static uint8_t keys_prv;
+	static const uint32_t keycommand[2] = { 0x09010000L, 0x00000102L };
+
+	uint8_t diff;
+	int16_t bit;
+	uint8_t tmp = keys_cur;
+	keys_cur = keys_prv;
+	keys_prv = tmp;
+
+	keys_cur = mt_ipcom((uint8_t *)keycommand);
+	diff = keys_prv ^ keys_cur;
+	for (bit = 0; bit < 8; bit++)
+	{
+		if (diff & (1 << bit))
+		{
+			uint8_t k;
+			d_event_t ev;
+			ev.type = keys_cur & (1 << bit) ? ev_keydown : ev_keyup;
+
+			switch (bit)
+			{
+				case 0: ev.data1 = KEYD_A;     break; // Enter
+				case 1: ev.data1 = KEYD_LEFT;  break; // Left
+				case 2: ev.data1 = KEYD_UP;    break; // Up
+				case 3: ev.data1 = KEYD_START; break; // Esc
+				case 4: ev.data1 = KEYD_RIGHT; break; // Right
+				case 5: ev.data1 = KEYD_B;     break; // \ 
+				case 6: ev.data1 = KEYD_A;     break; // Space
+				case 7: ev.data1 = KEYD_DOWN;  break; // Down
+			}
+			D_PostEvent(&ev);
+		}
+	}
 }
 
 
