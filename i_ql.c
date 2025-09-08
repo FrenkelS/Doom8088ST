@@ -26,6 +26,7 @@
 #include <qdos.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "doomdef.h"
 #include "a_pcfx.h"
@@ -61,17 +62,37 @@ void I_InitGraphics(void)
 // Returns time in 1/35th second tics.
 //
 
+static QL_LINK_t qlLink;
+static volatile int32_t ticcount;
+
+static boolean isTimerSet;
+
+
+static void I_TimerISR(void)
+{
+	ticcount++;
+}
+
+
 int32_t I_GetTime(void)
 {
-	// TODO implement timer
-	static int32_t ticcount;
-	return ticcount++;
+	return ticcount * TICRATE / CLOCKS_PER_SEC;
 }
 
 
 void I_InitTimer(void)
 {
-	// Do nothing
+	qlLink.l_next = NULL;
+	qlLink.l_rtn  = I_TimerISR;
+	mt_lpoll(&qlLink);
+
+	isTimerSet = true;
+}
+
+
+static void I_ShutdownTimer(void)
+{
+	mt_rpoll(&qlLink);
 }
 
 
@@ -80,16 +101,7 @@ void I_InitTimer(void)
 // Keyboard code
 //
 
-static boolean isKeyboardIsrSet = false;
-
-
 void I_InitKeyboard(void)
-{
-	isKeyboardIsrSet = true;
-}
-
-
-static void I_ShutdownKeyboard(void)
 {
 	// Do nothing
 }
@@ -196,8 +208,8 @@ static void I_Shutdown(void)
 
 	I_ShutdownSound();
 
-	if (isKeyboardIsrSet)
-		I_ShutdownKeyboard();
+	if (isTimerSet)
+		I_ShutdownTimer();
 }
 
 
