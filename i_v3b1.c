@@ -104,6 +104,9 @@ static void I_UploadNewPalette(int8_t pal)
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	videomemory = (uint8_t*)VIDMEM;
+
+	memset(videomemory, 0, VIDBYTES * VIDHEIGHT);
+
 	videomemory += (VIDBYTES - VIEWWINDOWWIDTH) / 2 - 1;			// center horizontally
 	videomemory += ((VIDHEIGHT - SCREENHEIGHT * 2) / 2) * VIDBYTES;	// center vertically
 }
