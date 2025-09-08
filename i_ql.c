@@ -108,14 +108,13 @@ void I_StartTic(void)
 {
 	static uint8_t keys_cur;
 	static uint8_t keys_prv;
-	const uint8_t keycommand[8] = { 0x09, 0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02 };
 
 	uint8_t diff;
 	uint8_t tmp = keys_cur;
 	keys_cur = keys_prv;
 	keys_prv = tmp;
 
-	keys_cur = mt_ipcom((uint8_t *)keycommand);
+	keys_cur = keyrow(1);
 	diff = keys_prv ^ keys_cur;
 
 	if (diff & (1 << 0)) I_PostEvent(keys_cur & (1 << 0), KEYD_A);		// Enter
