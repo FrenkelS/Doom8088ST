@@ -1595,7 +1595,7 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     fixed_t yc, xs, tx, xscale, xl, x1, x2, xr, iscale;
     const spritedef_t __far* sprdef;
     const spriteframe_t __far* sprframe;
-    uint16_t rot;
+    uint16_t rot = 0;
     boolean flip;
     const patch_t __far* patch;
     vissprite_t* vis;
@@ -1619,8 +1619,6 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     // decide which patch to use for sprite relative to player
     sprdef   = &sprites[thing->sprite];
     sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
-
-    rot = 0;
 
     if (sprframe->rotate)
     {

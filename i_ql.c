@@ -95,42 +95,37 @@ static void I_ShutdownKeyboard(void)
 }
 
 
+static void I_PostEvent(boolean keydown, int16_t data1)
+{
+	d_event_t ev;
+	ev.type  = keydown ? ev_keydown : ev_keyup;
+	ev.data1 = data1;
+	D_PostEvent(&ev);
+}
+
+
 void I_StartTic(void)
 {
 	static uint8_t keys_cur;
 	static uint8_t keys_prv;
-	static const uint32_t keycommand[2] = { 0x09010000L, 0x00000102L };
+	const uint8_t keycommand[8] = { 0x09, 0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02 };
 
 	uint8_t diff;
-	int16_t bit;
 	uint8_t tmp = keys_cur;
 	keys_cur = keys_prv;
 	keys_prv = tmp;
 
 	keys_cur = mt_ipcom((uint8_t *)keycommand);
 	diff = keys_prv ^ keys_cur;
-	for (bit = 0; bit < 8; bit++)
-	{
-		if (diff & (1 << bit))
-		{
-			uint8_t k;
-			d_event_t ev;
-			ev.type = keys_cur & (1 << bit) ? ev_keydown : ev_keyup;
 
-			switch (bit)
-			{
-				case 0: ev.data1 = KEYD_A;     break; // Enter
-				case 1: ev.data1 = KEYD_LEFT;  break; // Left
-				case 2: ev.data1 = KEYD_UP;    break; // Up
-				case 3: ev.data1 = KEYD_START; break; // Esc
-				case 4: ev.data1 = KEYD_RIGHT; break; // Right
-				case 5: ev.data1 = KEYD_B;     break; // \ 
-				case 6: ev.data1 = KEYD_A;     break; // Space
-				case 7: ev.data1 = KEYD_DOWN;  break; // Down
-			}
-			D_PostEvent(&ev);
-		}
-	}
+	if (diff & (1 << 0)) I_PostEvent(keys_cur & (1 << 0), KEYD_A);		// Enter
+	if (diff & (1 << 1)) I_PostEvent(keys_cur & (1 << 1), KEYD_LEFT);	// Left
+	if (diff & (1 << 2)) I_PostEvent(keys_cur & (1 << 2), KEYD_UP);		// Up
+	if (diff & (1 << 3)) I_PostEvent(keys_cur & (1 << 3), KEYD_START);	// Esc
+	if (diff & (1 << 4)) I_PostEvent(keys_cur & (1 << 4), KEYD_RIGHT);	// Right
+
+	if (diff & (1 << 6)) I_PostEvent(keys_cur & (1 << 6), KEYD_A);		// Space
+	if (diff & (1 << 7)) I_PostEvent(keys_cur & (1 << 7), KEYD_DOWN);	// Down
 }
 
 
