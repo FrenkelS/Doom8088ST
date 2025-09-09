@@ -1624,7 +1624,8 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     {
         // choose a different rotation based on player view
         angle16_t ang = R_PointToAngle(fx, fy);
-        rot = (angle16_t)(ang - (angle16_t)(thing->angle >> FRACBITS) + (angle16_t)(ANG45_16 / 2) * 9) >> 13;
+        unsigned int temp = (angle16_t)(ang - (angle16_t)(thing->angle >> FRACBITS) + (angle16_t)(ANG45_16 / 2) * 9);
+        rot = temp >> 13;
     }
 
     flip = (boolean)SPR_FLIPPED(sprframe, rot);
