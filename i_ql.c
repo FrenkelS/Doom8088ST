@@ -215,22 +215,35 @@ void I_StartTic(void)
 // Audio
 //
 
+typedef struct {
+	uint16_t	dur;
+	uint8_t		pitch;
+	uint8_t		pitch2;
+	uint8_t		wrap;
+	uint16_t	g_x;
+	uint8_t		g_y;
+	uint8_t		fuzz;
+	uint8_t		rndm;
+} sound_t;
+
+
 void PCFX_Play(int16_t lumpnum)
 {
-	UNUSED(lumpnum);
-	// TODO
+	const sound_t *s = W_GetLumpByNum(lumpnum);
+	do_sound(s->dur * 128, s->pitch, s->pitch2, s->wrap, s->g_x, s->g_y, s->fuzz, s->rndm);
+	Z_ChangeTagToCache(s);
 }
 
 
 void PCFX_Init(void)
 {
-	// TODO
+	// Do nothing
 }
 
 
 void PCFX_Shutdown(void)
 {
-	// TODO
+	// Do nothing
 }
 
 

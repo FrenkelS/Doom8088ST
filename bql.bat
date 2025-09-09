@@ -21,6 +21,11 @@ set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIA
 @set GLOBOBJS=%GLOBOBJS% w_wad.c
 @set GLOBOBJS=%GLOBOBJS% z_zone.c
 
+@rem @type %GLOBOBJS% > speed.c
+@rem qdos-gcc -c -O3 %CFLAGS% %RENDER_OPTIONS% speed.c -o ql/speed.o
+@rem del speed.c
+@rem @set GLOBOBJS=
+
 
 @set GLOBOBJS=%GLOBOBJS% am_map.c
 @set GLOBOBJS=%GLOBOBJS% d_items.c
@@ -59,7 +64,13 @@ set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIA
 @set GLOBOBJS=%GLOBOBJS% wi_stuff.c
 @set GLOBOBJS=%GLOBOBJS% z_bmallo.c
 
+@rem @type %GLOBOBJS% > space.c
+@rem qdos-gcc -c -Os %CFLAGS% %RENDER_OPTIONS% space.c -o ql/space.o
+@rem del space.c
+@rem qdos-gcc ql/speed.o ql/space.o -o ql/doom8088.out
 
 qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.out
+
+
 del ql\doom8088
 rename ql\doom8088.out doom8088
