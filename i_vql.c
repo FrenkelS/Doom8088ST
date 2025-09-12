@@ -39,7 +39,7 @@
 #define SCREENMODE_HI	(0<<3)
 
 #if !defined SCREENMODE
-#define SCREENMODE SCREENMODE_HI
+#define SCREENMODE SCREENMODE_LO
 #endif
 
 
@@ -157,6 +157,9 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 void I_ShutdownGraphics(void)
 {
+	uint8_t *rezPtr = (uint8_t*)0x18063;
+	*rezPtr = SCREENMODE_HI;
+
 	I_SetPalette(0);
 	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
 	I_FinishUpdate();
