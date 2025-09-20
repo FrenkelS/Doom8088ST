@@ -9,7 +9,7 @@ set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIA
 
 @set GLOBOBJS=
 @set GLOBOBJS=%GLOBOBJS% r_draw.c
-@set GLOBOBJS=%GLOBOBJS% i_vql.c
+@set GLOBOBJS=%GLOBOBJS% i_qlv.c
 @set GLOBOBJS=%GLOBOBJS% p_enemy2.c
 @set GLOBOBJS=%GLOBOBJS% p_map.c
 @set GLOBOBJS=%GLOBOBJS% p_maputl.c
