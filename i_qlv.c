@@ -36,11 +36,11 @@
 #define SCREENHEIGHT_QL	256
 
 
-#define SCREENMODE_LO	(1<<3)
-#define SCREENMODE_HI	(0<<3)
+#define SCREENMODE_HI	(0<<3)	/* 512x256 4 color */
+#define SCREENMODE_LO	(1<<3)	/* 256x256 8 color */
 
 #if !defined SCREENMODE
-#define SCREENMODE SCREENMODE_LO
+#define SCREENMODE SCREENMODE_HI
 #endif
 
 
@@ -65,23 +65,89 @@ void I_ReloadPalette(void)
 
 
 #if SCREENMODE == SCREENMODE_HI
-static const uint16_t redColorsLeft[8] =
-{
-	0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f, 0x00ff
-};
+static void (*drawBuffer)(uint8_t*);
 
-static const uint16_t redColorsRight[8] =
-{
-	0x0080, 0x00c0, 0x00e0, 0x00f0, 0x00f8, 0x00fc, 0x00fe, 0x00ff
-};
 
-static const uint16_t yellowColorsLeft[4] =
+static void drawBufferRed(uint8_t *buffer)
 {
-	0x1818, 0x2424, 0x5a5a, 0xa5a5
-};
-#define yellowColorsRight yellowColorsLeft
-#define GREEN_LEFT	0x5500
-#define GREEN_RIGHT	0xaa00
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
+
+	int16_t x, y;
+
+	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+	{
+		for (x = 0; x < VIEWWINDOWWIDTH; x++)
+		{
+			*dst++ = 0;
+			*dst++ = *src++;
+		}
+		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+	}
+}
+
+
+static void drawBufferGreen(uint8_t *buffer)
+{
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
+
+	int16_t x, y;
+
+	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+	{
+		for (x = 0; x < VIEWWINDOWWIDTH; x++)
+		{
+			*dst++ = *src++;
+			*dst++ = 0;
+		}
+		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+	}
+}
+
+
+static void drawBufferWhite(uint8_t *buffer)
+{
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
+
+	int16_t x, y;
+
+	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+	{
+		for (x = 0; x < VIEWWINDOWWIDTH; x++)
+		{
+			*dst++ = *src;
+			*dst++ = *src++;
+		}
+		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+	}
+}
+
+
+static void drawBufferYellow(uint8_t *buffer)
+{
+	uint8_t *src = buffer;
+	uint8_t *dst = videomemory;
+
+	int16_t x, y;
+
+	for (y = 0; y < (SCREENHEIGHT - ST_HEIGHT) / 2; y++)
+	{
+		src += VIEWWINDOWWIDTH;
+		memset(dst, 0xff, VIEWWINDOWWIDTH * 2);
+		dst += PLANEWIDTH;
+
+		for (x = 0; x < VIEWWINDOWWIDTH; x++)
+		{
+			*dst++ = *src;
+			*dst++ = *src++;
+		}
+		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+	}
+}
+
+
 #else
 static const uint16_t redColorsLeft[8] =
 {
@@ -109,6 +175,16 @@ static const uint16_t yellowColorsRight[4] =
 
 static void I_UploadNewPalette(int8_t pal)
 {
+#if SCREENMODE == SCREENMODE_HI
+	if (1 <= pal && pal <= 8)
+		drawBuffer = drawBufferRed;
+	else if (9 <= pal && pal <= 12)
+		drawBuffer = drawBufferYellow;
+	else if (pal == 13)
+		drawBuffer = drawBufferGreen;
+	else
+		drawBuffer = drawBufferWhite;
+#else
 	uint16_t *leftPtr  = (uint16_t *)(videomemory - 2);
 	uint16_t *rightPtr = (uint16_t *)(videomemory + VIEWWINDOWWIDTH * 2);
 	uint16_t leftColor  = 0;
@@ -139,6 +215,7 @@ static void I_UploadNewPalette(int8_t pal)
 		leftPtr  += PLANEWIDTH / sizeof(uint16_t);
 		rightPtr += PLANEWIDTH / sizeof(uint16_t);
 	}
+#endif
 }
 
 
@@ -177,17 +254,32 @@ static void I_DrawBuffer(uint8_t *buffer)
 
 	int16_t x, y;
 
+#if SCREENMODE == SCREENMODE_HI
+	drawBuffer(buffer);
+
+	if (drawStatusBar)
+	{
+		src += (SCREENHEIGHT - ST_HEIGHT) * VIEWWINDOWWIDTH;
+		dst += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
+
+		for (y = 0; y < ST_HEIGHT; y++)
+		{
+			for (x = 0; x < VIEWWINDOWWIDTH; x++)
+			{
+				*dst++ = *src;
+				*dst++ = *src++;
+			}
+			dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+		}
+	}
+	drawStatusBar = true;
+#else
 	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
 	{
 		for (x = 0; x < VIEWWINDOWWIDTH; x++)
 		{
-#if SCREENMODE == SCREENMODE_HI
-			*dst++ = *src;
-			*dst++ = *src++;
-#else
 			dst++;
 			*dst++ = *src++;
-#endif
 		}
 		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
 	}
@@ -198,18 +290,14 @@ static void I_DrawBuffer(uint8_t *buffer)
 		{
 			for (x = 0; x < VIEWWINDOWWIDTH; x++)
 			{
-#if SCREENMODE == SCREENMODE_HI
-				*dst++ = *src;
-				*dst++ = *src++;
-#else
 				dst++;
 				*dst++ = *src++;
-#endif
 			}
 			dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
 		}
 	}
 	drawStatusBar = true;
+#endif
 }
 
 
