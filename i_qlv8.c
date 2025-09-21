@@ -46,7 +46,7 @@
 extern const int16_t CENTERY;
 
 
-static uint8_t _s_screen[VIEWWINDOWWIDTH * SCREENHEIGHT];
+static uint8_t _s_screen[VIEWWINDOWWIDTH * SCREENHEIGHT * 2];
 static uint8_t *videomemory;
 
 
@@ -63,91 +63,6 @@ void I_ReloadPalette(void)
 }
 
 
-#if SCREENMODE == SCREENMODE_HI
-static void (*drawBuffer)(uint8_t*);
-
-
-static void drawBufferRed(uint8_t *buffer)
-{
-	uint8_t *src = buffer;
-	uint8_t *dst = videomemory;
-
-	int16_t x, y;
-
-	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-	{
-		for (x = 0; x < VIEWWINDOWWIDTH; x++)
-		{
-			*dst++ = 0;
-			*dst++ = *src++;
-		}
-		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
-	}
-}
-
-
-static void drawBufferGreen(uint8_t *buffer)
-{
-	uint8_t *src = buffer;
-	uint8_t *dst = videomemory;
-
-	int16_t x, y;
-
-	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-	{
-		for (x = 0; x < VIEWWINDOWWIDTH; x++)
-		{
-			*dst++ = *src++;
-			*dst++ = 0;
-		}
-		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
-	}
-}
-
-
-static void drawBufferWhite(uint8_t *buffer)
-{
-	uint8_t *src = buffer;
-	uint8_t *dst = videomemory;
-
-	int16_t x, y;
-
-	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-	{
-		for (x = 0; x < VIEWWINDOWWIDTH; x++)
-		{
-			*dst++ = *src;
-			*dst++ = *src++;
-		}
-		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
-	}
-}
-
-
-static void drawBufferYellow(uint8_t *buffer)
-{
-	uint8_t *src = buffer;
-	uint8_t *dst = videomemory;
-
-	int16_t x, y;
-
-	for (y = 0; y < (SCREENHEIGHT - ST_HEIGHT) / 2; y++)
-	{
-		src += VIEWWINDOWWIDTH;
-		memset(dst, 0xff, VIEWWINDOWWIDTH * 2);
-		dst += PLANEWIDTH;
-
-		for (x = 0; x < VIEWWINDOWWIDTH; x++)
-		{
-			*dst++ = *src;
-			*dst++ = *src++;
-		}
-		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
-	}
-}
-
-
-#else
 static const uint16_t redColorsLeft[8] =
 {
 	0x0002, 0x0002, 0x000a, 0x000a, 0x002a, 0x002a, 0x00aa, 0x00aa
@@ -169,21 +84,10 @@ static const uint16_t yellowColorsRight[4] =
 };
 #define GREEN_LEFT	0x2200
 #define GREEN_RIGHT	0x8800
-#endif
 
 
 static void I_UploadNewPalette(int8_t pal)
 {
-#if SCREENMODE == SCREENMODE_HI
-	if (1 <= pal && pal <= 8)
-		drawBuffer = drawBufferRed;
-	else if (9 <= pal && pal <= 12)
-		drawBuffer = drawBufferYellow;
-	else if (pal == 13)
-		drawBuffer = drawBufferGreen;
-	else
-		drawBuffer = drawBufferWhite;
-#else
 	uint16_t *leftPtr  = (uint16_t *)(videomemory - 2);
 	uint16_t *rightPtr = (uint16_t *)(videomemory + VIEWWINDOWWIDTH * 2);
 	uint16_t leftColor  = 0;
@@ -214,7 +118,6 @@ static void I_UploadNewPalette(int8_t pal)
 		leftPtr  += PLANEWIDTH / sizeof(uint16_t);
 		rightPtr += PLANEWIDTH / sizeof(uint16_t);
 	}
-#endif
 }
 
 
@@ -241,7 +144,7 @@ void I_ShutdownGraphics(void)
 	*rezPtr = SCREENMODE_HI;
 
 	I_SetPalette(0);
-	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT * 2);
 	drawStatusBar = true;
 	I_FinishUpdate();
 }
@@ -254,50 +157,23 @@ static void I_DrawBuffer(uint8_t *buffer)
 
 	int16_t x, y;
 
-#if SCREENMODE == SCREENMODE_HI
-	drawBuffer(buffer);
-
-	if (drawStatusBar)
-	{
-		src += (SCREENHEIGHT - ST_HEIGHT) * VIEWWINDOWWIDTH;
-		dst += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
-
-		for (y = 0; y < ST_HEIGHT; y++)
-		{
-			for (x = 0; x < VIEWWINDOWWIDTH; x++)
-			{
-				*dst++ = *src;
-				*dst++ = *src++;
-			}
-			dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
-		}
-	}
-	drawStatusBar = true;
-#else
 	for (y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
 	{
-		for (x = 0; x < VIEWWINDOWWIDTH; x++)
-		{
-			dst++;
-			*dst++ = *src++;
-		}
-		dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+		memcpy(dst, src, VIEWWINDOWWIDTH * 2);
+		src += VIEWWINDOWWIDTH * 2;
+		dst += PLANEWIDTH;
 	}
 
 	if (drawStatusBar)
 	{
 		for (y = 0; y < ST_HEIGHT; y++)
 		{
-			for (x = 0; x < VIEWWINDOWWIDTH; x++)
-			{
-				dst++;
-				*dst++ = *src++;
-			}
-			dst += PLANEWIDTH - (VIEWWINDOWWIDTH * 2);
+			memcpy(dst, src, VIEWWINDOWWIDTH * 2);
+			src += VIEWWINDOWWIDTH * 2;
+			dst += PLANEWIDTH;
 		}
 	}
 	drawStatusBar = true;
-#endif
 }
 
 
@@ -358,47 +234,47 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	//  e.g. a DDA-lile scaling.
 	// This is as fast as it gets.
 
-	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
+	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH * 2) + dcvars->x * 2 + 1];
 	l = count >> 4;
 	while (l--)
 	{
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 14: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 13: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 12: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 11: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 10: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  9: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  8: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  7: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  6: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  5: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  4: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  3: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  2: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 15: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case 14: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case 13: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case 12: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case 11: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case 10: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  9: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  8: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  7: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  6: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  5: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  4: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  3: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
+		case  2: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH * 2; frac += fracstep;
 		case  1: *dest = colormap[source[frac >> COLBITS]];
 	}
 }
@@ -428,7 +304,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
+	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH * 2) + dcvars->x * 2 + 1];
 
 	if (dcvars->yl & 1)
 	{
@@ -443,8 +319,8 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 
 	for (i = 0; i < count / 2; i++)
 	{
-		*dest = color0; dest += VIEWWINDOWWIDTH;
-		*dest = color1; dest += VIEWWINDOWWIDTH;
+		*dest = color0; dest += VIEWWINDOWWIDTH * 2;
+		*dest = color1; dest += VIEWWINDOWWIDTH * 2;
 	}
 
 	if (count & 1)
@@ -482,12 +358,12 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH) + dcvars->x];
+	dest = &_s_screen[(dcvars->yl * VIEWWINDOWWIDTH * 2) + dcvars->x * 2 + 1];
 
 	do
 	{
 		*dest = fuzzcolors[fuzzpos];
-		dest += VIEWWINDOWWIDTH;
+		dest += VIEWWINDOWWIDTH * 2;
 
 		fuzzpos++;
 		if (fuzzpos >= FUZZTABLE)
@@ -498,7 +374,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
-	memset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT) * 2);
 }
 
 
@@ -516,52 +392,14 @@ void V_ShutdownDrawLine(void)
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
-#if SCREENMODE == SCREENMODE_HI
-	int16_t dx = abs(x1 - x0);
-	int16_t sx = x0 < x1 ? 1 : -1;
-
-	int16_t dy = -abs(y1 - y0);
-	int16_t sy = y0 < y1 ? 1 : -1;
-
-	int16_t err = dx + dy;
-
-	uint8_t bitmask = 0x80 >> (x0 & 7);
-
-	UNUSED(color);
-
-	while (true)
-	{
-		int16_t e2;
-		uint8_t c = _s_screen[y0 * VIEWWINDOWWIDTH + (x0 >> 3)];
-		_s_screen[y0 * VIEWWINDOWWIDTH + (x0 >> 3)] = (c & ~bitmask) | bitmask;
-
-		if (x0 == x1 && y0 == y1)
-			break;
-
-		e2 = 2 * err;
-
-		if (e2 >= dy)
-		{
-			err += dy;
-			x0  += sx;
-
-			bitmask = 0x80 >> (x0 & 7);
-		}
-
-		if (e2 <= dx)
-		{
-			err += dx;
-			y0  += sy;
-		}
-	}
-#else
-// TODO SCREENMODE_LO not implemented yet
-#endif
+	// TODO SCREENMODE_LO not implemented yet
 }
 
 
 void V_DrawBackground(int16_t backgroundnum)
 {
+	// TODO
+/*
 	int16_t x, y;
 	const byte *src = W_GetLumpByNum(backgroundnum);
 
@@ -582,6 +420,7 @@ void V_DrawBackground(int16_t backgroundnum)
 	}
 
 	Z_ChangeTagToCache(src);
+*/
 }
 
 
@@ -589,7 +428,7 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 {
 	const uint8_t *lump = W_TryGetLumpByNum(num);
 
-	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH;
+	offset = (offset / SCREENWIDTH) * VIEWWINDOWWIDTH * 2;
 
 	if (lump != NULL)
 	{
@@ -623,7 +462,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	desttop = &_s_screen[(y * VIEWWINDOWWIDTH) + (x >> 2)];
+	desttop = &_s_screen[(y * VIEWWINDOWWIDTH * 2) + (x >> 2) * 2 + 1];
 
 	width = patch->width;
 
@@ -638,7 +477,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		while (column->topdelta != 0xff)
 		{
 			const byte *source = (const byte*)column + 3;
-			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH);
+			byte *dest = desttop + (column->topdelta * VIEWWINDOWWIDTH * 2);
 
 			uint16_t count = column->length;
 
@@ -647,42 +486,42 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			if (count == 7)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
 				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
 			}
 			else if (count == 3)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
 				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
 			}
 			else if (count == 5)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
 				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
 			}
 			else if (count == 6)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
 				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
 			}
 			else
 			{
 				while (count--)
 				{
-					c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH;
+					c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
 				}
 			}
 
@@ -693,7 +532,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		if (p == 4)
 		{
 			p = 0;
-			desttop++;
+			desttop += 2;
 		}
 		bitmask = bitmasks4[p];
 	}
@@ -748,7 +587,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH) + (dc_x >> 2)];
+			dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH * 2) + (dc_x >> 2) * 2 + 1];
 
 			source = (const byte*)column + 3;
 
@@ -758,7 +597,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 				uint8_t c = *dest;
 				uint8_t color = source[frac >> 8];
 				*dest = (c & bitmask) | (color >> (p * 2));
-				dest += VIEWWINDOWWIDTH;
+				dest += VIEWWINDOWWIDTH * 2;
 				frac += DYI;
 			}
 
@@ -774,9 +613,9 @@ static int16_t *wipe_y_lookup;
 
 void wipe_StartScreen(void)
 {
-	frontbuffer = Z_TryMallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT);
+	frontbuffer = Z_TryMallocStatic(VIEWWINDOWWIDTH * SCREENHEIGHT * 2);
 	if (frontbuffer)
-		memcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT);
+		memcpy(frontbuffer, _s_screen, VIEWWINDOWWIDTH * SCREENHEIGHT * 2);
 }
 
 
@@ -811,28 +650,30 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH);
-				d = &frontbuffer[i] + ((SCREENHEIGHT      - 1) * VIEWWINDOWWIDTH);
+				s = &frontbuffer[i * 2] + ((SCREENHEIGHT - dy - 1) * VIEWWINDOWWIDTH * 2);
+				d = &frontbuffer[i * 2] + ((SCREENHEIGHT      - 1) * VIEWWINDOWWIDTH * 2);
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy
 
 				for (j = SCREENHEIGHT - wipe_y_lookup[i] - dy; j; j--)
 				{
-					*d = *s;
-					d += -VIEWWINDOWWIDTH;
-					s += -VIEWWINDOWWIDTH;
+					d[0] = s[0];
+					d[1] = s[1];
+					d += -VIEWWINDOWWIDTH * 2;
+					s += -VIEWWINDOWWIDTH * 2;
 				}
 
 				// copy new screen. We need to copy only between y_lookup and + dy y_lookup
-				s = &backbuffer[i]  + wipe_y_lookup[i] * VIEWWINDOWWIDTH;
-				d = &frontbuffer[i] + wipe_y_lookup[i] * VIEWWINDOWWIDTH;
+				s = &backbuffer[ i * 2] + wipe_y_lookup[i] * VIEWWINDOWWIDTH * 2;
+				d = &frontbuffer[i * 2] + wipe_y_lookup[i] * VIEWWINDOWWIDTH * 2;
 
 				for (j = 0 ; j < dy; j++)
 				{
-					*d = *s;
-					d += VIEWWINDOWWIDTH;
-					s += VIEWWINDOWWIDTH;
+					d[0] = s[0];
+					d[1] = s[1];
+					d += VIEWWINDOWWIDTH * 2;
+					s += VIEWWINDOWWIDTH * 2;
 				}
 
 				wipe_y_lookup[i] += dy;
