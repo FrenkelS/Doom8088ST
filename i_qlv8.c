@@ -19,7 +19,7 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Sinclair QL 512x256 4 color
+ *      Video code for Sinclair QL 256x256 8 color
  *
  *-----------------------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@
 #define SCREENMODE_LO	(1<<3)	/* 256x256 8 color */
 
 #if !defined SCREENMODE
-#define SCREENMODE SCREENMODE_HI
+#define SCREENMODE SCREENMODE_LO
 #endif
 
 
