@@ -233,6 +233,9 @@ void I_InitGraphicsHardwareSpecificCode(void)
 }
 
 
+static boolean drawStatusBar = true;
+
+
 void I_ShutdownGraphics(void)
 {
 	uint8_t *rezPtr = (uint8_t*)0x18063;
@@ -240,11 +243,9 @@ void I_ShutdownGraphics(void)
 
 	I_SetPalette(0);
 	memset(_s_screen, 0, VIEWWINDOWWIDTH * SCREENHEIGHT);
+	drawStatusBar = true;
 	I_FinishUpdate();
 }
-
-
-static boolean drawStatusBar = true;
 
 
 static void I_DrawBuffer(uint8_t *buffer)
