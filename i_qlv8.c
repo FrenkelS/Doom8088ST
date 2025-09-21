@@ -403,7 +403,7 @@ static void setPixel(uint8_t *a, int16_t x, uint16_t andmask, uint8_t color)
 		0x80c0  // white
 	};
 
-	uint16_t ormask = cols[color] >> ((x & 3) * 2);
+	uint16_t ormask = cols[color] >> x;
 	uint16_t *ptr = (uint16_t*)a;
 	uint16_t c = *ptr;
 	*ptr = (c & andmask) | ormask;
@@ -422,13 +422,14 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	int16_t err = dx + dy;
 
-	uint16_t andmask = ~(0x80c0 >> ((x0 & 3) * 2));
+	int16_t x = (x0 & 3) * 2;
+	uint16_t andmask = ~(0x80c0 >> x);
 
 	while (true)
 	{
 		int16_t e2;
 		uint8_t *ptr = &_s_screen[y0 * VIEWWINDOWWIDTH * 2 + (x0 >> 2) * 2];
-		setPixel(ptr, x0, andmask, color);
+		setPixel(ptr, x, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -440,7 +441,8 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 			err += dy;
 			x0  += sx;
 
-			andmask = ~(0x80c0 >> ((x0 & 3) * 2));
+			x = (x0 & 3) * 2;
+			andmask = ~(0x80c0 >> x);
 		}
 
 		if (e2 <= dx)
