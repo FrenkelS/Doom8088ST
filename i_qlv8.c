@@ -390,7 +390,7 @@ void V_ShutdownDrawLine(void)
 }
 
 
-void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
+static void setPixel(uint8_t *a, int16_t x, uint16_t andmask, uint8_t color)
 {
 	static const uint16_t cols[8] = {
 		0x0000, // black
@@ -403,6 +403,17 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 		0x80c0  // white
 	};
 
+	uint16_t ormask = cols[color] >> ((x & 3) * 2);
+	uint16_t *ptr = (uint16_t*)a;
+	uint16_t c = *ptr;
+	*ptr = (c & andmask) | ormask;
+}
+
+
+void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
+{
+
+
 	int16_t dx = abs(x1 - x0);
 	int16_t sx = x0 < x1 ? 1 : -1;
 
@@ -411,15 +422,13 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	int16_t err = dx + dy;
 
-	uint16_t andmask = ~(0x80c0    >> ((x0 & 3) * 2));
-	uint16_t  ormask = cols[color] >> ((x0 & 3) * 2);
+	uint16_t andmask = ~(0x80c0 >> ((x0 & 3) * 2));
 
 	while (true)
 	{
 		int16_t e2;
-		uint16_t *ptr = (uint16_t*)&_s_screen[y0 * VIEWWINDOWWIDTH * 2 + (x0 >> 2) * 2];
-		uint16_t c = *ptr;
-		*ptr = (c & andmask) | ormask;
+		uint8_t *ptr = &_s_screen[y0 * VIEWWINDOWWIDTH * 2 + (x0 >> 2) * 2];
+		setPixel(ptr, x0, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -431,8 +440,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 			err += dy;
 			x0  += sx;
 
-			andmask = ~(0x80c0    >> ((x0 & 3) * 2));
-			 ormask = cols[color] >> ((x0 & 3) * 2);
+			andmask = ~(0x80c0 >> ((x0 & 3) * 2));
 		}
 
 		if (e2 <= dx)
