@@ -215,7 +215,7 @@ void I_StartTic(void)
 // Audio
 //
 
-typedef struct {
+typedef PACKEDATTR_PRE struct {
 	uint16_t	dur;
 	uint8_t		pitch;
 	uint8_t		pitch2;
@@ -224,13 +224,15 @@ typedef struct {
 	uint8_t		g_y;
 	uint8_t		fuzz;
 	uint8_t		rndm;
-} sound_t;
+} PACKEDATTR_POST sound_t;
+
+typedef char assertSoundSize[sizeof(sound_t) == 10 ? 1 : -1];
 
 
 void PCFX_Play(int16_t lumpnum)
 {
 	const sound_t *s = W_GetLumpByNum(lumpnum);
-	do_sound(s->dur * 128, s->pitch, s->pitch2, s->wrap, s->g_x, s->g_y, s->fuzz, s->rndm);
+	do_sound(s->dur, s->pitch, s->pitch2, s->wrap, s->g_x, s->g_y, s->fuzz, s->rndm);
 	Z_ChangeTagToCache(s);
 }
 
