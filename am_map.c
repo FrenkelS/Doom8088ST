@@ -97,6 +97,25 @@ static const uint8_t mapcolor_tele = CYAN;
 static const uint8_t mapcolor_secr = MAGENTA;
 static const uint8_t mapcolor_unsn = WHITE;
 static const uint8_t mapcolor_sngl = WHITE;
+#elif NR_OF_COLORS == 8
+#define BLUE			1
+#define RED				2
+#define MAGENTA			3
+#define GREEN			4
+#define CYAN			5
+#define YELLOW			6
+#define WHITE			7
+static const uint8_t mapcolor_wall = MAGENTA;
+static const uint8_t mapcolor_fchg = CYAN;
+static const uint8_t mapcolor_cchg = CYAN;
+static const uint8_t mapcolor_clsd = WHITE;
+static const uint8_t mapcolor_rdor = RED;
+static const uint8_t mapcolor_bdor = BLUE;
+static const uint8_t mapcolor_ydor = YELLOW;
+static const uint8_t mapcolor_tele = GREEN;
+static const uint8_t mapcolor_secr = MAGENTA;
+static const uint8_t mapcolor_unsn = WHITE;
+static const uint8_t mapcolor_sngl = WHITE;
 #elif NR_OF_COLORS == 16
 #define BLUE			0x01
 #define GREEN			0x02

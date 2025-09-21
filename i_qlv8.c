@@ -392,35 +392,80 @@ void V_ShutdownDrawLine(void)
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
-	// TODO SCREENMODE_LO not implemented yet
+	static const uint16_t cols[8] = {
+		0x0000, // black
+		0x0040, // blue
+		0x0080, // red
+		0x00c0, // magenta
+		0x8000, // green
+		0x8040, // cyan
+		0x8080, // yellow
+		0x80c0  // white
+	};
+
+	int16_t dx = abs(x1 - x0);
+	int16_t sx = x0 < x1 ? 1 : -1;
+
+	int16_t dy = -abs(y1 - y0);
+	int16_t sy = y0 < y1 ? 1 : -1;
+
+	int16_t err = dx + dy;
+
+	uint16_t andmask = ~(0x80c0    >> ((x0 & 3) * 2));
+	uint16_t  ormask = cols[color] >> ((x0 & 3) * 2);
+
+	while (true)
+	{
+		int16_t e2;
+		uint16_t *ptr = (uint16_t*)&_s_screen[y0 * VIEWWINDOWWIDTH * 2 + (x0 >> 2) * 2];
+		uint16_t c = *ptr;
+		*ptr = (c & andmask) | ormask;
+
+		if (x0 == x1 && y0 == y1)
+			break;
+
+		e2 = 2 * err;
+
+		if (e2 >= dy)
+		{
+			err += dy;
+			x0  += sx;
+
+			andmask = ~(0x80c0    >> ((x0 & 3) * 2));
+			 ormask = cols[color] >> ((x0 & 3) * 2);
+		}
+
+		if (e2 <= dx)
+		{
+			err += dx;
+			y0  += sy;
+		}
+	}
 }
 
 
 void V_DrawBackground(int16_t backgroundnum)
 {
-	// TODO
-/*
 	int16_t x, y;
 	const byte *src = W_GetLumpByNum(backgroundnum);
 
 	for (y = 0; y < SCREENHEIGHT; y++)
 	{
-		for (x = 0; x < VIEWWINDOWWIDTH; x += 16)
+		for (x = 0; x < VIEWWINDOWWIDTH * 2; x += 32)
 		{
-			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH + x];
-			const byte *s = &src[((y & 63) * 16)];
+			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH * 2 + x];
+			const byte *s = &src[((y & 63) * 32)];
 
-			size_t len = 16;
+			size_t len = 32;
 
-			if (VIEWWINDOWWIDTH - x < 16)
-				len = VIEWWINDOWWIDTH - x;
+			if (VIEWWINDOWWIDTH * 2 - x < 32)
+				len = VIEWWINDOWWIDTH * 2 - x;
 
 			memcpy(d, s, len);
 		}
 	}
 
 	Z_ChangeTagToCache(src);
-*/
 }
 
 
