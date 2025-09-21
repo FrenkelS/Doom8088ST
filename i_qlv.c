@@ -19,8 +19,8 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Sinclair QL 512x256 4 color (2 colors used)
- *                                 256x256 8 color (4 colors used)
+ *      Video code for Sinclair QL 512x256 4 color
+ *                                 256x256 8 color
  *
  *-----------------------------------------------------------------------------*/
 
