@@ -77,16 +77,19 @@ static void I_UploadNewPalette(int8_t pal)
 
 	if (1 <= pal && pal <= 8)
 	{
+		// damage
 		leftColor  = leftcolors[ pal - 1];
 		rightColor = rightcolors[pal - 1];
 	}
 	else if (9 <= pal && pal <= 12)
 	{
+		// item pick up
 		leftColor  = yellowcolors[pal - 9];
 		rightColor = yellowcolors[pal - 9];
 	}
 	else if (pal == 13)
 	{
+		// radiation shielding suit
 		leftColor  = 0xaa;
 		rightColor = 0x55;
 	}
