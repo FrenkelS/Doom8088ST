@@ -412,8 +412,6 @@ static void setPixel(uint8_t *a, int16_t x, uint16_t andmask, uint8_t color)
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
-
-
 	int16_t dx = abs(x1 - x0);
 	int16_t sx = x0 < x1 ? 1 : -1;
 
@@ -505,28 +503,24 @@ void ST_Drawer(void)
 }
 
 
-static const uint8_t bitmasks4[4] = {0x3f, 0xcf, 0xf3, 0xfc};
-
-
 void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 {
 	byte *desttop;
-	int16_t width, p, col;
-	uint8_t bitmask;
+	int16_t width, col;
 
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	desttop = &_s_screen[(y * VIEWWINDOWWIDTH * 2) + (x >> 2) * 2 + 1];
+	desttop = &_s_screen[(y * VIEWWINDOWWIDTH * 2) + (x >> 2) * 2];
+	x = (x & 3) * 2;
 
 	width = patch->width;
-
-	p = x & 3;
-	bitmask = bitmasks4[p];
 
 	for (col = 0; col < width; col++)
 	{
 		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col]);
+
+		uint16_t andmask = ~(0x80c0 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -536,60 +530,56 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			uint16_t count = column->length;
 
-			uint8_t c;
-			uint8_t color;
-
 			if (count == 7)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 3)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 5)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else if (count == 6)
 			{
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
-				c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2));
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
+				setPixel(dest, x, andmask, *source++);
 			}
 			else
 			{
 				while (count--)
 				{
-					c = *dest; color = *source++; *dest = (c & bitmask) | (color >> (p * 2)); dest += VIEWWINDOWWIDTH * 2;
+					setPixel(dest, x, andmask, *source++); dest += VIEWWINDOWWIDTH * 2;
 				}
 			}
 
 			column = (const column_t*)((const byte*)column + column->length + 4);
 		}
 
-		p++;
-		if (p == 4)
+		x += 2;
+		if (x == 8)
 		{
-			p = 0;
+			x = 0;
 			desttop += 2;
 		}
-		bitmask = bitmasks4[p];
 	}
 }
 
@@ -614,8 +604,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	for (dc_x = left; dc_x < right; dc_x++, col += DXI)
 	{
 		const column_t *column;
-		int16_t p;
-		uint8_t bitmask;
+		uint16_t andmask;
 
 		if (dc_x < 0)
 			continue;
@@ -624,8 +613,8 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 		column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col >> 8]);
 
-		p = dc_x & 3;
-		bitmask = bitmasks4[p];
+		x = (dc_x & 3) * 2;
+		andmask = ~(0x80c0 >> x);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
@@ -642,16 +631,14 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH * 2) + (dc_x >> 2) * 2 + 1];
+			dest = &_s_screen[(dc_yl * VIEWWINDOWWIDTH * 2) + (dc_x >> 2) * 2];
 
 			source = (const byte*)column + 3;
 
 			count = dc_yh - dc_yl;
 			while (count--)
 			{
-				uint8_t c = *dest;
-				uint8_t color = source[frac >> 8];
-				*dest = (c & bitmask) | (color >> (p * 2));
+				setPixel(dest, x, andmask, source[frac >> 8]);
 				dest += VIEWWINDOWWIDTH * 2;
 				frac += DYI;
 			}
