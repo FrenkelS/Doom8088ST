@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -114,6 +114,7 @@ static void P_RemoveThinkerDelayed(thinker_t __far* thinker)
 
 static void P_RemoveThingDelayed(thinker_t __far* thinker)
 {
+    mobj_t __far* thing;
 
     thinker_t __far* next = thinker->next;
     /* Note that currentthinker is guaranteed to point to us,
@@ -122,9 +123,9 @@ static void P_RemoveThingDelayed(thinker_t __far* thinker)
          * thinker->prev->next = thinker->next */
     (next->prev = thinker->prev)->next = next;
 
-    mobj_t __far* thing = (mobj_t __far*)thinker;
+    thing = (mobj_t __far*)thinker;
 
-    if(thing->flags & MF_POOLED)
+    if (thing->flags & MF_POOLED)
         thing->type = MT_NOTHING;
     else
         Z_Free(thinker);

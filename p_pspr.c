@@ -236,8 +236,9 @@ static weapontype_t P_CheckCanSwitchWeapon(weapontype_t weapon, player_t* player
 weapontype_t P_WeaponCycleUp(player_t *player)
 {
     weapontype_t w = player->readyweapon;
+    int16_t i;
 
-    for(int16_t i = 0; i < NUMWEAPONS; i++)
+    for (i = 0; i < NUMWEAPONS; i++)
     {
         w++;
         if(w >= NUMWEAPONS)
@@ -287,8 +288,9 @@ weapontype_t P_WeaponCycleUp(player_t *player)
 weapontype_t P_WeaponCycleDown(player_t *player)
 {
     weapontype_t w = player->readyweapon;
+    int16_t i;
 
-    for (int16_t i = 0; i < NUMWEAPONS; i++)
+    for (i = 0; i < NUMWEAPONS; i++)
     {
         if (w == 0)
             w = NUMWEAPONS-1;
@@ -490,8 +492,7 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
 
   // bob the weapon based on movement speed
   {
-    int16_t angle = _g_leveltime;
-    angle = (angle * 128) & FINEMASK;
+    int16_t angle = (((int16_t)_g_leveltime) * 128) & FINEMASK;
 
     int16_t ahw = player->bob >> FRACBITS;
     fixed_t cos = finecosine(angle);

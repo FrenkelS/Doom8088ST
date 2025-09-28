@@ -1,5 +1,5 @@
 Doom8088: AT&T UNIX PC Edition
-Doom8088 for AT&T UNIC PC computers
+Doom for AT&T UNIC PC computers
 https://github.com/FrenkelS/Doom8088ST
 
 Doom was originally designed in 1993 for 32-bit DOS computers with 4 MB of RAM.

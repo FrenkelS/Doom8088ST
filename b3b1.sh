@@ -10,7 +10,7 @@ export CFLAGS="-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DB
 
 export GLOBOBJS=""
 export GLOBOBJS+=" r_draw.c"
-export GLOBOBJS+=" i_v3b1.c"
+export GLOBOBJS+=" i_3b1v.c"
 export GLOBOBJS+=" p_enemy2.c"
 export GLOBOBJS+=" p_map.c"
 export GLOBOBJS+=" p_maputl.c"

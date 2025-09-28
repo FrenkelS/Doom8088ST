@@ -472,9 +472,9 @@ static uint32_t mulu(uint16_t a, uint16_t b) {
 #else
 	uint32_t result = a;
 	__asm__ (
-		"mulu.w %[b], %[result]"
-		: [result] "+d" (result)
-		: [b] "d" (b)
+		"mulu.w %1, %0"
+		: "+d" (result)
+		: "d" (b)
 	);
 	return result;
 #endif
@@ -491,15 +491,17 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw, bhw;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
-	uint16_t bhw = b >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
+	bhw = b >> FRACBITS;
 
-	int32_t result;
 	if (bhw == 0) {
 		uint32_t hl = mulu(ahw, blw);
 
@@ -528,22 +530,26 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw, bhw;
+	uint32_t hh, hl, lh, ll;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
-	uint16_t bhw = b >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
+	bhw = b >> FRACBITS;
 
-	uint32_t hh = mulu(ahw, bhw) << FRACBITS;
-	uint32_t hl = mulu(ahw, blw);
-	uint32_t lh = mulu(alw, bhw);
+	hh = mulu(ahw, bhw) << FRACBITS;
+	hl = mulu(ahw, blw);
+	lh = mulu(alw, bhw);
 
 	// Make sure we round towards -inf
-	uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
+	ll = (mulu(alw, blw) + neg) >> FRACBITS;
 
-	int32_t result = hh + hl + lh + ll;
+	result = hh + hl + lh + ll;
 	if (neg) result = -result;
 	return result;
 }
@@ -563,19 +569,23 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
+	uint16_t alw, ahw, blw;
+	uint32_t hl, ll;
+	int32_t result;
+
 	// Only work with unsigned numbers.
 	a = D_abs(a);
 	b = D_abs(b);
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
-	uint16_t blw = b;
+	alw = a;
+	ahw = a >> FRACBITS;
+	blw = b;
 
-	uint32_t hl = mulu(ahw, blw);
+	hl = mulu(ahw, blw);
 
 	// Make sure we round towards -inf
-	uint32_t ll = (mulu(alw, blw) + neg) >> FRACBITS;
+	ll = (mulu(alw, blw) + neg) >> FRACBITS;
 
-	int32_t result = hl + ll;
+	result = hl + ll;
 
 	if (neg) result = -result;
 	return result;
@@ -590,14 +600,19 @@ inline
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
 	boolean neg = a < 0;
+
+	uint16_t alw, ahw;
+	uint32_t ll, hl;
+	fixed_t r;
+
 	a = D_abs(a);
 
-	uint16_t alw = a;
-	uint16_t ahw = a >> FRACBITS;
+	alw = a;
+	ahw = a >> FRACBITS;
 
-	uint32_t ll = (uint32_t) alw * blw;
-	uint32_t hl = (uint32_t) ahw * blw;
-	fixed_t r = (ll >> FRACBITS) + hl;
+	ll = (uint32_t) alw * blw;
+	hl = (uint32_t) ahw * blw;
+	r = (ll >> FRACBITS) + hl;
 	if (neg) r = -r;
 	return r;
 }
@@ -628,11 +643,12 @@ fixed_t CONSTFUNC FixedApproxDiv(fixed_t a, fixed_t b)
 static PUREFUNC int8_t R_PointOnSide(fixed_t x, fixed_t y, const mapnode_t __far* node)
 {
 	int16_t ix = x >> FRACBITS;
+	int16_t iy;
 
 	if (!node->dx)
 		return ix <= node->x ? node->dy > 0 : node->dy < 0;
 
-	int16_t iy = y >> FRACBITS;
+	iy = y >> FRACBITS;
 
 	if (!node->dy)
 		return iy <= node->y ? node->dx < 0 : node->dx > 0;
@@ -661,13 +677,15 @@ subsector_t __far* R_PointInSubsector(fixed_t x, fixed_t y)
 	static fixed_t prevy;
 	static subsector_t __far* prevr;
 
+	int16_t nodenum;
+
 	if (prevx == x && prevy == y)
 		return prevr;
 
 	prevx = x;
 	prevy = y;
 
-	int16_t nodenum = numnodes-1;
+	nodenum = numnodes-1;
 
 	// special case for trivial maps (single subsector, no nodes)
 	if (numnodes == 0)
@@ -688,23 +706,27 @@ subsector_t __far* R_PointInSubsector(fixed_t x, fixed_t y)
 
 static CONSTFUNC int16_t SlopeDiv(uint32_t num, uint32_t den)
 {
-    den = den >> 8;
+	uint16_t ans;
 
-    if (den == 0)
-        return SLOPERANGE;
+	den = den >> 8;
 
-    const uint16_t ans = (num << 3) / den;//FixedApproxDiv(num << 3, den) >> FRACBITS;
+	if (den == 0)
+		return SLOPERANGE;
 
-    return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
+	ans = (num << 3) / den;//FixedApproxDiv(num << 3, den) >> FRACBITS;
+
+	return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
 }
 
 
 static CONSTFUNC int16_t SlopeDiv16(uint16_t n, uint16_t d)
 {
+	uint16_t ans;
+
 	if (d == 0)
 		return SLOPERANGE;
 
-	const uint16_t ans = ((uint32_t)n * SLOPERANGE) / d;
+	ans = ((uint32_t)n * SLOPERANGE) / d;
 
 	return (ans <= SLOPERANGE) ? ans : SLOPERANGE;
 }
@@ -890,11 +912,13 @@ static angle16_t R_PointToAngle16(int16_t x, int16_t y)
 
 static CONSTFUNC int16_t R_PointToDist(int16_t x, int16_t y)
 {
+    fixed_t dx, dy;
+
     if (viewx == (fixed_t)x << FRACBITS && viewy == (fixed_t)y << FRACBITS)
         return 0;
 
-    fixed_t dx = D_abs(((fixed_t)x << FRACBITS) - viewx);
-    fixed_t dy = D_abs(((fixed_t)y << FRACBITS) - viewy);
+    dx = D_abs(((fixed_t)x << FRACBITS) - viewx);
+    dy = D_abs(((fixed_t)y << FRACBITS) - viewy);
 
     if (dy > dx)
     {
@@ -924,6 +948,8 @@ const uint8_t* R_LoadColorMap(int16_t lightlevel)
         return fixedcolormap;
     else
     {
+        int16_t cm;
+
         if (curline)
         {
             if (curline->v1.y == curline->v2.y)
@@ -934,11 +960,11 @@ const uint8_t* R_LoadColorMap(int16_t lightlevel)
 
         lightlevel += (extralight +_g_gamma) << LIGHTSEGSHIFT;
 
-        int16_t cm = ((256-lightlevel)>>2) - 24;
+        cm = ((256-lightlevel)>>2) - 24;
 
-        if(cm >= NUMCOLORMAPS)
+        if (cm >= NUMCOLORMAPS)
             cm = NUMCOLORMAPS-1;
-        else if(cm < 0)
+        else if (cm < 0)
             cm = 0;
 
         return fullcolormap + cm*256;
@@ -1043,6 +1069,7 @@ void R_DrawFuzzColumn (const draw_column_vars_t *dcvars);
 static void R_DrawVisSprite(const vissprite_t *vis)
 {
     fixed_t  frac;
+    const patch_t __far* patch;
 
     R_DrawColumn_f colfunc = R_DrawColumnSprite;
     draw_column_vars_t dcvars;
@@ -1063,7 +1090,7 @@ static void R_DrawVisSprite(const vissprite_t *vis)
     sprtopscreen = CENTERY * FRACUNIT - FixedMul(dcvars.texturemid, spryscale);
 
 
-    const patch_t __far* patch = W_GetLumpByNum(vis->lump_num);
+    patch = W_GetLumpByNum(vis->lump_num);
 
     dcvars.x = vis->x1;
 
@@ -1074,7 +1101,7 @@ static void R_DrawVisSprite(const vissprite_t *vis)
 
         frac += vis->xiscale;
 
-        if(((frac >> FRACBITS) >= patch->width) || frac < 0)
+        if (((frac >> FRACBITS) >= patch->width) || frac < 0)
             break;
 
         dcvars.x++;
@@ -1123,6 +1150,9 @@ static void R_GetColumn(const texture_t __far* texture, int16_t texcolumn, int16
 static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 {
 	draw_column_vars_t dcvars;
+	int16_t texnum;
+	const texture_t __far* texture;
+	const patch_t __far* patch;
 
 	// Calculate light table.
 	// Use different light tables
@@ -1133,7 +1163,7 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 	frontsector = &_g_sectors[curline->frontsectornum];
 	backsector  = &_g_sectors[curline->backsectornum];
 
-	int16_t texnum = texturetranslation[_g_sides[curline->sidenum].midtexture];
+	texnum = texturetranslation[_g_sides[curline->sidenum].midtexture];
 
 	// killough 4/13/98: get correct lightlevel for 2s normal textures
 	rw_lightlevel = frontsector->lightlevel;
@@ -1160,13 +1190,11 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 
 	dcvars.colormap = R_LoadColorMap(rw_lightlevel);
 
-	const texture_t __far* texture = R_GetTexture(texnum);
-
-	const uint16_t widthmask = texture->widthmask;
+	texture = R_GetTexture(texnum);
 
 	// draw the columns
 	// simple texture == 1 patch
-	const patch_t __far* patch = W_GetLumpByNum(texture->patches[0].patch_num);
+	patch = W_GetLumpByNum(texture->patches[0].patch_num);
 
 	for (dcvars.x = x1 ; dcvars.x <= x2 ; dcvars.x++, spryscale += rw_scalestep)
 	{
@@ -1174,14 +1202,16 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 
 		if (xc != SHRT_MAX) // dropoff overflow
 		{
-			xc &= widthmask;
+			const column_t __far* column;
+
+			xc &= texture->widthmask;
 
 			sprtopscreen = CENTERY * FRACUNIT - FixedMul(dcvars.texturemid, spryscale);
 
 			dcvars.fracstep = FixedReciprocal((uint32_t)spryscale) >> COLEXTRABITS;
 
 			// draw the texture
-			const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[xc]);
+			column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[xc]);
 
 			R_DrawMaskedColumn(R_DrawColumnWall, &dcvars, column);
 			maskedtexturecol[dcvars.x] = SHRT_MAX; // dropoff overflow
@@ -1224,13 +1254,17 @@ static PUREFUNC boolean R_PointOnSegSide(fixed_t x, fixed_t y, const seg_t __far
 
 static void R_DrawSprite (const vissprite_t* spr)
 {
+    int16_t x;
     int16_t* clipbot = floorclip;
     int16_t* cliptop = ceilingclip;
+    const drawseg_t* ds;
 
     fixed_t scale;
     fixed_t lowscale;
 
-    for (int16_t x = spr->x1; x <= spr->x2; x++)
+    const drawseg_t* drawsegs;
+
+    for (x = spr->x1; x <= spr->x2; x++)
     {
         clipbot[x] = VIEWWINDOWHEIGHT;
         cliptop[x] = -1;
@@ -1244,16 +1278,19 @@ static void R_DrawSprite (const vissprite_t* spr)
     // (pointer check was originally nonportable
     // and buggy, by going past LEFT end of array):
 
-    const drawseg_t* drawsegs  =_s_drawsegs;
+    drawsegs = _s_drawsegs;
 
-    for (const drawseg_t* ds = ds_p; ds-- > drawsegs; )  // new -- killough
+    for (ds = ds_p; ds-- > drawsegs; )  // new -- killough
     {
+        int16_t r1, r2;
+        fixed_t gzt;
+
         // determine if the drawseg obscures the sprite
         if (ds->x1 > spr->x2 || ds->x2 < spr->x1 || (!ds->silhouette && !ds->maskedtexturecol))
             continue;      // does not cover sprite
 
-        const int16_t r1 = ds->x1 < spr->x1 ? spr->x1 : ds->x1;
-        const int16_t r2 = ds->x2 > spr->x2 ? spr->x2 : ds->x2;
+        r1 = ds->x1 < spr->x1 ? spr->x1 : ds->x1;
+        r2 = ds->x2 > spr->x2 ? spr->x2 : ds->x2;
 
         if (ds->scale1 > ds->scale2)
         {
@@ -1279,18 +1316,18 @@ static void R_DrawSprite (const vissprite_t* spr)
 
         if (ds->silhouette & SIL_BOTTOM && spr->gz < ds->bsilheight) //bottom sil
         {
-            for (int16_t x = r1; x <= r2; x++)
+            for (x = r1; x <= r2; x++)
             {
                 if (clipbot[x] == VIEWWINDOWHEIGHT)
                     clipbot[x] = ds->sprbottomclip[x];
             }
         }
 
-        fixed_t gzt = spr->gz + (((int32_t)spr->patch_topoffset) << FRACBITS);
+        gzt = spr->gz + (((int32_t)spr->patch_topoffset) << FRACBITS);
 
         if (ds->silhouette & SIL_TOP && gzt > ds->tsilheight)   // top sil
         {
-            for (int16_t x = r1; x <= r2; x++)
+            for (x = r1; x <= r2; x++)
             {
                 if (cliptop[x] == -1)
                     cliptop[x] = ds->sprtopclip[x];
@@ -1330,15 +1367,17 @@ static void R_DrawPSprite (pspdef_t *psp, int16_t lightlevel)
     vissprite_t   *vis;
     vissprite_t   avis;
     fixed_t       topoffset;
+    const patch_t __far* patch;
+    int16_t tx;
 
     // decide which patch to use
     sprdef = &sprites[psp->state->sprite];
 
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
-    const patch_t __far* patch = W_GetLumpByNum(sprframe->lump[0]);
+    patch = W_GetLumpByNum(sprframe->lump[0]);
     // calculate edges of the shape
-    int16_t tx = psp->sx - BASEXCENTER;
+    tx = psp->sx - BASEXCENTER;
 
     tx -= patch->leftoffset;
     hl = (uint32_t) tx * PSPRITESCALE;
@@ -1419,7 +1458,8 @@ static void R_DrawPlayerSprites(void)
 // insertion sort
 static void isort(vissprite_t **s, int16_t n)
 {
-	for (int16_t i = 1; i < n; i++)
+	int16_t i;
+	for (i = 1; i < n; i++)
 	{
 		vissprite_t *temp = s[i];
 		if (s[i - 1]->scale < temp->scale)
@@ -1458,12 +1498,12 @@ static void R_DrawMasked(void)
 {
     drawseg_t *ds;
     drawseg_t* drawsegs = _s_drawsegs;
-
+    int16_t i;
 
     R_SortVisSprites();
 
     // draw all vissprites back to front
-    for (int16_t i = num_vissprite; --i >= 0; )
+    for (i = num_vissprite; --i >= 0; )
         R_DrawSprite(vissprite_ptrs[i]);
 
     // render any remaining masked mid textures
@@ -1552,6 +1592,14 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     fixed_t ys = FixedMulAngle(tr_y, viewsin);
     const fixed_t tz = xc - (-ys);
 
+    fixed_t yc, xs, tx, xscale, xl, x1, x2, xr, iscale;
+    const spritedef_t __far* sprdef;
+    const spriteframe_t __far* sprframe;
+    uint16_t rot = 0;
+    boolean flip;
+    const patch_t __far* patch;
+    vissprite_t* vis;
+
     // thing is behind view plane?
     if (tz < MINZ)
         return;
@@ -1560,29 +1608,28 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     if(tz > MAXZ)
         return;
 
-    fixed_t yc = FixedMulAngle(tr_y, viewcos);
-    fixed_t xs = FixedMulAngle(tr_x, viewsin);
-    fixed_t tx = -(yc + (-xs));
+    yc = FixedMulAngle(tr_y, viewcos);
+    xs = FixedMulAngle(tr_x, viewsin);
+    tx = -(yc + (-xs));
 
     // too far off the side?
     if (D_abs(tx)>(tz<<2))
         return;
 
     // decide which patch to use for sprite relative to player
-    const spritedef_t __far*   sprdef   = &sprites[thing->sprite];
-    const spriteframe_t __far* sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
-
-    uint16_t rot = 0;
+    sprdef   = &sprites[thing->sprite];
+    sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
     if (sprframe->rotate)
     {
         // choose a different rotation based on player view
         angle16_t ang = R_PointToAngle(fx, fy);
-        rot = (angle16_t)(ang - (angle16_t)(thing->angle >> FRACBITS) + (angle16_t)(ANG45_16 / 2) * 9) >> 13;
+        unsigned int qlHack = (angle16_t)(ang - (angle16_t)(thing->angle >> FRACBITS) + (angle16_t)(ANG45_16 / 2) * 9);
+        rot = qlHack >> 13;
     }
 
-    const boolean flip = (boolean)SPR_FLIPPED(sprframe, rot);
-    const patch_t __far* patch = W_GetLumpByNum(sprframe->lump[rot]);
+    flip = (boolean)SPR_FLIPPED(sprframe, rot);
+    patch = W_GetLumpByNum(sprframe->lump[rot]);
 
     /* calculate edges of the shape
      * cph 2003/08/1 - fraggle points out that this offset must be flipped
@@ -1593,10 +1640,10 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
         tx -= ((int32_t)patch->leftoffset) << FRACBITS;
 
     //const fixed_t xscale = FixedDiv(PROJECTION, tz);
-    const fixed_t xscale = PROJECTION / (tz >> FRACBITS);
+    xscale = PROJECTION / (tz >> FRACBITS);
 
-    fixed_t xl = CENTERX * FRACUNIT + FixedMul(tx,xscale);
-    const int16_t x1 = (xl >> FRACBITS);
+    xl = CENTERX * FRACUNIT + FixedMul(tx,xscale);
+    x1 = (xl >> FRACBITS);
 
     // off the side?
     if (x1 > VIEWWINDOWWIDTH)
@@ -1605,8 +1652,8 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
         return;
     }
 
-    fixed_t xr = CENTERX * FRACUNIT - FRACUNIT + FixedMul(tx + (((int32_t)patch->width) << FRACBITS), xscale);
-    const int16_t x2 = (xr >> FRACBITS);
+    xr = CENTERX * FRACUNIT - FRACUNIT + FixedMul(tx + (((int32_t)patch->width) << FRACBITS), xscale);
+    x2 = (xr >> FRACBITS);
 
     // off the side?
     if (xr < 0)
@@ -1624,7 +1671,7 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
 
 
     // store information in a vissprite
-    vissprite_t* vis = R_NewVisSprite ();
+    vis = R_NewVisSprite();
 
     //No more vissprites.
     if(!vis)
@@ -1646,7 +1693,7 @@ static void R_ProjectSprite (mobj_t __far* thing, int16_t lightlevel)
     vis->x2              = x2 >= VIEWWINDOWWIDTH ? VIEWWINDOWWIDTH - 1 : x2;
 
 
-    const fixed_t iscale = FixedReciprocal(xscale);
+    iscale = FixedReciprocal(xscale);
 
     if (flip)
     {
@@ -1754,7 +1801,9 @@ static uint16_t FindColumnCacheItem(int16_t texture, int16_t column)
 
 	uint16_t cx = CACHE_ENTRY(column, texture);
 
-	for (int16_t i = 0; i < MAX_CACHE_TRIES; i++)
+	int16_t i;
+
+	for (i = 0; i < MAX_CACHE_TRIES; i++)
 	{
 		if (columnCacheEntries[key] == 0 || columnCacheEntries[key] == cx)
 			return key;
@@ -1793,15 +1842,18 @@ static const byte __far* R_ComposeColumn(const int16_t texture, const texture_t 
             const texpatch_t __far* patch = &tex->patches[i];
 
             const int16_t x1 = patch->originx;
+            int16_t x2;
+
+            const patch_t __far* realpatch;
 
             if (xc < x1)
                 continue;
 
-            const patch_t __far* realpatch = W_TryGetLumpByNum(patch->patch_num);
+            realpatch = W_TryGetLumpByNum(patch->patch_num);
             if (realpatch == NULL)
                 return NULL;
 
-            const int16_t x2 = x1 + realpatch->width;
+            x2 = x1 + realpatch->width;
 
             if (xc < x2)
             {
@@ -1827,9 +1879,11 @@ static void R_DrawSegTextureColumn(const texture_t __far* tex, int16_t texture, 
     {
         int16_t patch_num;
         int16_t x_c;
+        const patch_t __far* patch;
+
         R_GetColumn(tex, texcolumn, &patch_num, &x_c);
 
-        const patch_t __far* patch = W_TryGetLumpByNum(patch_num);
+        patch = W_TryGetLumpByNum(patch_num);
         if (patch == NULL)
             R_DrawColumnFlat(texture, dcvars);
         else
@@ -1945,8 +1999,9 @@ static void R_RenderSegLoop(int16_t rw_x, boolean segtextured, boolean markfloor
         {
             // calculate texture offset
 #if !defined FLAT_WALL
+			int16_t ang;
 			texturecolumn = rw_offset;
-			int16_t ang = (angle16_t)(rw_centerangle + xtoviewangleTable[rw_x]) >> ANGLETOFINESHIFT_16;
+			ang = (angle16_t)(rw_centerangle + xtoviewangleTable[rw_x]) >> ANGLETOFINESHIFT_16;
 			if (ang < 1024) {			//    0 <= ang < 1024
 				fixed_t tan = finetangentTable_part_4[1023 - ang];
 				texturecolumn += (rw_distance * tan) >> FRACBITS;
@@ -2079,7 +2134,8 @@ static boolean R_CheckOpenings(const int16_t start)
 static void R_ClearOpeningClippingDetermination(void)
 {
 	// opening / clipping determination
-	for (int8_t i = 0; i < VIEWWINDOWWIDTH; i++)
+	int8_t i;
+	for (i = 0; i < VIEWWINDOWWIDTH; i++)
 		floorclip[i] = VIEWWINDOWHEIGHT, ceilingclip[i] = -1;
 }
 
@@ -2117,6 +2173,10 @@ inline static int16_t CONSTFUNC Mod(int16_t a, int16_t b)
 //
 static void R_StoreWallRange(const int16_t start, const int16_t stop)
 {
+    angle16_t offsetangle;
+    int16_t hyp, rw_x;
+    boolean markfloor, markceiling, segtextured;
+
     // don't overflow and crash
     if (ds_p == &_s_drawsegs[MAXDRAWSEGS])
     {
@@ -2136,7 +2196,7 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle;
 
-    angle16_t offsetangle = rw_normalangle - rw_angle1;
+    offsetangle = rw_normalangle - rw_angle1;
 
 #if defined _M_I86
     if (abs(offsetangle) > ANG90_16)
@@ -2146,11 +2206,11 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
         offsetangle = ANG90_16;
 #endif
 
-    int16_t hyp = R_PointToDist(curline->v1.x, curline->v1.y);
+    hyp = R_PointToDist(curline->v1.x, curline->v1.y);
 
     rw_distance = (hyp * finecosineapprox(offsetangle >> ANGLETOFINESHIFT_16)) >> FRACBITS;
 
-    int16_t rw_x = ds_p->x1 = start;
+    rw_x = ds_p->x1 = start;
     ds_p->x2 = stop;
     ds_p->curline = curline;
     rw_stopx = stop+1;
@@ -2178,8 +2238,6 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
 
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
-
-    boolean markfloor, markceiling;
 
     if (!backsector)
     {
@@ -2304,7 +2362,7 @@ static void R_StoreWallRange(const int16_t start, const int16_t stop)
     }
 
     // calculate rw_offset (only needed for textured lines)
-    boolean segtextured = ((midtexture | toptexture | bottomtexture | maskedtexture) > 0);
+    segtextured = ((midtexture | toptexture | bottomtexture | maskedtexture) > 0);
 
     if (segtextured)
     {
@@ -2536,13 +2594,16 @@ static void R_ClipWallSegment(int16_t first, int16_t last, const boolean solid)
 
 static void R_AddLine(const seg_t __far* line)
 {
+    angle16_t angle1, angle2, span, tspan;
+    int8_t x1, x2;
+
     curline = line;
 
-    angle16_t angle1 = R_PointToAngle16(line->v1.x, line->v1.y);
-    angle16_t angle2 = R_PointToAngle16(line->v2.x, line->v2.y);
+    angle1 = R_PointToAngle16(line->v1.x, line->v1.y);
+    angle2 = R_PointToAngle16(line->v2.x, line->v2.y);
 
     // Clip to view edges.
-    angle16_t span = angle1 - angle2;
+    span = angle1 - angle2;
 
     // Back side, i.e. backface culling
     if (span >= ANG180_16)
@@ -2553,7 +2614,7 @@ static void R_AddLine(const seg_t __far* line)
     angle1 -= viewangle16;
     angle2 -= viewangle16;
 
-    angle16_t tspan = angle1 + clipangle;
+    tspan = angle1 + clipangle;
     if (tspan > 2 * clipangle)
     {
         tspan -= 2 * clipangle;
@@ -2580,8 +2641,8 @@ static void R_AddLine(const seg_t __far* line)
     // but not necessarily visible.
 
     // killough 1/31/98: Here is where "slime trails" can SOMETIMES occur:
-    int8_t x1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
-    int8_t x2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    x1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    x2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
 
     // Does not cross a pixel?
     if (x1 >= x2)       // killough 1/31/98 -- change == to >= for robustness
@@ -2700,12 +2761,16 @@ static boolean R_CheckBBox(const int16_t __far* bspcoord)
     int16_t boxpos = (viewx <= ((fixed_t)bspcoord[BOXLEFT]<<FRACBITS) ? 0 : viewx < ((fixed_t)bspcoord[BOXRIGHT]<<FRACBITS) ? 1 : 2) +
             (viewy >= ((fixed_t)bspcoord[BOXTOP]<<FRACBITS) ? 0 : viewy > ((fixed_t)bspcoord[BOXBOTTOM]<<FRACBITS) ? 4 : 8);
 
+    const byte* check;
+    angle16_t angle1, angle2;
+    int8_t sx1, sx2;
+
     if (boxpos == 5)
         return true;
 
-    const byte* check = checkcoord[boxpos];
-    angle16_t angle1 = R_PointToAngle16(bspcoord[check[0]], bspcoord[check[1]]) - viewangle16;
-    angle16_t angle2 = R_PointToAngle16(bspcoord[check[2]], bspcoord[check[3]]) - viewangle16;
+    check = checkcoord[boxpos];
+    angle1 = R_PointToAngle16(bspcoord[check[0]], bspcoord[check[1]]) - viewangle16;
+    angle2 = R_PointToAngle16(bspcoord[check[2]], bspcoord[check[3]]) - viewangle16;
 
 
     // cph - replaced old code, which was unclear and badly commented
@@ -2730,8 +2795,8 @@ static boolean R_CheckBBox(const int16_t __far* bspcoord)
     //  that touches the source post
     //  (adjacent pixels are touching).
 
-    int8_t sx1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
-    int8_t sx2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    sx1 = viewangletox((angle16_t)(angle1 + ANG90_16) >> ANGLETOFINESHIFT_16);
+    sx2 = viewangletox((angle16_t)(angle2 + ANG90_16) >> ANGLETOFINESHIFT_16);
     //    const cliprange_t *start;
 
     // Does not cross a pixel.

@@ -19,12 +19,28 @@
 #ifndef __COMPILER__
 #define __COMPILER__
 
-#if __GNUC__ <= 3
+#if defined __unixpc__
 #include <limits.h>
 #include <memory.h>
 #include <stddef.h>
 #include <stdio.h>
 
+int abs(int x);
+void *calloc(size_t _nelem, size_t _size);
+void exit(int _status) __attribute__((__noreturn__));
+size_t fread(void *_ptr, size_t _size, size_t _nelem, FILE *_stream);
+int fseek(FILE *_stream, long _offset, int _mode);
+long labs(long x);
+int printf(const char *_format, ...);
+int sprintf(char *_s, const char *_format, ...);
+int stricmp(const char *_s1, const char *_s2);
+int toupper(int c);
+#else
+#include <stdlib.h>
+#endif
+
+
+#if defined __QDOS__ || defined __unixpc__
 #define INT16_MIN SHRT_MIN
 #define INT16_MAX SHRT_MAX
 
@@ -44,20 +60,8 @@ typedef          long       int32_t;
 typedef unsigned long      uint32_t;
 
 typedef unsigned long long uint64_t;
-
-int abs(int x);
-void *calloc(size_t _nelem, size_t _size);
-void exit(int _status) __attribute__((__noreturn__));
-size_t fread(void *_ptr, size_t _size, size_t _nelem, FILE *_stream);
-int fseek(FILE *_stream, long _offset, int _mode);
-long labs(long x);
-int printf(const char *_format, ...);
-int sprintf(char *_s, const char *_format, ...);
-int stricmp(const char *_s1, const char *_s2);
-int toupper(int c);
 #else
-#include <stdint.h>
-#include <stdlib.h>
+#include <stdint.h>	
 #endif
 
 

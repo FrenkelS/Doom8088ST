@@ -158,7 +158,8 @@ static void HUlib_drawTextLine(hu_textline_t* textline)
 
 	// draw the new stuff
 	int16_t x = 0;
-	for (size_t i = 0; i < textline->len; i++)
+	size_t i;
+	for (i = 0; i < textline->len; i++)
 	{
 		char c = toupper(textline->lineoftext[i]); //jff insure were not getting a cheap toupper conv.
 

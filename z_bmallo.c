@@ -48,8 +48,14 @@
 typedef struct bmalpool_s {
 	struct bmalpool_s __far* nextpool;
 	size_t             blocks;
-	byte               used[];
+	byte               used[0];
 } bmalpool_t;
+
+#if defined _M_I86
+typedef char assertBmalpoolSize[sizeof(bmalpool_t) == 6 ? 1 : -1];
+#else
+typedef char assertBmalpoolSize[sizeof(bmalpool_t) == 8 ? 1 : -1];
+#endif
 
 
 inline static void __far* getelem(bmalpool_t __far* p, size_t size, size_t n)
@@ -88,6 +94,8 @@ enum { unused_block = 0, used_block = 1};
 
 void __far* Z_BMalloc(struct block_memory_alloc_s *pzone)
 {
+	bmalpool_t __far* newpool;
+
 	bmalpool_t __far*__far* pool = (bmalpool_t __far*__far*)&(pzone->firstpool);
 	while (*pool != NULL) {
 		byte __far* p = _fmemchr((*pool)->used, unused_block, (*pool)->blocks); // Scan for unused marker
@@ -100,8 +108,6 @@ void __far* Z_BMalloc(struct block_memory_alloc_s *pzone)
 	}
 
 	// Nothing available, must allocate a new pool
-	bmalpool_t __far* newpool;
-
 	// CPhipps: Allocate new memory, initialised to 0
 
 	*pool = newpool = Z_CallocLevel(sizeof(*newpool) + (sizeof(byte) + pzone->size) * (pzone->perpool));

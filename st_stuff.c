@@ -579,6 +579,7 @@ static void STlib_drawNum(st_number_t* n)
 
   int16_t   numdigits = n->width;
   int16_t   num = *n->num;
+  int16_t w, x;
 
   // CPhipps - compact some code, use num instead of *n->num
   if ((n->oldnum = num) < 0)
@@ -595,8 +596,8 @@ static void STlib_drawNum(st_number_t* n)
   if (num == largeammo)
     return;
 
-  const int16_t   w = V_NumPatchWidth(n->p[0]);
-  int16_t   x = n->x;
+  w = V_NumPatchWidth(n->p[0]);
+  x = n->x;
 
   // in the special case of 0, you draw 0
   if (!num)
@@ -614,25 +615,27 @@ static void STlib_drawNum(st_number_t* n)
 
 static void ST_drawWidgets(void)
 {
-    STlib_drawNum(&w_ready);
-	
+	int8_t i;
+
+	STlib_drawNum(&w_ready);
+
 	// Restore the ammo numbers for backpack stats I guess, etc ~Kippykip
-	for (int8_t i = 0; i < NUMAMMO; i++)
-    {
+	for (i = 0; i < NUMAMMO; i++)
+	{
 		STlib_drawNum(&w_ammo[i]);
 		STlib_drawNum(&w_maxammo[i]);
-    }
+	}
 
-    STlib_drawNum(&st_health);
-    STlib_drawNum(&st_armor);
+	STlib_drawNum(&st_health);
+	STlib_drawNum(&st_armor);
 
-    STlib_updateMultIcon(&w_faces);
+	STlib_updateMultIcon(&w_faces);
 
-    for (int8_t i = 0; i < 3 ;i++)
-        STlib_updateMultIcon(&w_keyboxes[i]);
+	for (i = 0; i < 3 ;i++)
+		STlib_updateMultIcon(&w_keyboxes[i]);
 
-    for (int8_t i = 0; i < 6; i++)
-        STlib_updateMultIcon(&w_arms[i]);
+	for (i = 0; i < 6; i++)
+		STlib_updateMultIcon(&w_arms[i]);
 }
 
 
@@ -656,42 +659,44 @@ void ST_doRefresh(void)
 
 boolean ST_NeedUpdate(void)
 {
+	int8_t i;
+
 	// ready weapon ammo
-	if(w_ready.oldnum != *w_ready.num)
-        return true;
-	
-    if(st_health.oldnum != *st_health.num)
-        return true;
+	if (w_ready.oldnum != *w_ready.num)
+		return true;
 
-    if(st_armor.oldnum != *st_armor.num)
-        return true;
+	if (st_health.oldnum != *st_health.num)
+		return true;
 
-    if(w_faces.oldinum != *w_faces.inum)
-        return true;
-	
+	if (st_armor.oldnum != *st_armor.num)
+		return true;
+
+	if (w_faces.oldinum != *w_faces.inum)
+		return true;
+
 	// ammo
-    for(int8_t i=0; i<NUMAMMO; i++)
-    {
-        if(w_ammo[i].oldnum != *w_ammo[i].num)
-            return true;
-		if(w_maxammo[i].oldnum != *w_maxammo[i].num)
-            return true;
-    }
+	for (i = 0; i < NUMAMMO; i++)
+	{
+		if (w_ammo[i].oldnum != *w_ammo[i].num)
+			return true;
+		if (w_maxammo[i].oldnum != *w_maxammo[i].num)
+			return true;
+	}
 
-    // weapons owned
-    for(int8_t i=0; i<6; i++)
-    {
-        if(w_arms[i].oldinum != *w_arms[i].inum)
-            return true;
-    }
+	// weapons owned
+	for (i = 0; i < 6; i++)
+	{
+		if (w_arms[i].oldinum != *w_arms[i].inum)
+			return true;
+	}
 
-    for(int8_t i = 0; i < 3; i++)
-    {
-        if(w_keyboxes[i].oldinum != *w_keyboxes[i].inum)
-            return true;
-    }
+	for (i = 0; i < 3; i++)
+	{
+		if (w_keyboxes[i].oldinum != *w_keyboxes[i].inum)
+			return true;
+	}
 
-    return false;
+	return false;
 }
 
 
@@ -741,7 +746,8 @@ static void ST_loadData(void)
 
     for (i=0;i<ST_NUMPAINFACES;i++)
     {
-        for (int8_t j=0;j<ST_NUMSTRAIGHTFACES;j++)
+        int8_t j;
+        for (j = 0; j < ST_NUMSTRAIGHTFACES; j++)
         {
             sprintf(namebuf, "STFST%d%d", i, j);
             faces[facenum++] = W_GetNumForName(namebuf);
@@ -821,6 +827,8 @@ static void STlib_initNum(st_number_t* n, int16_t x, int16_t y, int16_t* pl, int
 
 static void ST_createWidgets(void)
 {
+    int8_t i;
+
     // ready weapon ammo
     STlib_initNum(&w_ready, ST_AMMOX, ST_AMMOY, tallnum, &_g_player.ammo[weaponinfo[_g_player.readyweapon].ammo], ST_AMMOWIDTH);
 
@@ -831,7 +839,7 @@ static void ST_createWidgets(void)
     STlib_initNum(&st_armor, ST_ARMORX, ST_ARMORY, tallnum, &_g_player.armorpoints, ST_ARMORWIDTH);
 
     // weapons owned
-    for(int8_t i = 0; i < 6; i++)
+    for (i = 0; i < 6; i++)
     {
         STlib_initMultIcon(&w_arms[i], ST_ARMSX+(i%3)*ST_ARMSXSPACE, ST_ARMSY+(i/3)*ST_ARMSYSPACE, arms[i], &_g_player.weaponowned[i+1]);
     }

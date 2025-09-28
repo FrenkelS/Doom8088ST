@@ -814,8 +814,9 @@ static think_t P_ThinkerFunctionForType(mobjtype_t type, mobj_t __far* mobj)
 static mobj_t __far* P_NewMobj()
 {
     mobj_t __far* mobj = NULL;
+    int16_t i;
 
-    for(int16_t i = _g_thingPoolSize-1; i >= 0; i--)
+    for (i = _g_thingPoolSize-1; i >= 0; i--)
     {
         if(_g_thingPool[i].type == MT_NOTHING)
         {
@@ -933,8 +934,10 @@ void P_RemoveMobj(mobj_t __far* mobj)
 
 static PUREFUNC int16_t P_FindDoomedNum(int16_t type)
 {
+    int16_t i;
+
     // find which type to spawn
-    for (int16_t i = 0; i < NUMMOBJTYPES; i++)
+    for (i = 0; i < NUMMOBJTYPES; i++)
     {
         if (type == mobjinfo[i].doomednum)
             return i;
@@ -953,17 +956,16 @@ static PUREFUNC int16_t P_FindDoomedNum(int16_t type)
 
 static void P_SpawnPlayer(int16_t playerx, int16_t playery, int8_t playerangle)
 {
-  player_t* p;
+  player_t* p = &_g_player;
+  fixed_t x, y, z;
   mobj_t __far*   mobj;
-
-  p = &_g_player;
 
   if (p->playerstate == PST_REBORN)
     G_PlayerReborn ();
 
-  fixed_t x = ((int32_t)playerx) << FRACBITS;
-  fixed_t y = ((int32_t)playery) << FRACBITS;
-  fixed_t z = ONFLOORZ;
+  x = ((int32_t)playerx) << FRACBITS;
+  y = ((int32_t)playery) << FRACBITS;
+  z = ONFLOORZ;
   mobj = P_SpawnMobj (x,y,z, MT_PLAYER);
 
   // set color translations for player sprites

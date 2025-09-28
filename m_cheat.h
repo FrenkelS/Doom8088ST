@@ -3,7 +3,7 @@
 
 #include "d_event.h"
 
-boolean C_Responder (event_t *ev);
+boolean C_Responder(d_event_t *ev);
 
 
 #endif // M_CHEAT_H

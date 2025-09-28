@@ -107,17 +107,19 @@ void WI_drawLF(int16_t map)
 {
 	int16_t y = WI_TITLEY;
 	char lname[9];
+	const patch_t __far* patch;
+	const patch_t __far* finishedpatch;
 
 	// draw <LevelName>
 	WI_levelNameLump(map, lname);
-	const patch_t __far* patch = W_GetLumpByName(lname);
+	patch = W_GetLumpByName(lname);
 	V_DrawPatchScaled((SCREENWIDTH_VGA - patch->width)/2, y, patch);
 
 	y += (5 * patch->height) / 4;
 	Z_ChangeTagToCache(patch);
 
 	// draw "Finished!"
-	const patch_t __far* finishedpatch = W_GetLumpByName(finished);
+	finishedpatch = W_GetLumpByName(finished);
 	V_DrawPatchScaled((SCREENWIDTH_VGA - finishedpatch->width)/2, y, finishedpatch);
 	Z_ChangeTagToCache(finishedpatch);
 }
@@ -133,12 +135,14 @@ void WI_drawEL(int16_t map)
 {
 	int16_t y = WI_TITLEY;
 	char lname[9];
+	const patch_t __far* patch;
+	const patch_t __far* enteringpatch;
 
 	WI_levelNameLump(map, lname);
-	const patch_t __far* patch = W_GetLumpByName(lname);
+	patch = W_GetLumpByName(lname);
 
 	// draw "Entering"
-	const patch_t __far* enteringpatch = W_GetLumpByName(entering);
+	enteringpatch = W_GetLumpByName(entering);
 	V_DrawPatchScaled((SCREENWIDTH_VGA - enteringpatch->width)/2, y, enteringpatch);
 	Z_ChangeTagToCache(enteringpatch);
 

@@ -117,34 +117,37 @@ static void R_LoadTexture(int16_t texture_num)
 
     const maptexture_t __far* mtexture = (const maptexture_t __far*) ((const byte __far*)maptex + directory[texture_num]);
 
+    int16_t w;
+    uint8_t j;
+    texpatch_t __far* patch;
+    const mappatch_t __far* mpatch;
+
     texture_t __far* texture = Z_MallocLevel(sizeof(const texture_t) + sizeof(const texpatch_t)*(mtexture->patchcount-1), (void __far*__far*)&textures[texture_num]);
 
     texture->width      = mtexture->width;
     texture->height     = mtexture->height;
     texture->patchcount = mtexture->patchcount;
 
-    int16_t w = 1;
+    w = 1;
     while (w * 2 <= texture->width)
         w <<= 1;
     texture->widthmask  = w - 1;
 
-
-    texpatch_t __far* patch = texture->patches;
-    const mappatch_t __far* mpatch = mtexture->patches;
+    patch  =  texture->patches;
+    mpatch = mtexture->patches;
 
     texture->overlapped = false;
 
     //Skip to list of names.
     pnames += 4;
 
-    for (uint8_t j = 0; j < texture->patchcount; j++, mpatch++, patch++)
+    for (j = 0; j < texture->patchcount; j++, mpatch++, patch++)
     {
-        patch->originx = mpatch->originx;
-        patch->originy = mpatch->originy;
-
         char pname[8];
         _fmemcpy(pname, &pnames[mpatch->patch * 8], sizeof(pname));
 
+        patch->originx     = mpatch->originx;
+        patch->originy     = mpatch->originy;
         patch->patch_num   = W_GetNumForName(pname);
         patch->patch_width = V_NumPatchWidthDontCache(patch->patch_num);
     }
@@ -153,19 +156,17 @@ static void R_LoadTexture(int16_t texture_num)
     Z_ChangeTagToCache(pnames);
     Z_ChangeTagToCache(maptex);
 
-    for (uint8_t j = 0; j < texture->patchcount; j++)
+    for (j = 0; j < texture->patchcount; j++)
     {
         const texpatch_t __far* patch = &texture->patches[j];
 
         //Check for patch overlaps.
         int16_t l1 = patch->originx;
         int16_t r1 = l1 + patch->patch_width;
+        uint8_t k;
 
-        for (uint8_t k = j + 1; k < texture->patchcount; k++)
+        for (k = j + 1; k < texture->patchcount; k++)
         {
-            if (k == j)
-                continue;
-
             const texpatch_t __far* p2 = &texture->patches[k];
 
             //Check for patch overlaps.
@@ -211,13 +212,15 @@ const texture_t __far* R_GetTexture(int16_t texture)
 
 static int16_t R_GetTextureNumForName(const char* tex_name)
 {
-    char name8[8];
-    strncpy(name8, tex_name, sizeof(name8));
-
     const int32_t __far* maptex = W_GetLumpByName("TEXTURE1");
     const int32_t __far* directory = maptex+1;
 
-    for (int16_t i = 0; i < numtextures; i++)
+    int16_t i;
+
+    char name8[8];
+    strncpy(name8, tex_name, sizeof(name8));
+
+    for (i = 0; i < numtextures; i++)
     {
         int32_t offset = *directory++;
 
@@ -269,6 +272,8 @@ int16_t PUREFUNC R_CheckTextureNumForName (const char *tex_name)
 
 static void R_InitTextures()
 {
+	int16_t i;
+
 	const int32_t __far* mtex1 = W_GetLumpByName("TEXTURE1");
 	numtextures = *mtex1;
 	Z_ChangeTagToCache(mtex1);
@@ -281,7 +286,7 @@ static void R_InitTextures()
 
 	texturetranslation = Z_MallocStatic((numtextures + 1)*sizeof*texturetranslation);
 
-	for (int16_t i = 0; i < numtextures; i++)
+	for (i = 0; i < numtextures; i++)
 		texturetranslation[i] = i;
 }
 

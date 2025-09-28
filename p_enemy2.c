@@ -44,6 +44,10 @@ static const fixed_t yspeed[8] = {0,47000,FRACUNIT,47000,0,-47000,-FRACUNIT,-470
 
 static boolean P_Move(mobj_t __far* actor)
 {
+  int32_t speed;
+  fixed_t tryx, tryy;
+  boolean try_ok;
+
   if (actor->movedir == DI_NODIR)
     return false;
 
@@ -52,15 +56,17 @@ static boolean P_Move(mobj_t __far* actor)
     I_Error ("P_Move: Weird actor->movedir!");
 #endif
 
-  int32_t speed = mobjinfo[actor->type].speed;
+  speed = mobjinfo[actor->type].speed;
 
-  fixed_t tryx = actor->x + speed * xspeed[actor->movedir];
-  fixed_t tryy = actor->y + speed * yspeed[actor->movedir];
+  tryx = actor->x + speed * xspeed[actor->movedir];
+  tryy = actor->y + speed * yspeed[actor->movedir];
 
-  boolean try_ok = P_TryMove(actor, tryx, tryy);
+  try_ok = P_TryMove(actor, tryx, tryy);
 
   if (!try_ok)
     {      // open any specials
+      boolean good = false;
+
       if (!_g_numspechit)
         return false;
 
@@ -83,7 +89,6 @@ static boolean P_Move(mobj_t __far* actor)
        * back out when they shouldn't, and creates secondary stickiness).
        */
 
-      boolean good = false;
       for ( ; _g_numspechit--; )
         if (P_UseSpecialLine(actor, _g_spechit[_g_numspechit]))
           good = true;
@@ -191,11 +196,11 @@ static boolean P_LookForTargets(mobj_t __far* actor, boolean allaround)
 
 void A_Look(mobj_t __far* actor)
 {
+    boolean seen = false;
+
     mobj_t __far* targ = actor->subsector->sector->soundtarget;
     actor->threshold = 0; // any shot will wake up
     actor->pursuecount = 0;
-
-    boolean seen = false;
 
     if (targ && (targ->flags & MF_SHOOTABLE) )
     {

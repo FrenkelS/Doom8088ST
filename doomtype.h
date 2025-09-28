@@ -63,11 +63,15 @@ typedef uint8_t byte;
 #endif
 
 
-#ifdef __GNUC__
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 5)
 #define CONSTFUNC __attribute__((const))
-#define PUREFUNC __attribute__((pure))
 #else
 #define CONSTFUNC
+#endif
+
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+#define PUREFUNC __attribute__((pure))
+#else
 #define PUREFUNC
 #endif
 

@@ -345,7 +345,7 @@ static void G_DoLoadLevel (void)
 // Get info needed to make ticcmd_ts for the players.
 //
 
-void G_Responder (event_t* ev)
+void G_Responder(d_event_t* ev)
 {
     // any other key pops up menu if in demos
     //
@@ -525,22 +525,18 @@ static void G_PlayerFinishLevel(void)
 // almost everything is cleared and initialized
 //
 
-void G_PlayerReborn (void)
+void G_PlayerReborn(void)
 {
-    player_t *p;
     int16_t i;
-    int16_t killcount;
-    int16_t itemcount;
-    int16_t secretcount;
 
-    killcount   = _g_player.killcount;
-    itemcount   = _g_player.itemcount;
-    secretcount = _g_player.secretcount;
+    int16_t killcount   = _g_player.killcount;
+    int16_t itemcount   = _g_player.itemcount;
+    int16_t secretcount = _g_player.secretcount;
 
-    p = &_g_player;
+    player_t *p = &_g_player;
 
     int16_t cheats = p->cheats;
-    memset (p, 0, sizeof(*p));
+    memset(p, 0, sizeof(*p));
     p->cheats = cheats;
 
     _g_player.killcount = killcount;
@@ -689,20 +685,21 @@ inline static void LoadSRAM(byte __far* eeprom, uint16_t size, uint16_t offset)
 //
 // Update the strings displayed in the load-save menu.
 //
-void G_UpdateSaveGameStrings()
+void G_UpdateSaveGameStrings(void)
 {
+    int16_t i;
     uint16_t savebuffersize = sizeof(gba_save_data_t) * 8;
 
-
     byte __far* loadbuffer = Z_MallocStatic(savebuffersize);
+    gba_save_data_t __far* saveslots;
 
     LoadSRAM(loadbuffer, savebuffersize, 0);
 
-    gba_save_data_t __far* saveslots = (gba_save_data_t __far*)loadbuffer;
+    saveslots = (gba_save_data_t __far*)loadbuffer;
 
-    for(int16_t i = 0; i < 8; i++)
+    for (i = 0; i < 8; i++)
     {
-        if(saveslots[i].save_present != 1)
+        if (saveslots[i].save_present != 1)
         {
             strcpy(_g_savegamestrings[i], "EMPTY");
         }
@@ -730,14 +727,15 @@ static void G_DoLoadGame(void)
 {
     uint16_t savebuffersize = sizeof(gba_save_data_t) * 8;
 
-
     byte __far* loadbuffer = Z_MallocStatic(savebuffersize);
+    gba_save_data_t __far* saveslots;
+    gba_save_data_t __far* savedata;
 
     LoadSRAM(loadbuffer, savebuffersize, 0);
 
-    gba_save_data_t __far* saveslots = (gba_save_data_t __far*)loadbuffer;
+    saveslots = (gba_save_data_t __far*)loadbuffer;
 
-    gba_save_data_t __far* savedata = &saveslots[savegameslot];
+    savedata = &saveslots[savegameslot];
 
     if(savedata->save_present != 1)
         return;
@@ -784,12 +782,14 @@ static void G_DoSaveGame(void)
     uint16_t savebuffersize = sizeof(gba_save_data_t) * 8;
 
     byte __far* savebuffer = Z_MallocStatic(savebuffersize);
+    gba_save_data_t __far* saveslots;
+    gba_save_data_t __far* savedata;
 
     LoadSRAM(savebuffer, savebuffersize, 0);
 
-    gba_save_data_t __far* saveslots = (gba_save_data_t __far*)savebuffer;
+    saveslots = (gba_save_data_t __far*)savebuffer;
 
-    gba_save_data_t __far* savedata = &saveslots[savegameslot];
+    savedata = &saveslots[savegameslot];
 
     savedata->save_present = 1;
 
@@ -1047,14 +1047,15 @@ static void ExtractFileBase (const char *path, char *dest)
 static void G_DoPlayDemo(void)
 {
     char basename[9];
+    int16_t demolumpnum;
 
     ExtractFileBase(defdemoname,basename);           // killough
     basename[8] = 0;
 
     /* cph - store lump number for unlocking later */
-    int16_t demolumpnum = W_GetNumForName(basename);
-    demobuffer = W_GetLumpByNum(demolumpnum);
-    demolength = W_LumpLength(demolumpnum);
+    demolumpnum = W_GetNumForName(basename);
+    demobuffer  = W_GetLumpByNum(demolumpnum);
+    demolength  = W_LumpLength(demolumpnum);
 
     demo_p = G_ReadDemoHeader(demobuffer);
 

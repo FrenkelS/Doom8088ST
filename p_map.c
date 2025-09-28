@@ -844,9 +844,11 @@ static fixed_t FixedMul3(fixed_t a, fixed_t b, fixed_t c)
 {
 	if (a == 0)
 		return 0;
-
-	fixed_t bc = FixedMul(c, b);
-	return FixedMul(bc, a);
+	else
+	{
+		fixed_t bc = FixedMul(c, b);
+		return FixedMul(bc, a);
+	}
 }
 
 
@@ -875,8 +877,9 @@ static boolean PTR_ShootTraverse (intercept_t* in)
 
     if (li->flags & ML_TWOSIDED)
     {  // crosses a two sided (really 2s) line
+      fixed_t t;
       P_LineOpening (li);
-      fixed_t t = FixedMul3(aimslope, in->frac, attackrange) + shootz;
+      t = FixedMul3(aimslope, in->frac, attackrange) + shootz;
 
       if ((LN_FRONTSECTOR(li)->floorheight   == LN_BACKSECTOR(li)->floorheight   || _g_openbottom <= t) &&
           (LN_FRONTSECTOR(li)->ceilingheight == LN_BACKSECTOR(li)->ceilingheight || _g_opentop    >= t))
@@ -1371,6 +1374,8 @@ static boolean PIT_GetSectors(line_t __far* ld)
 
 void P_CreateSecNodeList(mobj_t __far* thing)
 {
+  int16_t xl, xh, yl, yh, bx, by;
+
   mobj_t __far* saved_tmthing = tmthing; /* cph - see comment at func end */
 
   // First, clear out the existing m_thing fields. As each node is
@@ -1397,13 +1402,13 @@ void P_CreateSecNodeList(mobj_t __far* thing)
 
   validcount++; // used to make sure we only process a line once
 
-  int16_t xl = (_g_tmbbox[BOXLEFT]   - _g_bmaporgx) >> MAPBLOCKSHIFT;
-  int16_t xh = (_g_tmbbox[BOXRIGHT]  - _g_bmaporgx) >> MAPBLOCKSHIFT;
-  int16_t yl = (_g_tmbbox[BOXBOTTOM] - _g_bmaporgy) >> MAPBLOCKSHIFT;
-  int16_t yh = (_g_tmbbox[BOXTOP]    - _g_bmaporgy) >> MAPBLOCKSHIFT;
+  xl = (_g_tmbbox[BOXLEFT]   - _g_bmaporgx) >> MAPBLOCKSHIFT;
+  xh = (_g_tmbbox[BOXRIGHT]  - _g_bmaporgx) >> MAPBLOCKSHIFT;
+  yl = (_g_tmbbox[BOXBOTTOM] - _g_bmaporgy) >> MAPBLOCKSHIFT;
+  yh = (_g_tmbbox[BOXTOP]    - _g_bmaporgy) >> MAPBLOCKSHIFT;
 
-  for (int16_t bx = xl; bx <= xh; bx++)
-    for (int16_t by = yl; by <= yh; by++)
+  for (bx = xl; bx <= xh; bx++)
+    for (by = yl; by <= yh; by++)
       P_BlockLinesIterator(bx,by,PIT_GetSectors);
 
   // Add the sector of the (x,y) point to sector_list.
