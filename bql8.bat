@@ -2,9 +2,9 @@ md ql
 
 @set PATH=C:\qdos-gcc\bin;%PATH%
 
-set RENDER_OPTIONS=-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=243 -DFLAT_SKY_COLOR=5 -DWAD_FILE=\"WIN2_DOOMQL8.WAD\" -DNR_OF_COLORS=8 -DLOW_MEMORY
-@rem set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
-set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
+set RENDER_OPTIONS=-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=243 -DFLAT_SKY_COLOR=5 -DWAD_FILE=\"WIN2_DOOMQL8.WAD\" -DNR_OF_COLORS=8
+set CFLAGS=-m68000 -fomit-frame-pointer -funroll-loops -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
+@rem set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN
 
 
 @set GLOBOBJS=
@@ -21,10 +21,10 @@ set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIA
 @set GLOBOBJS=%GLOBOBJS% w_wad.c
 @set GLOBOBJS=%GLOBOBJS% z_zone.c
 
-@rem @type %GLOBOBJS% > speed.c
-@rem qdos-gcc -c -O3 %CFLAGS% %RENDER_OPTIONS% speed.c -o ql/speed.o
-@rem del speed.c
-@rem @set GLOBOBJS=
+@type %GLOBOBJS% > speed.c
+qdos-gcc -c -O3 %CFLAGS% %RENDER_OPTIONS% speed.c -o ql/speed.o
+del speed.c
+@set GLOBOBJS=
 
 
 @set GLOBOBJS=%GLOBOBJS% am_map.c
@@ -64,12 +64,12 @@ set CFLAGS=-m68000 -fomit-frame-pointer -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIA
 @set GLOBOBJS=%GLOBOBJS% wi_stuff.c
 @set GLOBOBJS=%GLOBOBJS% z_bmallo.c
 
-@rem @type %GLOBOBJS% > space.c
-@rem qdos-gcc -c -Os %CFLAGS% %RENDER_OPTIONS% space.c -o ql/space.o
-@rem del space.c
-@rem qdos-gcc ql/speed.o ql/space.o -o ql/doom8088.out
+@type %GLOBOBJS% > space.c
+qdos-gcc -c -Os %CFLAGS% %RENDER_OPTIONS% space.c -o ql/space.o
+del space.c
+qdos-gcc ql/speed.o ql/space.o -o ql/doom8088.out
 
-qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.out
+@rem qdos-gcc -Os %CFLAGS% %RENDER_OPTIONS% %GLOBOBJS% -o ql/doom8088.out
 
 
 del ql\doomql8
