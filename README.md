@@ -99,8 +99,8 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 |Atari ST     |`i_ast.c`, `i_astv16.c`|[m68k-atari-mintelf binutils, GCC 14, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`, `bast16m.sh`, `bast16l.sh`|320x200 16 color mode, high/medium/low detail mode  |
 |Atari ST     |`i_ast.c`, `i_astv2.c` |[m68k-atari-mintelf binutils, GCC 14, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`, `bast520.sh`                |640x200  4 color mode, 2 colors are used</br>`DOOM520.TOS` is for computers with 512 kB of RAM. It goes from the first level immediately to the last level.|
 |AT&T UNIX PC |`i_3b1.c`, `i_3b1v.c`  |[unixpc-gcc](https://github.com/mikehaertel/unixpc-gcc)                       |`b3b1.sh`                               |The build script generates `speed.o` and `space.o`. These files need to be linked to create `doom8088`.|
-|Sinclair QL  |`i_ql.c`, `i_qlv8.c`|[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)|`bql8.bat`|256x256 8 color mode|
-|Sinclair QL  |`i_ql.c`, `i_qlv2.c`|[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)|`bql2.bat`|512x256 4 color mode|
+|Sinclair QL  |`i_ql.c`,  `i_qlv8.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                         |`bql8.bat`                              |256x256 8 color mode                                |
+|Sinclair QL  |`i_ql.c`,  `i_qlv2.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                         |`bql2.bat`                              |512x256 4 color mode                                |
 |IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Motorola 68000 Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
