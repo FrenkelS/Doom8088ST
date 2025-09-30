@@ -20,7 +20,7 @@ then
   export OUTPUT=DOOMAMBW
 fi
 
-m68k-amigaos-gcc -c i_vami2.c  $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
+m68k-amigaos-gcc -c i_amiv2.c  $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
 m68k-amigaos-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -msmall-code -mcrt=nix13 -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -mregparm -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre
@@ -46,8 +46,8 @@ export GLOBOBJS+=" g_game.c"
 export GLOBOBJS+=" hu_stuff.c"
 export GLOBOBJS+=" i_audio.c"
 export GLOBOBJS+=" i_amiga.c"
-#export GLOBOBJS+=" i_vami2.c"
-export GLOBOBJS+=" i_vami2.o"
+#export GLOBOBJS+=" i_amiv2.c"
+export GLOBOBJS+=" i_amiv2.o"
 export GLOBOBJS+=" info.c"
 export GLOBOBJS+=" m_cheat.c"
 export GLOBOBJS+=" m_menu.c"
@@ -101,7 +101,7 @@ export GLOBOBJS+=" z_zone.o"
 m68k-amigaos-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o amiga/$OUTPUT
 m68k-amigaos-strip -s amiga/$OUTPUT
 
-rm i_vami2.o
+rm i_amiv2.o
 rm p_enemy2.o
 rm p_map.o
 rm p_maputl.o

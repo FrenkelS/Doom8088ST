@@ -1,0 +1,330 @@
+/*-----------------------------------------------------------------------------
+ *
+ *
+ *  Copyright (C) 2025 Frenkel Smeijers
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ *  02111-1307, USA.
+ *
+ * DESCRIPTION:
+ *      Sinclair QL implementation of i_system.h
+ *
+ *-----------------------------------------------------------------------------*/
+
+#include <qdos.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "doomdef.h"
+#include "a_pcfx.h"
+#include "d_main.h"
+#include "i_sound.h"
+#include "i_system.h"
+
+
+
+
+
+void I_InitGraphicsHardwareSpecificCode(void);
+void I_ShutdownGraphics(void);
+
+
+static boolean isGraphicsModeSet = false;
+
+
+//**************************************************************************************
+//
+// Screen code
+//
+
+void I_InitGraphics(void)
+{
+	I_InitGraphicsHardwareSpecificCode();
+	isGraphicsModeSet = true;
+}
+
+
+//**************************************************************************************
+//
+// Returns time in 1/35th second tics.
+//
+
+static QL_LINK_t qlLink;
+static volatile int32_t ticcount;
+
+static boolean isTimerSet;
+
+
+static void I_TimerISR(void)
+{
+	ticcount++;
+}
+
+
+int32_t I_GetTime(void)
+{
+	return ticcount * TICRATE / CLOCKS_PER_SEC;
+}
+
+
+void I_InitTimer(void)
+{
+	qlLink.l_next = NULL;
+	qlLink.l_rtn  = I_TimerISR;
+	mt_lpoll(&qlLink);
+
+	isTimerSet = true;
+}
+
+
+static void I_ShutdownTimer(void)
+{
+	mt_rpoll(&qlLink);
+}
+
+
+//**************************************************************************************
+//
+// Keyboard code
+//
+
+void I_InitKeyboard(void)
+{
+	// Do nothing
+}
+
+
+static void I_PostEvent(boolean keydown, int16_t data1)
+{
+	d_event_t ev;
+	ev.type  = keydown ? ev_keydown : ev_keyup;
+	ev.data1 = data1;
+	D_PostEvent(&ev);
+}
+
+
+#define KB_MATRIX_SIZE 8
+
+void I_StartTic(void)
+{
+	static uint8_t kb_matrix[KB_MATRIX_SIZE * 2];
+	static uint8_t *kb_matrix_cur = &kb_matrix[0];
+	static uint8_t *kb_matrix_prv = &kb_matrix[KB_MATRIX_SIZE];
+
+	uint8_t diff;
+	uint8_t *tmp = kb_matrix_cur;
+	kb_matrix_cur = kb_matrix_prv;
+	kb_matrix_prv = tmp;
+
+
+	kb_matrix_cur[1] = keyrow(1);
+	diff = kb_matrix_prv[1] ^ kb_matrix_cur[1];
+
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[1] & (1 << 0), KEYD_A);				// Enter
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[1] & (1 << 1), KEYD_LEFT);			// Left
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[1] & (1 << 2), KEYD_UP);				// Up
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[1] & (1 << 3), KEYD_START);			// Esc
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[1] & (1 << 4), KEYD_RIGHT);			// Right
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[1] & (1 << 6), KEYD_A);				// Space
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[1] & (1 << 7), KEYD_DOWN);			// Down
+
+
+	kb_matrix_cur[2] = keyrow(2);
+	diff = kb_matrix_prv[2] ^ kb_matrix_cur[2];
+
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[2] & (1 << 0), KEYD_BRACKET_RIGHT);	// ]
+
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[2] & (1 << 2), KEYD_R);				// >
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[2] & (1 << 3), 'c');					// c
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[2] & (1 << 4), 'b');					// b
+
+
+	kb_matrix_cur[3] = keyrow(3);
+	diff = kb_matrix_prv[3] ^ kb_matrix_cur[3];
+
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[3] & (1 << 0), KEYD_BRACKET_LEFT);	// [
+
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[3] & (1 << 2), 'k');					// k
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[3] & (1 << 3), 's');					// s
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[3] & (1 << 4), 'f');					// f
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[3] & (1 << 5), KEYD_PLUS);			// +
+
+
+	kb_matrix_cur[4] = keyrow(4);
+	diff = kb_matrix_prv[4] ^ kb_matrix_cur[4];
+
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[4] & (1 << 0), 'l');					// l
+
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[4] & (1 << 2), 'h');					// h
+
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[4] & (1 << 4), 'a');					// a
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[4] & (1 << 5), 'p');					// p
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[4] & (1 << 6), 'd');					// d
+
+
+	kb_matrix_cur[5] = keyrow(5);
+	diff = kb_matrix_prv[5] ^ kb_matrix_cur[5];
+
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[5] & (1 << 2), 'i');					// i
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[5] & (1 << 3), KEYD_SELECT);			// Tab
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[5] & (1 << 4), 'r');					// r
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[5] & (1 << 5), KEYD_MINUS);			// -
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[5] & (1 << 6), 'y');					// y
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[5] & (1 << 7), 'o');					// o
+
+
+	kb_matrix_cur[6] = keyrow(6);
+	diff = kb_matrix_prv[6] ^ kb_matrix_cur[6];
+
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[6] & (1 << 3), 'q');					// q
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[6] & (1 << 4), 'e');					// e
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[6] & (1 << 6), 't');					// t
+
+
+	kb_matrix_cur[7] = keyrow(7);
+	diff = kb_matrix_prv[7] ^ kb_matrix_cur[7];
+
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[7] & (1 << 0), KEYD_SPEED);			// Shift
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[7] & (1 << 1), KEYD_B);				// Ctrl
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[7] & (1 << 2), KEYD_STRAFE);			// Alt
+
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[7] & (1 << 4), 'v');					// v
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[7] & (1 << 6), 'n');					// n
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[7] & (1 << 7), KEYD_L);				// <
+}
+
+
+//**************************************************************************************
+//
+// Audio
+//
+
+typedef PACKEDATTR_PRE struct {
+	uint16_t	dur;
+	uint8_t		pitch;
+	uint8_t		pitch2;
+	uint8_t		wrap;
+	uint16_t	g_x;
+	uint8_t		g_y;
+	uint8_t		fuzz;
+	uint8_t		rndm;
+} PACKEDATTR_POST sound_t;
+
+typedef char assertSoundSize[sizeof(sound_t) == 10 ? 1 : -1];
+
+
+void PCFX_Play(int16_t lumpnum)
+{
+	const sound_t *s = W_GetLumpByNum(lumpnum);
+	do_sound(s->dur, s->pitch, s->pitch2, s->wrap, s->g_x, s->g_y, s->fuzz, s->rndm);
+	Z_ChangeTagToCache(s);
+}
+
+
+void PCFX_Init(void)
+{
+	// Do nothing
+}
+
+
+void PCFX_Shutdown(void)
+{
+	// Do nothing
+}
+
+
+//**************************************************************************************
+//
+// Memory
+//
+
+uint8_t __far* I_ZoneBase(uint32_t *heapSize)
+{
+	uint32_t m;
+
+	uint32_t availableMemory = mt_free();
+	uint32_t paragraphs = availableMemory / PARAGRAPH_SIZE;
+	uint8_t *ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+	while (!ptr)
+	{
+		paragraphs--;
+		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
+	}
+
+	// align ptr
+	m = (uint32_t) ptr;
+	if ((m & (PARAGRAPH_SIZE - 1)) != 0)
+	{
+		paragraphs--;
+		while ((m & (PARAGRAPH_SIZE - 1)) != 0)
+			m = (uint32_t) ++ptr;
+	}
+
+	*heapSize = paragraphs * PARAGRAPH_SIZE;
+	return ptr;
+}
+
+
+//**************************************************************************************
+//
+// Exit code
+//
+
+static void I_Shutdown(void)
+{
+	if (isGraphicsModeSet)
+		I_ShutdownGraphics();
+
+	I_ShutdownSound();
+
+	if (isTimerSet)
+		I_ShutdownTimer();
+}
+
+
+void I_Quit(void)
+{
+	I_Shutdown();
+
+	printf("\n");
+	exit(0);
+}
+
+
+void I_Error(const char *error, ...)
+{
+	va_list argptr;
+
+	I_Shutdown();
+
+	va_start(argptr, error);
+	vprintf(error, argptr);
+	va_end(argptr);
+	printf("\n");
+	exit(1);
+}
+
+
+int main(int argc, const char * const * argv)
+{
+	printf("Doom8088: Sinclair QL Edition\n");
+
+	D_DoomMain(argc, argv);
+	return 0;
+}

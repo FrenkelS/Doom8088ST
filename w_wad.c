@@ -38,11 +38,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
-#include <stdint.h>
+
+#include <unistd.h>
 
 #include "compiler.h"
 #include "d_player.h"
@@ -129,6 +127,8 @@ typedef struct
 
 void W_Init(void)
 {
+	wadinfo_t header;
+
 	printf("\tadding " WAD_FILE "\r\n");
 	printf("\tshareware version.\r\n");
 
@@ -136,7 +136,6 @@ void W_Init(void)
 	if (fileWAD == NULL)
 		I_Error("Can't open " WAD_FILE ".");
 
-	wadinfo_t header;
 	W_ReadDataFromFile(&header, 0, sizeof(header));
 
 	fileinfo = Z_MallocStatic(header.numlumps * sizeof(filelump_t));
@@ -171,16 +170,18 @@ uint16_t PUREFUNC W_LumpLength(int16_t num)
 //
 int16_t PUREFUNC W_GetNumForName(const char *name)
 {
-	int64_t nameint;
-	strncpy((char*)&nameint, name, 8);
+	int16_t i;
+
+	char name8[8];
+	strncpy(name8, name, sizeof(name8));
 
 #if BACKWARDS
-	for (int16_t i = numlumps - 1; i >= 0; i--)
+	for (i = numlumps - 1; i >= 0; i--)
 #else
-	for (int16_t i = 0; i < numlumps; i++)
+	for (i = 0; i < numlumps; i++)
 #endif
 	{
-		if (nameint == *(int64_t __far*)(fileinfo[i].name))
+		if (Z_EqualNames(fileinfo[i].name, name8))
 		{
 			return i;
 		}

@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -33,8 +33,6 @@
  *
  *-----------------------------------------------------------------------------
  */
-
-#include <stdint.h>
 
 #include "d_player.h"
 #include "d_event.h"
@@ -156,9 +154,11 @@ void F_Drawer (void)
 {
 	if (!finalestage)
 	{
+		int32_t count;
+
 		V_DrawBackground(backgroundnum);
 
-		int32_t count = (finalecount - 10) * 100 / Get_TextSpeed();
+		count = (finalecount - 10) * 100 / Get_TextSpeed();
 		if (count < 0)
 			count = 0;
 

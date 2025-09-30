@@ -161,7 +161,7 @@ void I_StartTic(void)
 			continue;
 		}
 
-		event_t ev;
+		d_event_t ev;
 		if (k & 0x80)
 			ev.type = ev_keyup;
 		else
@@ -416,7 +416,7 @@ uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 	if (Getcookie(C__FRB, NULL) == C_FOUND)
 	{
 		uint32_t availableMemory = Mxalloc(-1, MX_TTRAM);
-		paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
+		paragraphs = availableMemory < 8 * 1024 * 1024L ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
 		ptr = (uint8_t*)Mxalloc(paragraphs * PARAGRAPH_SIZE, MX_TTRAM);
 		while (!ptr)
 		{
@@ -427,7 +427,7 @@ uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 	else
 	{
 		uint32_t availableMemory = Malloc(-1);
-		paragraphs = availableMemory < 8 * 1024 * 1024 ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
+		paragraphs = availableMemory < 8 * 1024 * 1024L ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
 		ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 		while (!ptr)
 		{

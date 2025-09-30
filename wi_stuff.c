@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -288,12 +288,13 @@ static void WI_updateShowNextLoc(void)
 //
 static void WI_drawShowNextLoc(void)
 {
+    int16_t last, i;
     WI_slamBackground();
 
-    int16_t last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
+    last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
 
     // draw a splat on taken cities.
-    for (int16_t i=0 ; i<=last ; i++)
+    for (i = 0; i <= last; i++)
         WI_drawSplat(i);
 
     // splat the secret level?

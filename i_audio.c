@@ -39,7 +39,6 @@
 #include "config.h"
 #endif
 
-#include <stdint.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -72,6 +71,8 @@ static int16_t firstsfx;
 
 int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 {
+	int16_t lumpnum;
+
 	UNUSED(vol);
 	UNUSED(sep);
 
@@ -87,7 +88,7 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 //	 || id == sfx_sawidl)
 //		return -1;
 
-	int16_t lumpnum = firstsfx + id;
+	lumpnum = firstsfx + id;
 	PCFX_Play(lumpnum);
 
 	return channel;

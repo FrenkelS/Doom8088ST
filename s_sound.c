@@ -186,6 +186,8 @@ static void S_StartSoundAtVolume(mobj_t __far* origin, sfxenum_t sfx_id, int16_t
 
     int16_t sep = NORM_SEP;
 
+    int16_t h;
+
     //jff 1/22/98 return if sound is not enabled
     if (nosfxparm)
         return;
@@ -224,7 +226,7 @@ static void S_StartSoundAtVolume(mobj_t __far* origin, sfxenum_t sfx_id, int16_t
     if (cnum<0)
         return;
 
-    int16_t h = I_StartSound(sfx_id, cnum, volume, sep);
+    h = I_StartSound(sfx_id, cnum, volume, sep);
     if (h != -1)
     {
         channels[cnum].handle = h;
@@ -436,7 +438,8 @@ static void S_StopChannel(int16_t cnum)
 
 static boolean S_AdjustSoundParams(mobj_t __far* listener, mobj_t __far* source, int16_t *vol, int16_t *sep)
 {
-	fixed_t adx, ady,approx_dist;
+	fixed_t adx, ady, approx_dist;
+	angle_t angle;
 
 	//jff 1/22/98 return if sound is not enabled
 	if (nosfxparm)
@@ -476,9 +479,8 @@ static boolean S_AdjustSoundParams(mobj_t __far* listener, mobj_t __far* source,
 	if (approx_dist > S_CLIPPING_DIST)
 		return false;
 	
-
     // angle of source to listener
-    angle_t angle = R_PointToAngle2(listener->x, listener->y, source->x, source->y);
+    angle = R_PointToAngle2(listener->x, listener->y, source->x, source->y);
 
     if (angle <= listener->angle)
         angle += 0xffffffff;
@@ -488,7 +490,6 @@ static boolean S_AdjustSoundParams(mobj_t __far* listener, mobj_t __far* source,
 
     // stereo separation
     *sep = 128 - ((S_STEREO_SWING * finesineapprox(angle))>>FRACBITS);
-
 
 	// volume calculation
 	if (approx_dist < S_CLOSE_DIST)

@@ -96,8 +96,9 @@ static const switchlist_t alphSwitchList[MAXSWITCHES] =
 void P_InitSwitchList(void)
 {
     int16_t		index = 0;
+    int16_t i;
 
-    for (int16_t i = 0; i < MAXSWITCHES; i++)
+    for (i = 0; i < MAXSWITCHES; i++)
     {
         switchlist[index++] = R_CheckTextureNumForName(alphSwitchList[i].name1);
         switchlist[index++] = R_CheckTextureNumForName(alphSwitchList[i].name2);
@@ -110,9 +111,11 @@ void P_InitSwitchList(void)
 
 void P_LoadTexture(int16_t texture)
 {
+	int16_t i;
+
 	R_GetTexture(texture);
 
-	for (int16_t i = 0; i < numswitches * 2; i++)
+	for (i = 0; i < numswitches * 2; i++)
 	{
 		if (switchlist[i] == texture)
 		{

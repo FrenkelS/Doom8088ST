@@ -75,21 +75,22 @@ static uint16_t PUREFUNC P_InterceptVector2(const divline_t *v2, const divline_t
 {
 	fixed_t a = (v1->dy >> FRACBITS) * ((v1->x - v2->x) >> 8);
 	fixed_t b = (v1->dx >> FRACBITS) * ((v2->y - v1->y) >> 8);
+	fixed_t c, d, den, r;
 
 	fixed_t num = a + b;
 
 	if (num == 0)
 		return 0;
 
-	fixed_t c = FixedMul(v2->dx, v1->dy >> 8);
-	fixed_t d = FixedMul(v2->dy, v1->dx >> 8);
+	c = FixedMul(v2->dx, v1->dy >> 8);
+	d = FixedMul(v2->dy, v1->dx >> 8);
 
-	fixed_t den = c - d;
+	den = c - d;
 
 	if (den == 0 || (den >> 12) == 0)
 		return 0;
 
-	fixed_t r = (num << 4) / (den >> 12);
+	r = (num << 4) / (den >> 12);
 	return (uint32_t)r <= 0xffffu ? r : 0xffffu;
 }
 
@@ -110,6 +111,8 @@ static boolean P_CrossSubsector(int16_t num)
 
     for (count = _g_subsectors[num].numlines; --count >= 0; seg++)
     { // check lines
+        fixed_t v1x, v1y, v2x, v2y;
+        uint16_t frac;
         int16_t linenum = seg->linenum;
 
         line_t __far* line = &_g_lines[linenum];
@@ -152,10 +155,10 @@ static boolean P_CrossSubsector(int16_t num)
         }
 
         // Forget this line if it doesn't cross the line of sight
-        fixed_t v1x = (fixed_t)line->v1.x<<FRACBITS;
-        fixed_t v1y = (fixed_t)line->v1.y<<FRACBITS;
-        fixed_t v2x = (fixed_t)line->v2.x<<FRACBITS;
-        fixed_t v2y = (fixed_t)line->v2.y<<FRACBITS;
+        v1x = (fixed_t)line->v1.x<<FRACBITS;
+        v1y = (fixed_t)line->v1.y<<FRACBITS;
+        v2x = (fixed_t)line->v2.x<<FRACBITS;
+        v2y = (fixed_t)line->v2.y<<FRACBITS;
 
         if (P_DivlineSide(v1x, v1y, &los.strace) == P_DivlineSide(v2x, v2y, &los.strace))
             continue;
@@ -177,7 +180,7 @@ static boolean P_CrossSubsector(int16_t num)
             return false;
 
         // crosses a two sided line
-        uint16_t frac = P_InterceptVector2(&los.strace, &divl);
+        frac = P_InterceptVector2(&los.strace, &divl);
 
         if (front->floorheight != back->floorheight)
         {
@@ -207,6 +210,7 @@ static boolean P_CrossBSPNode(int16_t bspnum)
     while (!(bspnum & NF_SUBSECTOR))
     {
         const mapnode_t __far* bsp = nodes + bspnum;
+        int8_t side, side2;
 
         divline_t dl;
         dl.x = ((fixed_t)bsp->x << FRACBITS);
@@ -214,9 +218,8 @@ static boolean P_CrossBSPNode(int16_t bspnum)
         dl.dx = ((fixed_t)bsp->dx << FRACBITS);
         dl.dy = ((fixed_t)bsp->dy << FRACBITS);
 
-        int8_t side,side2;
-        side = P_DivlineSide(los.strace.x,los.strace.y,&dl)&1;
-        side2= P_DivlineSide(los.t2x, los.t2y, &dl);
+        side  = P_DivlineSide(los.strace.x,los.strace.y,&dl) & 1;
+        side2 = P_DivlineSide(los.t2x, los.t2y, &dl);
 
         if (side == side2)
             bspnum = bsp->children[side]; // doesn't touch the other side
@@ -256,6 +259,9 @@ boolean P_CheckSight(mobj_t __far* t1, mobj_t __far* t2)
   static uint32_t prevlat1;
   static uint32_t prevlat2;
   static boolean prevr;
+  const sector_t __far* s1;
+  const sector_t __far* s2;
+  int16_t pnum;
 
   if (prevlat1 == linearAddress(t1)
    && prevlat2 == linearAddress(t2))
@@ -263,9 +269,9 @@ boolean P_CheckSight(mobj_t __far* t1, mobj_t __far* t2)
   prevlat1 = linearAddress(t1);
   prevlat2 = linearAddress(t2);
 
-  const sector_t __far* s1 = t1->subsector->sector;
-  const sector_t __far* s2 = t2->subsector->sector;
-  int16_t pnum = (s1-_g_sectors)*_g_numsectors + (s2-_g_sectors);
+  s1 = t1->subsector->sector;
+  s2 = t2->subsector->sector;
+  pnum = (s1-_g_sectors)*_g_numsectors + (s2-_g_sectors);
 
   // First check for trivial rejection.
   // Determine subsector entries in REJECT table.

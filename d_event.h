@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -49,7 +49,7 @@
 typedef enum
 {
   ev_keydown,
-  ev_keyup,
+  ev_keyup
 } evtype_t;
 
 // Event structure.
@@ -57,7 +57,7 @@ typedef struct
 {
   evtype_t  type;
   int16_t       data1;    // keys / mouse/joystick buttons
-} event_t;
+} d_event_t;
 
 
 typedef enum
@@ -70,7 +70,7 @@ typedef enum
   ga_playdemo,
   ga_completed,
   ga_victory,
-  ga_worlddone,
+  ga_worlddone
 } gameaction_t;
 
 
@@ -93,7 +93,7 @@ typedef enum
   // The 4bit weapon mask and shift, convenience.
 //BT_WEAPONMASK   = (8+16+32),
   BT_WEAPONMASK   = (8+16+32+64), // extended to pick up SSG        // phares
-  BT_WEAPONSHIFT  = 3,
+  BT_WEAPONSHIFT  = 3
 
 } buttoncode_t;
 

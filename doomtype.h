@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -36,8 +36,6 @@
 
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
-
-#include <stdint.h>
 
 #include "compiler.h"
 
@@ -65,11 +63,15 @@ typedef uint8_t byte;
 #endif
 
 
-#ifdef __GNUC__
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 5)
 #define CONSTFUNC __attribute__((const))
-#define PUREFUNC __attribute__((pure))
 #else
 #define CONSTFUNC
+#endif
+
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+#define PUREFUNC __attribute__((pure))
+#else
 #define PUREFUNC
 #endif
 

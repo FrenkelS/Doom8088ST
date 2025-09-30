@@ -37,8 +37,6 @@
  *-----------------------------------------------------------------------------
  */
 
-#include <stdint.h>
-
 #include "doomdef.h"
 #include "doomtype.h"
 #include "d_player.h"
@@ -105,7 +103,7 @@ static int16_t titlepicnum;
  *  short ciruit operator madness begin!
  */
 
-void D_PostEvent(event_t *ev)
+void D_PostEvent(d_event_t *ev)
 {
     /* cph - suppress all input events at game start
    * FIXME: This is a lousy kludge */
@@ -147,11 +145,13 @@ static void D_Display (void)
 {
     static gamestate_t oldgamestate = GS_LEVEL;
 
+    boolean wipe;
+
     if (nodrawers)                    // for comparative timing / profiling
         return;
 
     // save the current screen if about to wipe
-    boolean wipe = (_g_gamestate != wipegamestate);
+    wipe = (_g_gamestate != wipegamestate);
 
     if (wipe)
         wipe_StartScreen();
@@ -260,7 +260,8 @@ static void TryRunTics (void)
 //  calls all ?_Responder, ?_Ticker, and ?_Drawer,
 //  calls I_GetTime and I_StartTic
 //
-_Noreturn static void D_DoomLoop(void)
+static void NORETURN_PRE D_DoomLoop(void) NORETURN_POST;
+static void D_DoomLoop(void)
 {
     for (;;)
     {
@@ -304,10 +305,11 @@ static void D_UpdateFPS()
     static uint32_t fps_frames = 0;
     static uint32_t fps_timebefore = 0;
 
+    uint32_t timenow = I_GetTime();
+
     fps_frames++;
 
-    uint32_t timenow = I_GetTime();
-    if(timenow >= (fps_timebefore + TICRATE))
+    if (timenow >= (fps_timebefore + TICRATE))
     {
         uint32_t tics_elapsed = timenow - fps_timebefore;
         fixed_t f_realfps = FixedApproxDiv((fps_frames*(TICRATE*10)) << FRACBITS, tics_elapsed <<FRACBITS);
@@ -317,7 +319,7 @@ static void D_UpdateFPS()
         fps_frames = 0;
         fps_timebefore = timenow;
     }
-    else if(timenow < fps_timebefore)
+    else if (timenow < fps_timebefore)
     {
         //timer overflow.
         fps_timebefore = timenow;
@@ -432,8 +434,10 @@ static const char * const * myargv;
 
 int16_t M_CheckParm(char *check)
 {
-	for (int16_t i = 1; i < myargc; i++)
-		if (!strcasecmp(check, myargv[i]))
+	int16_t i;
+
+	for (i = 1; i < myargc; i++)
+		if (!stricmp(check, myargv[i]))
 			return i;
 
 	return 0;
@@ -454,6 +458,8 @@ static void D_Init(void)
 
 static void D_DoomMainSetup(void)
 {
+    int16_t p;
+
     // init subsystems
     I_InitTimer();
 
@@ -498,7 +504,7 @@ static void D_DoomMainSetup(void)
 
     I_InitGraphics();
 
-    int16_t p = M_CheckParm("-timedemo");
+    p = M_CheckParm("-timedemo");
     if (p && p < myargc - 1)
     {
         singletics = true;

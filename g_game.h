@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@
 // GAME
 //
 
-void G_Responder(event_t *ev);
+void G_Responder(d_event_t *ev);
 void G_CheckDemoStatus(void);
 void G_DeferedInitNew(skill_t skill);
 void G_DeferedPlayDemo(const char *demo);
@@ -56,7 +56,7 @@ void G_ReloadDefaults(void);     // killough 3/1/98: loads game defaults
 void G_PlayerReborn(void);
 void G_BuildTiccmd (void);
 
-void G_UpdateSaveGameStrings();
+void G_UpdateSaveGameStrings(void);
 
 void G_LoadSettings();
 void G_SaveSettings();

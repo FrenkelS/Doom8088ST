@@ -1,30 +1,25 @@
-Doom8088: Atari ST Edition
-Doom8088 for Atari ST computers
+Doom8088: Sinclair QL Edition
+Doom for Sinclair QL computers
 https://github.com/FrenkelS/Doom8088ST
 
 Doom was originally designed in 1993
-for 32-bit DOS computers with
-4 MB of RAM.
-It's mostly written in C code
-with very little assembly code.
-It has been ported to
-all kinds of systems.
-Usually these systems are 32-bit or
-more and have a flat memory model.
+for 32-bit DOS computers with 4 MB of RAM.
+It's mostly written in C code with very little assembly code.
+It has been ported to all kinds of systems.
+Usually these systems are 32-bit or more
+and have a flat memory model.
 
-Doom8088: Atari ST Edition is
-a port for Atari ST computers with at
-least 512 kB of RAM (1 MB recommended)
-and a Motorola 68000 CPU.
-It's based on Doom8088,
-a port of Doom for 16-bit DOS computers.
+Doom8088: Sinclair QL Edition is a port for Sinclair QL
+computers with at least 512 kB of RAM (1 MB recommended)
+and a Motorola 68008 CPU.
+It's based on Doom8088, a port of Doom for 16-bit DOS computers.
 
 What's special?
  - Supports only Doom 1 Episode 1
  - Rotating overlaid automap
  - Only demo3 is supported
- - 16 and 2 color modes
- - PC speaker like sound effects
+ - 8 and 2 color modes
+ - Some sound effects
  - No music
  - No texture mapped floors and ceilings
  - No light diminishing
@@ -35,29 +30,21 @@ What's special?
  - No mouse and joystick support
 
 Known bugs:
- - When there's not enough memory for
-   a texture, one color is drawn
- - When there's not enough memory for
-   the intermission screen, the last few
-   frames of gameplay are shown instead
+ - When there's not enough memory for a texture,
+   one color is drawn
+ - When there's not enough memory for the intermission screen,
+   the last few frames of gameplay are shown instead
 
 Supported video modes:
-|Video mode |Executable  |Notes        |
-|-----------|------------|-------------|
-|320x200 16c|DOOMSTCH.TOS|High detail  |
-|320x200 16c|DOOMSTCM.TOS|Medium detail|
-|320x200 16c|DOOMSTCL.TOS|Low detail   |
-|640x200  4c|DOOMSTBW.TOS|Medium detail|
-|           |            |2 colors     |
-|640x200  4c|DOOM520.TOS |For 512 kB   |
-|           |            |computers    |
+|Video mode|Executable|
+|----------|----------|
+|256x256 8c|doomql8   |
+|512x256 4c|doomql2   |
 
-DOOMSTC?.TOS need DOOMST16.WAD.
-DOOMSTBW.TOS needs DOOMST2.WAD.
+doomql8 needs DOOMQL8.WAD.
+doomql2 needs DOOMQL2.WAD.
 
-DOOM520.TOS also needs DOOMST2.WAD.
-It goes from the first level immediately
-to the last level.
+The game expects the WAD file to be in WIN2_
 
 Controls:
 |Action                 |Keys         |
@@ -68,12 +55,11 @@ Controls:
 |Walk                   |Arrow keys   |
 |Strafe                 |Alt          |
 |Strafe left and right  |< & >        |
-|Automap                |Tab          |
+|Automap                |Tabulate     |
 |Automap zoom in and out|+ & -        |
 |Automap follow mode    |F            |
 |Weapon up and down     |[ & ]        |
 |Menu                   |Esc          |
-|Quit to OS             |F10          |
 
 Cheats:
 |Code      |Effects                  |

@@ -26,7 +26,6 @@
 #ifndef __Z_ZONE__
 #define __Z_ZONE__
 
-#include <stddef.h>
 #include "doomtype.h"
 
 void Z_Init(void);
@@ -42,5 +41,7 @@ void Z_ChangeTagToCache(const void __far* ptr);
 void Z_Free(const void __far* ptr);
 void Z_FreeTags(void);
 void Z_CheckHeap(void);
+
+boolean Z_EqualNames(const char __far* farName, const char* nearName);
 
 #endif

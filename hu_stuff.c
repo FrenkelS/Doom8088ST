@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -33,7 +33,6 @@
  *-----------------------------------------------------------------------------
  */
 
-#include <stdint.h>
 #include "d_player.h"
 #include "r_defs.h"
 #include "hu_stuff.h"
@@ -159,7 +158,8 @@ static void HUlib_drawTextLine(hu_textline_t* textline)
 
 	// draw the new stuff
 	int16_t x = 0;
-	for (size_t i = 0; i < textline->len; i++)
+	size_t i;
+	for (i = 0; i < textline->len; i++)
 	{
 		char c = toupper(textline->lineoftext[i]); //jff insure were not getting a cheap toupper conv.
 

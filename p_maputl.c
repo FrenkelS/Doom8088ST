@@ -153,20 +153,24 @@ static void P_MakeDivline(const line_t __far* li, divline_t *dl)
 
 static inline fixed_t CONSTFUNC FixedDiv(fixed_t a, fixed_t b)
 {
+	uint16_t ibit;
+	int16_t ch;
+	uint16_t cl;
+
 	if (a < 0)
 	{
 		a = -a;
 		b = -b;
 	}
 
-	uint16_t ibit = 1;
+	ibit = 1;
 	while (b < a)
 	{
 		b    <<= 1;
 		ibit <<= 1;
 	}
 
-	int16_t ch = 0;
+	ch = 0;
 	for (; ibit != 0; ibit >>= 1)
 	{
 		if (a >= b)
@@ -177,7 +181,7 @@ static inline fixed_t CONSTFUNC FixedDiv(fixed_t a, fixed_t b)
 		a <<= 1;
 	}
 
-	uint16_t cl = 0;
+	cl = 0;
 	if (a >= b) {a -= b; cl |= 0x8000;} a <<= 1;
 	if (a >= b) {a -= b; cl |= 0x4000;} a <<= 1;
 	if (a >= b) {a -= b; cl |= 0x2000;} a <<= 1;
@@ -415,40 +419,40 @@ void P_SetThingPosition(mobj_t __far* thing)
 
 boolean P_BlockLinesIterator(int16_t x, int16_t y, boolean func(line_t __far*))
 {
+	if (!(0 <= x && x < _g_bmapwidth && 0 <= y && y <_g_bmapheight))
+		return true;
+	else
+	{
+		const uint16_t vcount = validcount;
 
-    if (!(0 <= x && x < _g_bmapwidth && 0 <= y && y <_g_bmapheight))
-        return true;
+		const int16_t offset = _g_blockmap[y*_g_bmapwidth+x];
+		const int16_t __far* list = _g_blockmaplump+offset;     // original was reading         // phares
 
-    const int16_t offset = _g_blockmap[y*_g_bmapwidth+x];
-    const int16_t __far* list = _g_blockmaplump+offset;     // original was reading         // phares
+		// delmiting 0 as linedef 0     // phares
 
+		// killough 1/31/98: for compatibility we need to use the old method.
+		// Most demos go out of sync, and maybe other problems happen, if we
+		// don't consider linedef 0. For safety this should be qualified.
 
-    // delmiting 0 as linedef 0     // phares
+		list++;     // skip 0 starting delimiter                      // phares
 
-    // killough 1/31/98: for compatibility we need to use the old method.
-    // Most demos go out of sync, and maybe other problems happen, if we
-    // don't consider linedef 0. For safety this should be qualified.
+		for ( ; *list != -1 ; list++)                                   // phares
+		{
+			const int16_t lineno = *list;
 
-    list++;     // skip 0 starting delimiter                      // phares
+			line_t __far* ld = &_g_lines[lineno];
 
-    const uint16_t vcount = validcount;
+			if (ld->validcount == vcount)
+				continue;       // line has already been checked
 
-    for ( ; *list != -1 ; list++)                                   // phares
-    {
-        const int16_t lineno = *list;
+			ld->validcount = vcount;
 
-        line_t __far* ld = &_g_lines[lineno];
+			if (!func(ld))
+				return false;
+		}
 
-        if (ld->validcount == vcount)
-            continue;       // line has already been checked
-
-        ld->validcount = vcount;
-
-        if (!func(ld))
-            return false;
-    }
-
-    return true;  // everything was checked
+		return true;  // everything was checked
+	}
 }
 
 //
@@ -656,45 +660,45 @@ boolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
 
   if (xt2 > xt1)
   {
-    mapxstep = 1;
     fixed_t partial = FRACUNIT - ((x1>>MAPBTOFRAC)&(FRACUNIT-1));
     ystep = FixedApproxDiv (y2-y1,x2-x1);
     yintercept = (y1>>MAPBTOFRAC) + FixedMul3216(ystep, partial);
+    mapxstep = 1;
   }
   else if (xt2 < xt1)
   {
-    mapxstep = -1;
     fixed_t partial = (x1>>MAPBTOFRAC)&(FRACUNIT-1);
     ystep = FixedApproxDiv (y2-y1,x1-x2);
     yintercept = (y1>>MAPBTOFRAC) + FixedMul3216(ystep, partial);
+    mapxstep = -1;
   }
   else // xt2 == xt1
   {
-    mapxstep = 0;
     ystep = 256*FRACUNIT;
     yintercept = (y1>>MAPBTOFRAC) + ystep;
+    mapxstep = 0;
   }
 
 
   if (yt2 > yt1)
   {
-    mapystep = 1;
     fixed_t partial = FRACUNIT - ((y1>>MAPBTOFRAC)&(FRACUNIT-1));
     xstep = FixedApproxDiv (x2-x1,y2-y1);
     xintercept = (x1>>MAPBTOFRAC) + FixedMul3216(xstep, partial);
+    mapystep = 1;
   }
   else if (yt2 < yt1)
   {
-    mapystep = -1;
     fixed_t partial = (y1>>MAPBTOFRAC)&(FRACUNIT-1);
     xstep = FixedApproxDiv (x2-x1,y1-y2);
     xintercept = (x1>>MAPBTOFRAC) + FixedMul3216(xstep, partial);
+    mapystep = -1;
   }
   else // yt2 == yt1
   {
-    mapystep = 0;
     xstep = 256*FRACUNIT;
     xintercept = (x1>>MAPBTOFRAC) + xstep;
+    mapystep = 0;
   }
 
 

@@ -140,7 +140,7 @@ void I_StartTic(void)
 		{
 			if (diff & (1 << bit))
 			{
-				event_t ev;
+				d_event_t ev;
 				ev.type = kb_matrix_cur[i] & (1 << bit) ? ev_keydown : ev_keyup;
 				uint8_t k = (i * 8) | bit;
 

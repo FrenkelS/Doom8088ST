@@ -38,8 +38,6 @@
 #include "config.h"
 #endif
 
-#include <stdint.h>
-
 #include "d_player.h"
 #include "r_defs.h"
 #include "st_stuff.h"
@@ -72,18 +70,18 @@ static const uint8_t mapcolor_secr = 0xb0;
 static const uint8_t mapcolor_unsn = 0xb0;
 static const uint8_t mapcolor_sngl = 0xdb;
 #elif NR_OF_COLORS == 2
-#define WHITE	(1<<7)
-static const uint8_t mapcolor_wall = WHITE;
-static const uint8_t mapcolor_fchg = WHITE;
-static const uint8_t mapcolor_cchg = WHITE;
-static const uint8_t mapcolor_clsd = WHITE;
-static const uint8_t mapcolor_rdor = WHITE;
-static const uint8_t mapcolor_bdor = WHITE;
-static const uint8_t mapcolor_ydor = WHITE;
-static const uint8_t mapcolor_tele = WHITE;
-static const uint8_t mapcolor_secr = WHITE;
-static const uint8_t mapcolor_unsn = WHITE;
-static const uint8_t mapcolor_sngl = WHITE;
+#define IGNORED	0
+static const uint8_t mapcolor_wall = IGNORED;
+static const uint8_t mapcolor_fchg = IGNORED;
+static const uint8_t mapcolor_cchg = IGNORED;
+static const uint8_t mapcolor_clsd = IGNORED;
+static const uint8_t mapcolor_rdor = IGNORED;
+static const uint8_t mapcolor_bdor = IGNORED;
+static const uint8_t mapcolor_ydor = IGNORED;
+static const uint8_t mapcolor_tele = IGNORED;
+static const uint8_t mapcolor_secr = IGNORED;
+static const uint8_t mapcolor_unsn = IGNORED;
+static const uint8_t mapcolor_sngl = IGNORED;
 #elif NR_OF_COLORS == 4
 #define CYAN	(1<<6)
 #define MAGENTA	(2<<6)
@@ -96,6 +94,25 @@ static const uint8_t mapcolor_rdor = MAGENTA;
 static const uint8_t mapcolor_bdor = CYAN;
 static const uint8_t mapcolor_ydor = WHITE;
 static const uint8_t mapcolor_tele = CYAN;
+static const uint8_t mapcolor_secr = MAGENTA;
+static const uint8_t mapcolor_unsn = WHITE;
+static const uint8_t mapcolor_sngl = WHITE;
+#elif NR_OF_COLORS == 8
+#define BLUE			1
+#define RED				2
+#define MAGENTA			3
+#define GREEN			4
+#define CYAN			5
+#define YELLOW			6
+#define WHITE			7
+static const uint8_t mapcolor_wall = MAGENTA;
+static const uint8_t mapcolor_fchg = CYAN;
+static const uint8_t mapcolor_cchg = CYAN;
+static const uint8_t mapcolor_clsd = WHITE;
+static const uint8_t mapcolor_rdor = RED;
+static const uint8_t mapcolor_bdor = BLUE;
+static const uint8_t mapcolor_ydor = YELLOW;
+static const uint8_t mapcolor_tele = GREEN;
 static const uint8_t mapcolor_secr = MAGENTA;
 static const uint8_t mapcolor_unsn = WHITE;
 static const uint8_t mapcolor_sngl = WHITE;
@@ -475,7 +492,7 @@ static void AM_maxOutWindowScale(void)
 //
 // Passed an input event, returns true if its handled
 //
-boolean AM_Responder(event_t*  ev)
+boolean AM_Responder(d_event_t* ev)
 {
     boolean rc;
     int16_t ch;
@@ -896,16 +913,15 @@ static void AM_drawWalls(void)
     // draw the unclipped visible portions of all lines
     for (i=0;i<_g_numlines;i++)
     {
+        const sector_t __far* backsector  = LN_BACKSECTOR( &_g_lines[i]);
+        const sector_t __far* frontsector = LN_FRONTSECTOR(&_g_lines[i]);
+
+        const int16_t line_special = LN_SPECIAL(&_g_lines[i]);
+
         l.a.x = (fixed_t)_g_lines[i].v1.x << MAPBITS;
         l.a.y = (fixed_t)_g_lines[i].v1.y << MAPBITS;
         l.b.x = (fixed_t)_g_lines[i].v2.x << MAPBITS;
         l.b.y = (fixed_t)_g_lines[i].v2.y << MAPBITS;
-
-
-        const sector_t __far* backsector = LN_BACKSECTOR(&_g_lines[i]);
-        const sector_t __far* frontsector = LN_FRONTSECTOR(&_g_lines[i]);
-
-        const int16_t line_special =  LN_SPECIAL(&_g_lines[i]);
 
         if (automapmode & am_rotate)
         {

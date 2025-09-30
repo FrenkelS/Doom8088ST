@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2025 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -36,9 +36,6 @@
  *  Dynamic HELP screen.
  *
  *-----------------------------------------------------------------------------*/
-
-#include <stdio.h>
-#include <stdint.h>
 
 #include "compiler.h"
 #include "doomdef.h"
@@ -364,11 +361,11 @@ static void M_DrawSaveLoad(const char* name)
 {
 	int8_t i, j;
 
-	V_DrawNamePatchScaled(72 ,LOADGRAPHIC_Y, name);
-
 	const patch_t __far* lpatch = W_GetLumpByName("M_LSLEFT");
 	const patch_t __far* mpatch = W_GetLumpByName("M_LSCNTR");
 	const patch_t __far* rpatch = W_GetLumpByName("M_LSRGHT");
+
+	V_DrawNamePatchScaled(72 ,LOADGRAPHIC_Y, name);
 
 	for (i = 0; i < load_end; i++)
 	{
@@ -810,7 +807,7 @@ static void M_InitDefaults(void)
 // action based on the state of the system.
 //
 
-boolean M_Responder (event_t* ev)
+boolean M_Responder(d_event_t* ev)
 {
     int16_t    ch;
 
@@ -990,13 +987,9 @@ static char __far* Z_Strdup(const char* s)
 {
     const size_t len = strlen(s);
 
-    if(!len)
-        return NULL;
+    char __far* ptr = Z_MallocStatic(len + 1);
 
-    char __far* ptr = Z_MallocStatic(len+1);
-
-    if(ptr)
-        _fstrcpy(ptr, s);
+    _fstrcpy(ptr, s);
 
     return ptr;
 }
@@ -1126,8 +1119,10 @@ static void M_StartMessage (const char* string, void (*routine)(boolean))
 //
 static void M_DrawThermo(int16_t x, int16_t y, int16_t thermWidth, int16_t thermDot )
 {
-    int16_t          xx;
+    int16_t          xx = x;
     int16_t           i;
+    int16_t thermm_lump;
+
     /*
    * Modification By Barry Mead to allow the Thermometer to have vastly
    * larger ranges. (the thermWidth parameter can now have a value as
@@ -1139,9 +1134,8 @@ static void M_DrawThermo(int16_t x, int16_t y, int16_t thermWidth, int16_t therm
     int16_t horizScaler; //Used to allow more thermo range for mouse sensitivity.
     thermWidth = (thermWidth > 200) ? 200 : thermWidth; //Clamp to 200 max
     horizScaler = (thermWidth > 23) ? (200 / thermWidth) : 8; //Dynamic range
-    xx = x;
 
-    int16_t thermm_lump = W_GetNumForName("M_THERMM");
+    thermm_lump = W_GetNumForName("M_THERMM");
 
     V_DrawNamePatchScaled(xx, y, "M_THERML");
 
@@ -1172,8 +1166,9 @@ static int16_t font_lump_offset;
 static int16_t M_StringWidth(const char __far* string)
 {
 	int16_t	w = 0;
+	size_t i;
 
-	for (size_t i = 0; i < _fstrlen(string); i++)
+	for (i = 0; i < _fstrlen(string); i++)
 	{
 		char c = string[i];
 		c = toupper(c);

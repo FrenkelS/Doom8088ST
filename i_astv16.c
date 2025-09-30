@@ -24,7 +24,6 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <stdint.h>
 #include <mint/cookie.h>
 #include <mint/osbind.h>
 
@@ -267,7 +266,7 @@ static void movep(uint32_t d, uint8_t *a)
 	a[4] = (d >>  8) & 0xff;
 	a[6] = (d >>  0) & 0xff;
 #else
-	asm (
+	__asm__ (
 		"movep.l %[d], 0(%[a])"
 		:
 		: [d]"d"(d), [a]"a"(a)
@@ -744,7 +743,7 @@ static void setPixel(uint8_t *a, int16_t x, uint32_t andmask, uint8_t color)
 	a[6] = (d >>  0) & 0xff;
 #else
 	uint32_t tmp = 0;
-	asm (
+	__asm__ (
 		"movep.l 0(%[dest]), %[tmp]\n"
 		"and.l %[andmask],   %[tmp]\n"
 		" or.l %[ormask],    %[tmp]\n"
@@ -769,11 +768,12 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	int16_t err = dx + dy;
 
+	int16_t x = x0 & 7;
+	uint32_t andmask = ~(0x80808080 >> x);
+
 	while (true)
 	{
 		uint8_t *address = &_s_screen[OFFSET(x0 >> 3, y0)];
-		int16_t x = x0 & 7;
-		uint32_t andmask = ~(0x80808080 >> x);
 		setPixel(address, x, andmask, color);
 
 		if (x0 == x1 && y0 == y1)
@@ -785,6 +785,9 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 		{
 			err += dy;
 			x0  += sx;
+
+			x = x0 & 7;
+			andmask = ~(0x80808080 >> x);
 		}
 
 		if (e2 <= dx)
