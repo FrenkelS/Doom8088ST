@@ -502,7 +502,7 @@ void V_ShutdownDrawLine(void)
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
-	static const uint8_t bitmasks8[8] = {0x7f, 0xbf, 0xdf, 0xef, 0xf7, 0xfb, 0xfd, 0xfe};
+	UNUSED(color);
 
 	int16_t dx = abs(x1 - x0);
 	int16_t sx = x0 < x1 ? 1 : -1;
@@ -512,13 +512,12 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	int16_t err = dx + dy;
 
-	int16_t p = x0 & 7;
-	uint8_t bitmask = bitmasks8[p];
+	uint8_t bitmask = 0b10000000 >> (x0 & 7);
 
 	while (true)
 	{
 		uint8_t c = _s_screen[y0 * PLANEWIDTH + (x0 >> 3)];
-		_s_screen[y0 * PLANEWIDTH + (x0 >> 3)] = (c & bitmask) | (color >> p);
+		_s_screen[y0 * PLANEWIDTH + (x0 >> 3)] = (c & ~bitmask) | bitmask;
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -530,8 +529,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 			err += dy;
 			x0  += sx;
 
-			p       = x0 & 7;
-			bitmask = bitmasks8[p];
+			bitmask = 0b10000000 >> (x0 & 7);
 		}
 
 		if (e2 <= dx)
