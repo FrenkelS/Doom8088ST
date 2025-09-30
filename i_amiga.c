@@ -254,21 +254,17 @@ void PCFX_Shutdown(void)
 // Returns time in 1/35th second tics.
 //
 
-static clock_t basetime;
-
 static boolean isTimerSet;
 
 
 int32_t I_GetTime(void)
 {
-	return (clock() - basetime) * TICRATE / CLOCKS_PER_SEC;
+	return clock() * TICRATE / CLOCKS_PER_SEC;
 }
 
 
 void I_InitTimer(void)
 {
-	basetime = clock();
-
 	isTimerSet = true;
 }
 
