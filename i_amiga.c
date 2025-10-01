@@ -101,34 +101,6 @@ static void I_PostEvent(boolean keydown, int16_t data1)
 }
 
 
-#define SC_ESCAPE			0x45
-#define SC_MINUS			0x0b
-#define SC_PLUS				0x0c
-#define SC_TAB				0x42
-#define SC_BRACKET_LEFT		0x1a
-#define SC_BRACKET_RIGHT	0x1b
-#define SC_ENTER			0x44
-#define SC_CTRL				0x63
-#define SC_LSHIFT			0x60
-#define SC_RSHIFT			0x61
-#define SC_COMMA			0x38
-#define SC_PERIOD			0x39
-#define SC_ALT				0x64
-#define SC_SPACE			0x40
-#define SC_F10				0x59
-#define SC_UPARROW			0x4c
-#define SC_DOWNARROW		0x4d
-#define SC_LEFTARROW		0x4f
-#define SC_RIGHTARROW		0x4e
-
-#define SC_Q	0x10
-#define SC_P	0x19
-#define SC_A	0x20
-#define SC_L	0x28
-#define SC_Z	0x31
-#define SC_M	0x37
-
-
 void I_StartTic(void)
 {
 	static uint8_t kb_matrix[KB_MATRIX_SIZE * 2];
