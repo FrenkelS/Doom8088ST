@@ -245,7 +245,7 @@ static void I_ShutdownTimer(void)
 
 uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 {
-	uint32_t availableMemory = AvailMem(MEMF_ANY);
+	uint32_t availableMemory = AvailMem(MEMF_ANY | MEMF_LARGEST);
 	uint32_t paragraphs = availableMemory < 8 * 1024 * 1024L ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
 	uint8_t *ptr = malloc(paragraphs * PARAGRAPH_SIZE);
 	while (!ptr)
