@@ -179,7 +179,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	coplist[COPLIST_IDX_BPL1PTH_VALUE] = addr >> 16;
 	coplist[COPLIST_IDX_BPL1PTL_VALUE] = addr;
 
-	custom.dmacon = BITCLR|DMAF_SPRITE;
+	custom.dmacon = BITCLR | DMAF_SPRITE;
 	custom.cop1lc = (uint32_t) coplist;
 
 	custom.color[0] = 0x000;

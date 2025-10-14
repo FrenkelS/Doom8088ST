@@ -26,7 +26,9 @@
 #include <stdarg.h>
 #include <time.h>
 #include <clib/alib_protos.h>
+#include <clib/graphics_protos.h>
 #include <devices/keyboard.h>
+#include <hardware/dmabits.h>
 #include <proto/exec.h>
 
 #include "doomdef.h"
@@ -194,21 +196,47 @@ void I_StartTic(void)
 // Audio
 //
 
+extern struct Custom custom;
+
+static int8_t __chip sndData[18600 - 8 - 32];
+
+
+static void PCFX_Stop(void)
+{
+	custom.dmacon = DMAF_AUD0;
+}
+
+
 void PCFX_Play(int16_t lumpnum)
 {
-	UNUSED(lumpnum);
+	PCFX_Stop();
+
+	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
+	uint16_t sndLength = sndLump[0];
+	memcpy(sndData, sndLump + 1, sndLength);
+	Z_ChangeTagToCache(sndLump);
+
+	custom.aud[0].ac_len = sndLength / 2;
+	custom.dmacon = DMAF_SETCLR | DMAF_AUD0;
 }
 
 
 void PCFX_Init(void)
 {
+	PCFX_Stop();
 
+	extern struct GfxBase *GfxBase;
+	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
+
+	custom.aud[0].ac_ptr = (uint16_t *)sndData;
+	custom.aud[0].ac_vol = 64;
+	custom.aud[0].ac_per = pal ? 3546895 / 11025 : 3579545 / 11025;
 }
 
 
 void PCFX_Shutdown(void)
 {
-
+	PCFX_Stop();
 }
 
 

@@ -211,7 +211,7 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	videoscreen += (40 - 30) / 2;										// center horizontally
 	videoscreen += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2;	// center vertically
 
-	custom.dmacon = BITCLR|DMAF_SPRITE;
+	custom.dmacon = BITCLR | DMAF_SPRITE;
 	custom.cop1lc = (uint32_t) coplist;
 
 	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
