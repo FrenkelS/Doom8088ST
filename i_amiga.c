@@ -76,7 +76,7 @@ static boolean isKeyboardIsrSet = false;
 void I_InitKeyboard(void)
 {
 	kb_mp = CreatePort(0, 0);
-	kb_io = (struct IOStdReq *) CreateExtIO(kb_mp, sizeof(struct IOStdReq));
+	kb_io = (struct IOStdReq *)CreateExtIO(kb_mp, sizeof(struct IOStdReq));
 	OpenDevice("keyboard.device", 0L, (struct IORequest *) kb_io, 0);
 	kb_io->io_Command = KBD_READMATRIX;
 	kb_io->io_Length  = SysBase->LibNode.lib_Version >= 36 ? KB_MATRIX_SIZE : 13;
@@ -87,8 +87,8 @@ void I_InitKeyboard(void)
 
 static void I_ShutdownKeyboard(void)
 {
-	CloseDevice((struct IORequest *) kb_io);
-	DeleteExtIO((struct IORequest *) kb_io);
+	CloseDevice((struct IORequest *)kb_io);
+	DeleteExtIO((struct IORequest *)kb_io);
 
 	DeletePort(kb_mp);
 }
@@ -116,7 +116,7 @@ void I_StartTic(void)
 
 	// read keyboard
 	kb_io->io_Data = (APTR) kb_matrix_cur;
-	DoIO((struct IORequest *) kb_io);
+	DoIO((struct IORequest *)kb_io);
 
 
 	diff = kb_matrix_prv[1] ^ kb_matrix_cur[1];
@@ -198,7 +198,8 @@ void I_StartTic(void)
 
 extern struct Custom custom;
 
-static int8_t __chip sndData[18600 - 8 - 32];
+static uint16_t zeroIndex = 0;
+static int8_t __chip sndBuffer[18600 - 8 - 32];
 
 
 static void PCFX_Stop(void)
@@ -213,10 +214,13 @@ void PCFX_Play(int16_t lumpnum)
 
 	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
 	uint16_t sndLength = sndLump[0];
-	memcpy(sndData, sndLump + 1, sndLength);
+	memcpy(sndBuffer, sndLump + 1, sndLength);
+	if (sndLength < zeroIndex)
+		memset(sndBuffer + sndLength, 0, zeroIndex - sndLength);
+	zeroIndex = sndLength;
 	Z_ChangeTagToCache(sndLump);
 
-	custom.aud[0].ac_len = sndLength / 2;
+	//custom.aud[0].ac_len = sndLength / 2;
 	custom.dmacon = DMAF_SETCLR | DMAF_AUD0;
 }
 
@@ -228,9 +232,10 @@ void PCFX_Init(void)
 	extern struct GfxBase *GfxBase;
 	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
 
-	custom.aud[0].ac_ptr = (uint16_t *)sndData;
+	custom.aud[0].ac_ptr = (uint16_t *)sndBuffer;
+	custom.aud[0].ac_len = sizeof(sndBuffer) / sizeof(uint16_t);
+	custom.aud[0].ac_per = (pal ? 3546895 : 3579545) / 11025;
 	custom.aud[0].ac_vol = 64;
-	custom.aud[0].ac_per = pal ? 3546895 / 11025 : 3579545 / 11025;
 }
 
 
