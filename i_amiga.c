@@ -62,6 +62,72 @@ void I_InitGraphics(void)
 
 //**************************************************************************************
 //
+// Audio
+//
+
+extern struct Custom custom;
+
+static uint16_t zeroIndex = 0;
+static int8_t __chip sndBuffer[18600 - 8 - 32];
+
+static int32_t stopSoundAtTic = 0;
+
+
+static void PCFX_Stop(void)
+{
+	custom.dmacon  = DMAF_AUD0;
+	stopSoundAtTic = 0;
+}
+
+
+void PCFX_Play(int16_t lumpnum)
+{
+	PCFX_Stop();
+
+	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
+	uint16_t sndLength = sndLump[0];
+	memcpy(sndBuffer, sndLump + 1, sndLength);
+	if (sndLength < zeroIndex)
+		memset(sndBuffer + sndLength, 0, zeroIndex - sndLength);
+	zeroIndex = sndLength;
+	Z_ChangeTagToCache(sndLump);
+
+	stopSoundAtTic = clock() + (sndLength * CLOCKS_PER_SEC) / 11025;
+
+	//custom.aud[0].ac_len = sndLength / 2;
+	custom.dmacon = DMAF_SETCLR | DMAF_AUD0;
+}
+
+
+static void PCFX_UpdateSound(void)
+{
+	if (stopSoundAtTic && clock() >= stopSoundAtTic)
+		PCFX_Stop();
+}
+
+
+void PCFX_Init(void)
+{
+	PCFX_Stop();
+
+	extern struct GfxBase *GfxBase;
+	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
+
+	custom.aud[0].ac_ptr = (uint16_t *)sndBuffer;
+	custom.aud[0].ac_len = sizeof(sndBuffer) / sizeof(uint16_t);
+	custom.aud[0].ac_per = (pal ? 3546895 : 3579545) / 11025;
+	custom.aud[0].ac_vol = 64;
+}
+
+
+void PCFX_Shutdown(void)
+{
+	PCFX_Stop();
+}
+
+
+//**************************************************************************************
+//
 // Keyboard code
 //
 
@@ -108,6 +174,8 @@ void I_StartTic(void)
 	static uint8_t kb_matrix[KB_MATRIX_SIZE * 2];
 	static uint8_t *kb_matrix_cur = &kb_matrix[0];
 	static uint8_t *kb_matrix_prv = &kb_matrix[KB_MATRIX_SIZE];
+
+	PCFX_UpdateSound();
 
 	uint8_t diff;
 	uint8_t *tmp = kb_matrix_cur;
@@ -188,60 +256,6 @@ void I_StartTic(void)
 
 	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[12] & (1 << 3), KEYD_B);				// Ctrl
 	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[12] & (1 << 4), KEYD_STRAFE);		// Alt
-}
-
-
-//**************************************************************************************
-//
-// Audio
-//
-
-extern struct Custom custom;
-
-static uint16_t zeroIndex = 0;
-static int8_t __chip sndBuffer[18600 - 8 - 32];
-
-
-static void PCFX_Stop(void)
-{
-	custom.dmacon = DMAF_AUD0;
-}
-
-
-void PCFX_Play(int16_t lumpnum)
-{
-	PCFX_Stop();
-
-	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
-	uint16_t sndLength = sndLump[0];
-	memcpy(sndBuffer, sndLump + 1, sndLength);
-	if (sndLength < zeroIndex)
-		memset(sndBuffer + sndLength, 0, zeroIndex - sndLength);
-	zeroIndex = sndLength;
-	Z_ChangeTagToCache(sndLump);
-
-	//custom.aud[0].ac_len = sndLength / 2;
-	custom.dmacon = DMAF_SETCLR | DMAF_AUD0;
-}
-
-
-void PCFX_Init(void)
-{
-	PCFX_Stop();
-
-	extern struct GfxBase *GfxBase;
-	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
-
-	custom.aud[0].ac_ptr = (uint16_t *)sndBuffer;
-	custom.aud[0].ac_len = sizeof(sndBuffer) / sizeof(uint16_t);
-	custom.aud[0].ac_per = (pal ? 3546895 : 3579545) / 11025;
-	custom.aud[0].ac_vol = 64;
-}
-
-
-void PCFX_Shutdown(void)
-{
-	PCFX_Stop();
 }
 
 
