@@ -104,3 +104,17 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 |IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Motorola 68000 Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
+
+## Porting to other platforms:
+To port Doom8088 to another platform, start by copying `i_dummy.c` and `i_dummyv.c` and see if it compiles.
+Then implement the functions `I_ZoneBase()`, `R_DrawColumnSprite()`, `R_DrawColumnFlat()` and `I_FinishUpdate()`.
+Look at the other platform implementations for inspiration on how to implement these functions.
+Take one of the WAD files from another platform port.
+That should be enough to run the timedemo benchmark.
+
+Implement `V_DrawPatchScaled()` so the game can show the main menu.
+Implement `I_StartTic()` and other keyboard code so the main menu can be navigated and the game can be played.
+
+Implement the other functions in the copy of `i_dummyv.c`.
+
+Optionally implement the sound code and improve the timer code.
