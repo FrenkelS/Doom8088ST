@@ -90,6 +90,7 @@ typedef uint16_t segment_t;
 typedef uint32_t segment_t;
 #define SIZE_OF_SEGMENT_T 4
 
+#undef  __far
 #define __far
 
 #define _fmemchr	memchr

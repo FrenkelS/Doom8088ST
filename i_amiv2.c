@@ -19,11 +19,16 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Video code for Atari ST 640x200 4 color (2 colors used)
+ *      Video code for Amiga 640x200 2 color
  *
  *-----------------------------------------------------------------------------*/
 
-#include <mint/osbind.h>
+#include <clib/exec_protos.h>
+#include <clib/intuition_protos.h>
+#include <clib/graphics_protos.h>
+#include <hardware/dmabits.h>
+
+#include <stdint.h>
 
 #include "compiler.h"
 
@@ -37,30 +42,94 @@
 #include "globdata.h"
 
 
-#define PLANEWIDTH 160
+#define HORIZONTAL_RESOLUTION_LO	320
+#define HORIZONTAL_RESOLUTION_HI	640
+
+#if !defined HORIZONTAL_RESOLUTION
+#define HORIZONTAL_RESOLUTION HORIZONTAL_RESOLUTION_HI
+#endif
+
+#define PLANEWIDTH			 		(HORIZONTAL_RESOLUTION/8)
+
+#if HORIZONTAL_RESOLUTION == HORIZONTAL_RESOLUTION_LO
+#define DDFSTRT_VALUE	0x0038
+#define DDFSTOP_VALUE	0x00d0
+#define BPLCON0_VALUE	0b0001000000000000
+#else
+#define DDFSTRT_VALUE	0x003c
+#define DDFSTOP_VALUE	0x00d4
+#define BPLCON0_VALUE	0b1001000000000000
+#endif
+
+#define DW	(HORIZONTAL_RESOLUTION/HORIZONTAL_RESOLUTION_LO)
+
+#if defined VERTICAL_RESOLUTION_DOUBLED
+#define DH	2
+#else
+#define DH	1
+#endif
+
+extern struct GfxBase *GfxBase;
+extern struct Custom custom;
 
 extern const int16_t CENTERY;
 
 
-static uint8_t *videomemory;
+static uint8_t __chip mem_chunk[3 * PLANEWIDTH * 256];
 static int16_t page;
-static uint16_t c1;
-static uint16_t c2;
+static uint8_t *pages[3];
+static uint8_t *_s_screen;
+static int16_t screenHeightAmiga;
 
 
-static  int16_t oldrez;
-static uint16_t oldc0;
-static uint16_t oldc1;
-static uint16_t oldc2;
-static uint16_t oldc3;
+#define FMODE	0x1fc
+
+#define DDFSTRT	0x092
+#define DDFSTOP	0x094
+
+#define DIWSTRT				0x08e
+#define DIWSTOP				0x090
+#define DIWSTRT_VALUE		0x2c81
+#define DIWSTOP_VALUE_PAL	0x2cc1
+#define DIWSTOP_VALUE_NTSC	0xf4c1
+
+#define BPLCON0	0x100
+
+#define BPL1MOD	0x108
+
+#define BPL1PTH	0x0e0
+#define BPL1PTL	0x0e2
+
+#define COPLIST_IDX_DIWSTOP_VALUE 9
+#define COPLIST_IDX_BPL1PTH_VALUE 15
+#define COPLIST_IDX_BPL1PTL_VALUE 17
+
+
+static uint16_t __chip coplist[] = {
+	FMODE,   0,
+	DDFSTRT, DDFSTRT_VALUE,
+	DDFSTOP, DDFSTOP_VALUE,
+	DIWSTRT, DIWSTRT_VALUE,
+	DIWSTOP, DIWSTOP_VALUE_PAL,
+	BPLCON0, BPLCON0_VALUE,
+	BPL1MOD, 0,
+
+	BPL1PTH, 0,
+	BPL1PTL, 0,
+
+	0xffff, 0xfffe, // COP_WAIT_END
+	0xffff, 0xfffe  // COP_WAIT_END
+};
 
 
 void I_ReloadPalette(void)
 {
-	char lumpName[8] = "COLORMAP";
-	if (_g_gamma != 0)
+	char* lumpName;
+	if (_g_gamma == 0)
+		lumpName = "COLORMAP";
+	else
 	{
-		lumpName[6] = 'P';
+		lumpName = "COLORMP0";
 		lumpName[7] = '0' + _g_gamma;
 	}
 
@@ -71,7 +140,7 @@ void I_ReloadPalette(void)
 static const uint16_t colors[14] =
 {
 	0x000,													// normal
-	0x100, 0x100, 0x200, 0x300, 0x400, 0x500, 0x600, 0x700,	// red
+	0x100, 0x300, 0x500, 0x700, 0x800, 0xa00, 0xc00, 0xe00,	// red
 	0x110, 0x321, 0x541, 0x652,								// yellow
 	0x020													// green
 };
@@ -79,43 +148,67 @@ static const uint16_t colors[14] =
 
 static void I_UploadNewPalette(int8_t pal)
 {
-	uint16_t cdark = colors[pal];
-	Setcolor(0, cdark);
-
-	if (page == 0)
-		c2 = cdark;
-	else
-		c1 = cdark;
+	custom.color[0] = colors[pal];
 }
 
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
-	oldrez = Getrez();
-	Setscreen(-1L, -1L, 1);
-	oldc0 = Setcolor(0, 0x000);
-	oldc1 = Setcolor(1, 0x777);
-	oldc2 = Setcolor(2, 0x000);
-	oldc3 = Setcolor(3, 0x777);
+	LoadView(NULL);
+	WaitTOF();
+	WaitTOF();
 
-	videomemory = Physbase();
-	videomemory += 20;				// center horizontally
-	videomemory += 20 * PLANEWIDTH;	// center vertically
+	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
+	if (pal) {
+		coplist[COPLIST_IDX_DIWSTOP_VALUE] = DIWSTOP_VALUE_PAL;
+		screenHeightAmiga = 256;
+	} else {
+		coplist[COPLIST_IDX_DIWSTOP_VALUE] = DIWSTOP_VALUE_NTSC;
+		screenHeightAmiga = 200;
+	}
 
-	videomemory += 2;
+	pages[0] = mem_chunk;
+	pages[1] = pages[0] + (PLANEWIDTH * 256);
+	pages[2] = pages[1] + (PLANEWIDTH * 256);
 	page = 1;
-	c1 = 0x000;
-	c2 = 0x777;
+	_s_screen = pages[page];
+	_s_screen += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;					// center horizontally
+	_s_screen += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2;	// center vertically
+
+	uint32_t addr = (uint32_t) pages[0];
+	coplist[COPLIST_IDX_BPL1PTH_VALUE] = addr >> 16;
+	coplist[COPLIST_IDX_BPL1PTL_VALUE] = addr;
+
+	custom.dmacon = BITCLR | DMAF_SPRITE;
+	custom.cop1lc = (uint32_t) coplist;
+
+	custom.color[0] = 0x000;
+	custom.color[1] = 0xfff;
+
+	OwnBlitter();
+	WaitBlit();
+	custom.bltcon0 = 0b0000100111110000;
+	custom.bltcon1 = 0;
+
+	custom.bltamod = PLANEWIDTH - SCREENWIDTH * DW / 8;
+	custom.bltdmod = PLANEWIDTH - SCREENWIDTH * DW / 8;
+
+	custom.bltafwm = 0xffff;
+	custom.bltalwm = 0xffff;
+
+	custom.bltbdat = 0xffff;
+	custom.bltcdat = 0xffff;
 }
 
 
 void I_ShutdownGraphics(void)
 {
-	Setscreen(-1L, -1L, oldrez);
-	Setcolor(0, oldc0);
-	Setcolor(1, oldc1);
-	Setcolor(2, oldc2);
-	Setcolor(3, oldc3);
+	DisownBlitter();
+	LoadView(((struct GfxBase *) GfxBase)->ActiView);
+	WaitTOF();
+	WaitTOF();
+	custom.cop1lc = (uint32_t) ((struct GfxBase *) GfxBase)->copinit;
+	RethinkDisplay();
 }
 
 
@@ -136,7 +229,7 @@ void I_StartUpdate(void)
 
 #define NO_PALETTE_CHANGE 100
 
-static int16_t st_needrefresh = 0;
+static uint16_t st_needrefresh = 0;
 
 void I_FinishUpdate(void)
 {
@@ -152,39 +245,40 @@ void I_FinishUpdate(void)
 	{
 		st_needrefresh--;
 
-		if (st_needrefresh == 0)
+		if (st_needrefresh != 2)
 		{
-			uint16_t *s = (uint16_t *)videomemory;
-			if (page == 0)
-				s++;
-			else
-				s--;
-			s += (SCREENHEIGHT - ST_HEIGHT) * (PLANEWIDTH / 2);
-			uint16_t *d = (uint16_t *)videomemory;
-			d += (SCREENHEIGHT - ST_HEIGHT) * (PLANEWIDTH / 2);
-			for (int16_t y = 0; y < ST_HEIGHT; y++)
-			{
-				for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
-				{
-					*d = *s;
-					s += 2;
-					d += 2;
-				}
-				s += 20;
-				d += 20;
-			}
+			int16_t prevpage = page - 1;
+			if (prevpage == -1)
+				prevpage = 2;
+
+			uint8_t *s = pages[prevpage];
+			uint8_t *d = _s_screen;
+			s += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;
+			s += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2;
+
+			s += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
+			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
+
+			WaitBlit();
+
+			custom.bltapt = s;
+			custom.bltdpt = d;
+
+			custom.bltsize = (ST_HEIGHT << 6) | ((SCREENWIDTH * DW / 8) / 2);
 		}
 	}
 
 	// page flip
-	Setcolor(1, c1);
-	Setcolor(2, c2);
-	uint16_t ctemp = c1;
-	c1 = c2;
-	c2 = ctemp;
+	uint32_t addr = (uint32_t) pages[page];
+	coplist[COPLIST_IDX_BPL1PTH_VALUE] = addr >> 16;
+	coplist[COPLIST_IDX_BPL1PTL_VALUE] = addr;
+	page++;
+	if (page == 3)
+		page = 0;
 
-	videomemory += (2 - 4 * page);
-	page = 1 - page;
+	_s_screen = pages[page];
+	_s_screen += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;
+	_s_screen += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2;
 }
 
 
@@ -197,10 +291,6 @@ void I_FinishViewWindow(void)
 #define COLEXTRABITS (8 - 1)
 #define COLBITS (8 + 1)
 
-
-#define OFFSET(x,y) ((y)*PLANEWIDTH+2*(x)-((x)&1))
-
-
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
 	int16_t count = (dcvars->yh - dcvars->yl) + 1;
@@ -209,11 +299,11 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	const uint8_t *src = dcvars->source;
+	const uint8_t *source = dcvars->source;
 
-	const uint8_t *colmap = dcvars->colormap;
+	const uint8_t *colormap = dcvars->colormap;
 
-	uint8_t *dest = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
+	uint8_t *dest = &_s_screen[(dcvars->yl * PLANEWIDTH) + dcvars->x];
 
 	const uint16_t fracstep = dcvars->fracstep;
 	uint16_t frac = (dcvars->texturemid >> COLEXTRABITS) + (dcvars->yl - CENTERY) * fracstep;
@@ -225,44 +315,44 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	int16_t l = count >> 4;
 	while (l--)
 	{
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case 14: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case 13: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case 12: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case 11: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case 10: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  9: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  8: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  7: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  6: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  5: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  4: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  3: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  2: *dest = colmap[src[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
-		case  1: *dest = colmap[src[frac >> COLBITS]];
+		case 15: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case 14: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case 13: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case 12: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case 11: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case 10: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  9: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  8: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  7: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  6: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  5: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  4: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  3: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  2: *dest = colormap[source[frac >> COLBITS]]; dest += PLANEWIDTH; frac += fracstep;
+		case  1: *dest = colormap[source[frac >> COLBITS]];
 	}
 }
 
@@ -287,7 +377,9 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
+	uint8_t *dest = &_s_screen[(dcvars->yl * PLANEWIDTH) + dcvars->x];
+
+	int16_t l = count >> 4;
 
 	uint8_t color0;
 	uint8_t color1;
@@ -302,8 +394,6 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 		color0 = color;
 		color1 = swapNibbles(color);
 	}
-
-	int16_t l = count >> 4;
 
 	while (l--)
 	{
@@ -375,7 +465,7 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &videomemory[OFFSET(dcvars->x, dcvars->yl)];
+	uint8_t *dest = &_s_screen[(dcvars->yl * PLANEWIDTH) + dcvars->x];
 
 	static int16_t fuzzpos = 0;
 
@@ -393,16 +483,8 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
-	uint16_t *dst = (uint16_t *)videomemory;
-	for (int16_t y = 0; y < (SCREENHEIGHT - ST_HEIGHT); y++)
-	{
-		for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
-		{
-			*dst = 0;
-			dst += 2;
-		}
-		dst += 20;
-	}
+	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+		memset(&_s_screen[y * PLANEWIDTH], 0, VIEWWINDOWWIDTH);
 }
 
 
@@ -434,8 +516,8 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	while (true)
 	{
-		uint8_t c = videomemory[OFFSET(x0 >> 3, y0)];
-		videomemory[OFFSET(x0 >> 3, y0)] = (c & ~bitmask) | bitmask;
+		uint8_t c = _s_screen[y0 * PLANEWIDTH + (x0 >> 3)];
+		_s_screen[y0 * PLANEWIDTH + (x0 >> 3)] = (c & ~bitmask) | bitmask;
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -467,19 +549,15 @@ void V_DrawBackground(int16_t backgroundnum)
 	{
 		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
 		{
-			      uint16_t *d = (uint16_t *)&videomemory[OFFSET(x, y)];
-			const uint16_t *s = (uint16_t *)&src[((y & 63) * 16)];
+			uint8_t *d = &_s_screen[y * PLANEWIDTH + x];
+			const byte *s = &src[((y & 63) * 16)];
 
 			size_t len = 16;
 
 			if (VIEWWINDOWWIDTH - x < 16)
 				len = VIEWWINDOWWIDTH - x;
 
-			for (int16_t tx = 0; tx < len / 2; tx++)
-			{
-				*d = *s++;
-				d += 2;
-			}
+			memcpy(d, s, len);
 		}
 	}
 
@@ -494,17 +572,14 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 	if (lump != NULL)
 	{
 		offset = (offset / SCREENWIDTH) * PLANEWIDTH;
-		uint16_t *src  = (uint16_t *)lump;
-		uint16_t *dest = (uint16_t *)&videomemory[offset];
+		const uint8_t *src = lump;
+		uint8_t *dest = &_s_screen[offset];
 		uint16_t lumpLength = W_LumpLength(num);
 		while (lumpLength)
 		{
-			for (int16_t x = 0; x < VIEWWINDOWWIDTH / 2; x++)
-			{
-				*dest = *src++;
-				dest += 2;
-			}
-			dest += 20;
+			memcpy(dest, src, VIEWWINDOWWIDTH);
+			src  += VIEWWINDOWWIDTH;
+			dest += PLANEWIDTH;
 			lumpLength -= VIEWWINDOWWIDTH;
 		}
 		Z_ChangeTagToCache(lump);
@@ -517,7 +592,7 @@ void ST_Drawer(void)
 	if (ST_NeedUpdate())
 	{
 		ST_doRefresh();
-		st_needrefresh = 2; // 2 screen pages
+		st_needrefresh = 3; // 3 screen pages
 	}
 }
 
@@ -530,8 +605,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte *desttop = &videomemory[OFFSET(x >> 2, y)];
-	boolean odd = (x >> 2) & 1;
+	byte *desttop = &_s_screen[(y * PLANEWIDTH) + (x >> 2)];
 
 	int16_t width = patch->width;
 
@@ -601,8 +675,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		if (p == 4)
 		{
 			p = 0;
-			desttop += odd ? 3 : 1;
-			odd = !odd;
+			desttop++;
 		}
 		bitmask = bitmasks4[p];
 	}
@@ -647,7 +720,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte *dest = &videomemory[OFFSET(dc_x >> 2, dc_yl)];
+			byte *dest = &_s_screen[(dc_yl * PLANEWIDTH) + (dc_x >> 2)];
 
 			int16_t frac = 0;
 
@@ -683,7 +756,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint8_t *backbuffer = videomemory;
+	uint8_t *backbuffer = _s_screen;
 
 	while (ticks--)
 	{
@@ -704,9 +777,9 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				uint8_t *s = &frontbuffer[OFFSET(i, SCREENHEIGHT - dy - 1)];
+				uint8_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * PLANEWIDTH);
 
-				uint8_t *d = &frontbuffer[OFFSET(i, SCREENHEIGHT - 1)];
+				uint8_t *d = &frontbuffer[i] + ((SCREENHEIGHT - 1) * PLANEWIDTH);
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy
@@ -719,8 +792,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				}
 
 				// copy new screen. We need to copy only between y_lookup and + dy y_lookup
-				s = &backbuffer[OFFSET(i, wipe_y_lookup[i])];
-				d = &frontbuffer[OFFSET(i, wipe_y_lookup[i])];
+				s = &backbuffer[i]  + wipe_y_lookup[i] * PLANEWIDTH;
+				d = &frontbuffer[i] + wipe_y_lookup[i] * PLANEWIDTH;
 
 				for (int16_t j = 0 ; j < dy; j++)
 				{
@@ -760,11 +833,13 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
-	frontbuffer = videomemory;
-	if (page == 0)
-		frontbuffer += 2;
-	else
-		frontbuffer -= 2;
+	int16_t prevpage = page - 1;
+	if (prevpage == -1)
+		prevpage = 2;
+
+	frontbuffer = pages[prevpage];
+	frontbuffer += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;
+	frontbuffer += (screenHeightAmiga - SCREENHEIGHT) * PLANEWIDTH / 2;
 
 	wipe_initMelt();
 
