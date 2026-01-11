@@ -219,6 +219,12 @@ void I_SetPalette(int8_t p)
 }
 
 
+void I_StartUpdate(void)
+{
+	// Do nothing
+}
+
+
 #define NO_PALETTE_CHANGE 100
 
 void I_FinishUpdate(void)

@@ -33,6 +33,7 @@ void I_InitGraphicsHardwareSpecificCode(void);
 void I_ShutdownGraphics(void);
 void I_ReloadPalette(void);
 void I_SetPalette(int8_t pal);
+void I_StartUpdate(void);
 void I_FinishUpdate(void);
 void I_FinishViewWindow(void);
 
