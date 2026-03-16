@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -49,8 +49,16 @@ uint8_t __far* I_ZoneBase(uint32_t *heapSize);
 void I_InitTimer(void);
 int32_t I_GetTime(void);
 
+
 void NORETURN_PRE I_Quit(void) NORETURN_POST;
+
+#if defined macintosh
+#define I_Error(...) I_ErrorMac("\p"__VA_ARGS__)
+void NORETURN_PRE I_ErrorMac(const char *error, ...) NORETURN_POST;
+#else
 void NORETURN_PRE I_Error(const char *error, ...) NORETURN_POST;
+#endif
+
 
 void I_InitKeyboard(void);
 

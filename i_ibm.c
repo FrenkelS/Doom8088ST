@@ -682,7 +682,7 @@ void I_Quit(void)
 }
 
 
-void I_Error (const char *error, ...)
+void I_Error(const char *error, ...)
 {
 	va_list argptr;
 
