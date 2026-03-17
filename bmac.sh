@@ -119,3 +119,5 @@ rm w_wad.o
 rm z_zone.o
 
 rm rez.output.rsrc
+rm -rd .finf
+rm -rd .rsrc
