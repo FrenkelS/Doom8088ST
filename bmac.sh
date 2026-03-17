@@ -20,7 +20,8 @@ then
   export OUTPUT=DOOM8088.code.bin
 fi
 
-m68k-apple-macos-gcc -c i_macv.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
+m68k-apple-macos-gcc -c i_macv.c   $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -funroll-loops -fira-loop-pressure -fno-tree-pre
+
 m68k-apple-macos-gcc -c p_enemy2.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 m68k-apple-macos-gcc -c p_map.c    $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre
 m68k-apple-macos-gcc -c p_maputl.c $RENDER_OPTIONS -march=$CPU -Ofast -fomit-frame-pointer -fgcse-sm -flto -fwhole-program -funroll-loops -fira-loop-pressure -fno-tree-pre

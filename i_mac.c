@@ -37,6 +37,9 @@
 #include <Quickdraw.h>
 
 
+#define TIMEDEMO
+
+
 void I_InitGraphicsHardwareSpecificCode(void);
 void I_ShutdownGraphics(void);
 
@@ -130,6 +133,7 @@ static void I_ShutdownTimer(void)
 
 uint8_t __far* I_ZoneBase(uint32_t *heapSize)
 {
+	MaxApplZone();
 	int32_t availableMemory = FreeMem();
 	uint32_t paragraphs = availableMemory < 8 * 1024 * 1024L ? availableMemory / PARAGRAPH_SIZE : 8 * 1024 * 1024L / PARAGRAPH_SIZE;
 	uint8_t* ptr = malloc(paragraphs * PARAGRAPH_SIZE);
@@ -226,7 +230,12 @@ int main(int argc, const char * const * argv)
 
 	EraseRect(&r);
 
+#if defined TIMEDEMO
+	const char * const args[] = {"DOOM8088", "-timedemo", "demo3"};
+	D_DoomMain(3, args);
+#else
 	D_DoomMain(argc, argv);
+#endif
 
 	return 0;
 }
