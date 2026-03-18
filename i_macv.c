@@ -64,8 +64,8 @@ void I_InitGraphicsHardwareSpecificCode(void)
 
 	//memset(videomemory, 0, VIDBYTES * VIDHEIGHT);
 
-	videomemory += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;						// center horizontally
-	videomemory += ((SCREENHEIGHT_MAC - SCREENHEIGHT) / 2) * PLANEWIDTH;	// center vertically
+	videomemory += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;							// center horizontally
+	videomemory += ((SCREENHEIGHT_MAC - SCREENHEIGHT * 2) / 2) * PLANEWIDTH;	// center vertically
 }
 
 
@@ -86,6 +86,8 @@ static void I_DrawBuffer(uint8_t *buffer)
 	{
 		BlockMoveData(src, dst, VIEWWINDOWWIDTH);
 		dst += PLANEWIDTH;
+		BlockMoveData(src, dst, VIEWWINDOWWIDTH);
+		dst += PLANEWIDTH;
 		src += VIEWWINDOWWIDTH;
 	}
 
@@ -93,6 +95,8 @@ static void I_DrawBuffer(uint8_t *buffer)
 	{
 		for (int16_t y = 0; y < ST_HEIGHT; y++)
 		{
+			BlockMoveData(src, dst, VIEWWINDOWWIDTH);
+			dst += PLANEWIDTH;
 			BlockMoveData(src, dst, VIEWWINDOWWIDTH);
 			dst += PLANEWIDTH;
 			src += VIEWWINDOWWIDTH;
