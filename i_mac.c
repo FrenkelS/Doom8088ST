@@ -37,7 +37,7 @@
 #include <Quickdraw.h>
 
 
-#define TIMEDEMO
+//#define TIMEDEMO
 
 
 void I_InitGraphicsHardwareSpecificCode(void);
@@ -67,17 +67,127 @@ void I_InitGraphics(void)
 // Keyboard code
 //
 
-static boolean isKeyboardIsrSet = false;
-
-
 void I_InitKeyboard(void)
 {
-	isKeyboardIsrSet = true;
+	// Do nothing
 }
 
 
+static void I_PostEvent(boolean keydown, int16_t data1)
+{
+	d_event_t ev;
+	ev.type  = keydown ? ev_keydown : ev_keyup;
+	ev.data1 = data1;
+	D_PostEvent(&ev);
+}
+
+
+#define KB_MATRIX_SIZE 16
+
 void I_StartTic(void)
 {
+	static uint8_t kb_matrix[KB_MATRIX_SIZE * 2];
+	static uint8_t *kb_matrix_cur = &kb_matrix[0];
+	static uint8_t *kb_matrix_prv = &kb_matrix[KB_MATRIX_SIZE];
+
+	uint8_t diff;
+	uint8_t *tmp = kb_matrix_cur;
+	kb_matrix_cur = kb_matrix_prv;
+	kb_matrix_prv = tmp;
+
+
+	GetKeys(kb_matrix_cur);
+
+	diff = kb_matrix_prv[0] ^ kb_matrix_cur[0];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[0] & (1 << 0), 'a');					// a
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[0] & (1 << 1), 's');					// s
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[0] & (1 << 2), 'd');					// d
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[0] & (1 << 3), 'f');					// f
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[0] & (1 << 4), 'h');					// h
+
+
+	diff = kb_matrix_prv[1] ^ kb_matrix_cur[1];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[1] & (1 << 0), 'c');					// c
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[1] & (1 << 1), 'v');					// v
+
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[1] & (1 << 3), 'b');					// b
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[1] & (1 << 4), 'q');					// q
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[1] & (1 << 6), 'e');					// e
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[1] & (1 << 7), 'r');					// r
+
+
+	diff = kb_matrix_prv[2] ^ kb_matrix_cur[2];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[2] & (1 << 0), 'y');					// y
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[2] & (1 << 1), 't');					// t
+
+
+	diff = kb_matrix_prv[3] ^ kb_matrix_cur[3];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[3] & (1 << 0), KEYD_PLUS);			// +
+
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[3] & (1 << 3), KEYD_MINUS);			// -
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[3] & (1 << 6), KEYD_BRACKET_RIGHT);	// ]
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[3] & (1 << 7), 'o');					// o
+
+
+	diff = kb_matrix_prv[4] ^ kb_matrix_cur[4];
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[4] & (1 << 1), KEYD_BRACKET_LEFT);	// [
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[4] & (1 << 2), 'i');					// i
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[4] & (1 << 3), 'p');					// p
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[4] & (1 << 4), KEYD_A);				// Return
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[4] & (1 << 5), 'l');					// l
+
+
+	diff = kb_matrix_prv[5] ^ kb_matrix_cur[5];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[5] & (1 << 0), 'k');			// k
+
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[5] & (1 << 3), KEYD_L);		// <
+
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[5] & (1 << 5), 'n');			// n
+
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[5] & (1 << 7), KEYD_R);		// >
+
+
+	diff = kb_matrix_prv[6] ^ kb_matrix_cur[6];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[6] & (1 << 0), KEYD_SELECT);	// Tab
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[6] & (1 << 1), KEYD_A);		// Space
+
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[6] & (1 << 5), KEYD_START);	// Esc
+
+
+	diff = kb_matrix_prv[7] ^ kb_matrix_cur[7];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[7] & (1 << 0), KEYD_SPEED);	// Shift
+
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[7] & (1 << 2), KEYD_STRAFE);	// Alt
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[7] & (1 << 3), KEYD_B);		// Ctrl
+
+
+	diff = kb_matrix_prv[9] ^ kb_matrix_cur[9];
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[4] & (1 << 4), KEYD_A);		// Enter
+
+
+	diff = kb_matrix_prv[10] ^ kb_matrix_cur[10];
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[10] & (1 << 4), KEYD_DOWN);	// 2
+
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[10] & (1 << 6), KEYD_LEFT);	// 4
+
+
+	diff = kb_matrix_prv[11] ^ kb_matrix_cur[11];
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[11] & (1 << 0), KEYD_RIGHT);	// 6
+
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[11] & (1 << 3), KEYD_UP);	// 8
+
+
+	diff = kb_matrix_prv[13] ^ kb_matrix_cur[13];
+	if (diff & (1 << 5)) I_Quit();												// F10
+
+
+	diff = kb_matrix_prv[15] ^ kb_matrix_cur[15];
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[15] & (1 << 3), KEYD_LEFT);	// Left
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[15] & (1 << 4), KEYD_RIGHT);	// Right
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[15] & (1 << 5), KEYD_DOWN);	// Down
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[15] & (1 << 6), KEYD_UP);	// Up
 }
 
 
@@ -106,23 +216,15 @@ void PCFX_Shutdown(void)
 // Returns time in 1/35th second tics.
 //
 
-static boolean isTimerSet;
-
-
 int32_t I_GetTime(void)
 {
-    return TickCount() * TICRATE / 60;
+	return TickCount() * TICRATE / 60;
 }
 
 
 void I_InitTimer(void)
 {
-	isTimerSet = true;
-}
-
-
-static void I_ShutdownTimer(void)
-{
+	// do nothing
 }
 
 
@@ -168,21 +270,12 @@ static void I_Shutdown(void)
 		I_ShutdownGraphics();
 
 	I_ShutdownSound();
-
-	if (isTimerSet)
-		I_ShutdownTimer();
-
-	if (isKeyboardIsrSet)
-	{
-	}
 }
 
 
 void I_Quit(void)
 {
 	I_Shutdown();
-
-	printf("\n");
 	exit(0);
 }
 
@@ -221,10 +314,10 @@ int main(int argc, const char * const * argv)
 	InitMenus();
 
 	r = qd.screenBits.bounds;
-    
+
 	SetRect(&r, r.left + 5, r.top + 45, r.right - 5, r.bottom - 5);
 	WindowPtr win = NewWindow(NULL, &r, "\pDOOM8088: Macintosh Edition", true, 0, (WindowPtr)-1, false, 0);
-    
+
 	SetPort(win);
 	r = win->portRect;
 
