@@ -140,54 +140,54 @@ void I_StartTic(void)
 
 
 	diff = kb_matrix_prv[5] ^ kb_matrix_cur[5];
-	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[5] & (1 << 0), 'k');			// k
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[5] & (1 << 0), 'k');					// k
 
-	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[5] & (1 << 3), KEYD_L);		// <
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[5] & (1 << 3), KEYD_L);				// <
 
-	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[5] & (1 << 5), 'n');			// n
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[5] & (1 << 5), 'n');					// n
 
-	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[5] & (1 << 7), KEYD_R);		// >
+	if (diff & (1 << 7)) I_PostEvent(kb_matrix_cur[5] & (1 << 7), KEYD_R);				// >
 
 
 	diff = kb_matrix_prv[6] ^ kb_matrix_cur[6];
-	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[6] & (1 << 0), KEYD_SELECT);	// Tab
-	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[6] & (1 << 1), KEYD_A);		// Space
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[6] & (1 << 0), KEYD_SELECT);			// Tab
+	if (diff & (1 << 1)) I_PostEvent(kb_matrix_cur[6] & (1 << 1), KEYD_A);				// Space
 
-	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[6] & (1 << 5), KEYD_START);	// Esc
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[6] & (1 << 5), KEYD_START);			// Esc
 
 
 	diff = kb_matrix_prv[7] ^ kb_matrix_cur[7];
-	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[7] & (1 << 0), KEYD_SPEED);	// Shift
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[7] & (1 << 0), KEYD_SPEED);			// Shift
 
-	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[7] & (1 << 2), KEYD_STRAFE);	// Alt
-	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[7] & (1 << 3), KEYD_B);		// Ctrl
+	if (diff & (1 << 2)) I_PostEvent(kb_matrix_cur[7] & (1 << 2), KEYD_STRAFE);			// Alt
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[7] & (1 << 3), KEYD_B);				// Ctrl
 
 
 	diff = kb_matrix_prv[9] ^ kb_matrix_cur[9];
-	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[4] & (1 << 4), KEYD_A);		// Enter
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[4] & (1 << 4), KEYD_A);				// Enter
 
 
 	diff = kb_matrix_prv[10] ^ kb_matrix_cur[10];
-	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[10] & (1 << 4), KEYD_DOWN);	// 2
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[10] & (1 << 4), KEYD_DOWN);			// 2
 
-	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[10] & (1 << 6), KEYD_LEFT);	// 4
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[10] & (1 << 6), KEYD_LEFT);			// 4
 
 
 	diff = kb_matrix_prv[11] ^ kb_matrix_cur[11];
-	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[11] & (1 << 0), KEYD_RIGHT);	// 6
+	if (diff & (1 << 0)) I_PostEvent(kb_matrix_cur[11] & (1 << 0), KEYD_RIGHT);			// 6
 
-	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[11] & (1 << 3), KEYD_UP);	// 8
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[11] & (1 << 3), KEYD_UP);			// 8
 
 
 	diff = kb_matrix_prv[13] ^ kb_matrix_cur[13];
-	if (diff & (1 << 5)) I_Quit();												// F10
+	if (diff & (1 << 5)) I_Quit();														// F10
 
 
 	diff = kb_matrix_prv[15] ^ kb_matrix_cur[15];
-	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[15] & (1 << 3), KEYD_LEFT);	// Left
-	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[15] & (1 << 4), KEYD_RIGHT);	// Right
-	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[15] & (1 << 5), KEYD_DOWN);	// Down
-	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[15] & (1 << 6), KEYD_UP);	// Up
+	if (diff & (1 << 3)) I_PostEvent(kb_matrix_cur[15] & (1 << 3), KEYD_LEFT);			// Left
+	if (diff & (1 << 4)) I_PostEvent(kb_matrix_cur[15] & (1 << 4), KEYD_RIGHT);			// Right
+	if (diff & (1 << 5)) I_PostEvent(kb_matrix_cur[15] & (1 << 5), KEYD_DOWN);			// Down
+	if (diff & (1 << 6)) I_PostEvent(kb_matrix_cur[15] & (1 << 6), KEYD_UP);			// Up
 }
 
 

@@ -428,8 +428,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	while (true)
 	{
-		uint8_t c = videomemory[OFFSET(x0 >> 3, y0)];
-		videomemory[OFFSET(x0 >> 3, y0)] = (c & ~bitmask) | bitmask;
+		videomemory[OFFSET(x0 >> 3, y0)] |= bitmask;
 
 		if (x0 == x1 && y0 == y1)
 			break;
