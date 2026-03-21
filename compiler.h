@@ -19,6 +19,11 @@
 #ifndef __COMPILER__
 #define __COMPILER__
 
+#if defined macintosh
+#define stricmp strcasecmp
+#endif
+
+
 #if defined __unixpc__
 #include <limits.h>
 #include <memory.h>

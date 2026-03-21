@@ -6,7 +6,7 @@ It's mostly written in C code with very little assembly code.
 It has been ported to all kinds of systems.
 Usually these systems are 32-bit or more and have a flat memory model.
 
-Doom8088: Motorola 68000 Edition is a port of Doom for Atari ST, AT&T UNIX PC and Sinclair QL computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68000, 68008 or 68010 CPU.
+Doom8088: Motorola 68000 Edition is a port of Doom for Atari ST, AT&T UNIX PC, Macintosh and Sinclair QL computers with at least 512 kB of RAM (1 MB recommended) and a Motorola 68000, 68008 or 68010 CPU.
 It's based on [Doom8088](https://github.com/FrenkelS/Doom8088), a port of Doom for 16-bit DOS computers.
 Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doom8088ST/releases).
 
@@ -17,6 +17,7 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
  - 16 color mode (Atari ST only)
  -  8 color mode (Sinclair QL only)
  -  2 color mode
+ - Digital sound effects (Macintosh only)
  - PC speaker like sound effects (Atari ST only)
  - No music
  - No texture mapped floors and ceilings
@@ -45,27 +46,27 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 ### Sinclair QL 256x256 8 color mode, effective resolution 60x128
 ![Doom8088 in 8 colors](readme_imgs/doomql8.png?raw=true)
 
-### Atari ST 640x200 and Sinclair QL 512x256 4 color mode, effective resolution 60x128 2 colors
+### Atari ST 640x200, Macintosh 512x342 and Sinclair QL 512x256 4 color mode, effective resolution 60x128 2 colors
 ![Doom8088 in 2 colors](readme_imgs/doomstbw.png?raw=true)
 
-### AT&T UNIX PC 720x348  2 color mode, effective resolution  60x128 2 colors
+### AT&T UNIX PC 720x348  2 color mode, effective resolution 60x128 2 colors
 ![Doom8088 in 2 colors](readme_imgs/doom3b1.png?raw=true)
 
 ## Controls:
-|Action                 |Atari ST     |Sinclair QL  |AT&T UNIX PC              |
-|-----------------------|-------------|-------------|--------------------------|
-|Fire                   |Ctrl         |Ctrl         |/                         |
-|Use                    |Enter & Space|Enter & Space|Enter & Space             |
-|Sprint                 |Shift        |Shift        |not available             |
-|Walk                   |Arrow keys   |Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|
-|Strafe                 |Alt          |Alt          |not available             |
-|Strafe left and right  |< & >        |< & >        |< & >                     |
-|Automap                |Tab          |Tabulate     |Tab                       |
-|Automap zoom in and out|+ & -        |+ & -        |+ & -                     |
-|Automap follow mode    |F            |F            |F                         |
-|Weapon up and down     |[ & ]        |[ & ]        |[ & ]                     |
-|Menu                   |Esc          |Esc          |Esc                       |
-|Quit to OS             |F10          |not available|Shift + Q                 |
+|Action                 |Atari ST     |Macintosh (experimental)  |Sinclair QL  |AT&T UNIX PC              |
+|-----------------------|-------------|--------------------------|-------------|--------------------------|
+|Fire                   |Ctrl         |Ctrl                      |Ctrl         |/                         |
+|Use                    |Enter & Space|Enter & Return & Space    |Enter & Space|Enter & Space             |
+|Sprint                 |Shift        |Shift                     |Shift        |not available             |
+|Walk                   |Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|
+|Strafe                 |Alt          |Alt                       |Alt          |not available             |
+|Strafe left and right  |< & >        |< & >                     |< & >        |< & >                     |
+|Automap                |Tab          |Tab                       |Tabulate     |Tab                       |
+|Automap zoom in and out|+ & -        |+ & -                     |+ & -        |+ & -                     |
+|Automap follow mode    |F            |F                         |F            |F                         |
+|Weapon up and down     |[ & ]        |[ & ]                     |[ & ]        |[ & ]                     |
+|Menu                   |Esc          |Esc                       |Esc          |Esc                       |
+|Quit to OS             |F10          |F10                       |not available|Shift + Q                 |
 
 ## Cheats:
 |Code      |Effects                  |Notes                           |
@@ -94,14 +95,15 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 |`-timedemo demo3`    |Run benchmark        |
 
 ## Building:
-|Platform     |Platform specific code |Compiler                                                                      |Build script                            |Additional information                              |
-|-------------|-----------------------|------------------------------------------------------------------------------|----------------------------------------|----------------------------------------------------|
+|Platform     |Platform specific code |Compiler                                                                         |Build script                            |Additional information                              |
+|-------------|-----------------------|---------------------------------------------------------------------------------|----------------------------------------|----------------------------------------------------|
 |Atari ST     |`i_ast.c`, `i_astv16.c`|[m68k-atari-mintelf binutils, GCC 14, MiNTLib](https://tho-otto.de/crossmint.php)|`bast16h.sh`, `bast16m.sh`, `bast16l.sh`|320x200 16 color mode, high/medium/low detail mode  |
 |Atari ST     |`i_ast.c`, `i_astv2.c` |[m68k-atari-mintelf binutils, GCC 14, MiNTLib](https://tho-otto.de/crossmint.php)|`bast2.sh`, `bast520.sh`                |640x200  4 color mode, 2 colors are used</br>`DOOM520.TOS` is for computers with 512 kB of RAM. It goes from the first level immediately to the last level.|
-|AT&T UNIX PC |`i_3b1.c`, `i_3b1v.c`  |[unixpc-gcc](https://github.com/mikehaertel/unixpc-gcc)                       |`b3b1.sh`                               |The build script generates `speed.o` and `space.o`. These files need to be linked to create `doom8088`.|
-|Sinclair QL  |`i_ql.c`,  `i_qlv8.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                         |`bql8.bat`                              |256x256 8 color mode                                |
-|Sinclair QL  |`i_ql.c`,  `i_qlv2.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                         |`bql2.bat`                              |512x256 4 color mode                                |
-|IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
+|AT&T UNIX PC |`i_3b1.c`, `i_3b1v.c`  |[unixpc-gcc](https://github.com/mikehaertel/unixpc-gcc)                          |`b3b1.sh`                               |The build script generates `speed.o` and `space.o`. These files need to be linked to create `doom8088`.|
+|Macintosh    |`i_mac.c`, `i_macv.c`  |[Retro68](https://github.com/autc04/Retro68)                                     |`bmac.sh`                               |                                                    |
+|Sinclair QL  |`i_ql.c`,  `i_qlv8.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                            |`bql8.bat`                              |256x256 8 color mode                                |
+|Sinclair QL  |`i_ql.c`,  `i_qlv2.c`  |[qdos-gcc](https://github.com/xXorAa/qdos-gcc-2.95.3)                            |`bql2.bat`                              |512x256 4 color mode                                |
+|IBM PC 16-bit|`i_ibm.c`, `i_vcgabw.c`|[gcc-ia16](https://github.com/tkchia/gcc-ia16)                                   |`bcgabw.sh`                             |See [Doom8088](https://github.com/FrenkelS/Doom8088)|
 
 Doom8088: Motorola 68000 Edition needs an IWAD file that has been preprocessed by [jWadUtil](https://github.com/FrenkelS/jWadUtil).
 
