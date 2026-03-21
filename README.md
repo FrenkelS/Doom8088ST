@@ -53,20 +53,20 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 ![Doom8088 in 2 colors](readme_imgs/doom3b1.png?raw=true)
 
 ## Controls:
-|Action                 |Atari ST & Macintosh|Sinclair QL  |AT&T UNIX PC              |
-|-----------------------|--------------------|-------------|--------------------------|
-|Fire                   |Ctrl                |Ctrl         |/                         |
-|Use                    |Enter & Space       |Enter & Space|Enter & Space             |
-|Sprint                 |Shift               |Shift        |not available             |
-|Walk                   |Arrow keys          |Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|
-|Strafe                 |Alt                 |Alt          |not available             |
-|Strafe left and right  |< & >               |< & >        |< & >                     |
-|Automap                |Tab                 |Tabulate     |Tab                       |
-|Automap zoom in and out|+ & -               |+ & -        |+ & -                     |
-|Automap follow mode    |F                   |F            |F                         |
-|Weapon up and down     |[ & ]               |[ & ]        |[ & ]                     |
-|Menu                   |Esc                 |Esc          |Esc                       |
-|Quit to OS             |F10                 |not available|Shift + Q                 |
+|Action                 |Atari ST     |Macintosh (experimental)  |Sinclair QL  |AT&T UNIX PC              |
+|-----------------------|-------------|--------------------------|-------------|--------------------------|
+|Fire                   |Ctrl         |Ctrl                      |Ctrl         |/                         |
+|Use                    |Enter & Space|Enter & Return & Space    |Enter & Space|Enter & Space             |
+|Sprint                 |Shift        |Shift                     |Shift        |not available             |
+|Walk                   |Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|Arrow keys   |Arrow keys & 8 & 2 & 4 & 6|
+|Strafe                 |Alt          |Alt                       |Alt          |not available             |
+|Strafe left and right  |< & >        |< & >                     |< & >        |< & >                     |
+|Automap                |Tab          |Tab                       |Tabulate     |Tab                       |
+|Automap zoom in and out|+ & -        |+ & -                     |+ & -        |+ & -                     |
+|Automap follow mode    |F            |F                         |F            |F                         |
+|Weapon up and down     |[ & ]        |[ & ]                     |[ & ]        |[ & ]                     |
+|Menu                   |Esc          |Esc                       |Esc          |Esc                       |
+|Quit to OS             |F10          |F10                       |not available|Shift + Q                 |
 
 ## Cheats:
 |Code      |Effects                  |Notes                           |
