@@ -196,18 +196,63 @@ void I_StartTic(void)
 // Audio
 //
 
+static SndChannelPtr chan;
+static SoundHeader header;
+static SndCommand cmdPlay;
+
+static uint8_t sndBuffer[18600 - 8 - 32];
+
+
+static void PCFX_Stop(void)
+{
+	SndCommand cmd;
+	cmd.param1 = 0;
+	cmd.param2 = 0;
+
+	cmd.cmd    = quietCmd;
+	SndDoImmediate(chan, &cmd);
+
+	cmd.cmd    = flushCmd;
+	SndDoImmediate(chan, &cmd);
+}
+
+
 void PCFX_Play(int16_t lumpnum)
 {
+	PCFX_Stop();
+
+	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
+	uint16_t sndLength = sndLump[0];
+	BlockMoveData(sndLump + 1, sndBuffer, sndLength);
+	Z_ChangeTagToCache(sndLump);
+
+	header.length = sndLength;
+
+	SndDoCommand(chan, &cmdPlay, true);
 }
 
 
 void PCFX_Init(void)
 {
+	SndNewChannel(&chan, sampledSynth, 0x0080, NULL);
+
+	header.samplePtr     = sndBuffer;
+	header.sampleRate    = 11025 << 16;
+	header.loopStart     = 0;
+	header.loopEnd       = 0;
+	header.encode        = stdSH;
+	header.baseFrequency = 60;
+
+	cmdPlay.cmd    = bufferCmd;
+	cmdPlay.param1 = 0;
+	cmdPlay.param2 = (int32_t)&header;
 }
 
 
 void PCFX_Shutdown(void)
 {
+	PCFX_Stop();
+	SndDisposeChannel(chan, true);
 }
 
 
