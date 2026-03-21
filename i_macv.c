@@ -117,8 +117,6 @@ void I_InitGraphicsHardwareSpecificCode(void)
 {
 	videomemory = qd.screenBits.baseAddr;
 
-	//memset(videomemory, 0, VIDBYTES * VIDHEIGHT);
-
 	videomemory += (PLANEWIDTH - VIEWWINDOWWIDTH) / 2;							// center horizontally
 	videomemory += ((SCREENHEIGHT_MAC - SCREENHEIGHT * 2) / 2) * PLANEWIDTH;	// center vertically
 }
