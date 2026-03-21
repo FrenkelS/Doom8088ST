@@ -19,7 +19,7 @@
  *  02111-1307, USA.
  *
  * DESCRIPTION:
- *      Macintosh video code
+ *      Video code for Macintosh 512x342 2 color
  *
  *-----------------------------------------------------------------------------*/
 

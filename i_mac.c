@@ -330,6 +330,8 @@ void I_ErrorMac(const char *error, ...)
 	va_list argptr;
 	Str255 pstr;
 
+	I_Shutdown();
+
 	va_start(argptr, error);
 	vsprintf(pstr, error, argptr);
 	va_end(argptr);
