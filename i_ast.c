@@ -252,19 +252,39 @@ void I_StartTic(void)
 //
 // Audio
 //
-// This code is based on
+// The PC speaker code is based on
 // https://www.fxjavadevblog.fr/m68k-atari-st-ym-player/#interagir-avec-le-ym-2149
+
+static boolean digitalSoundEffects;
+static int16_t firstsfx;
+
+static volatile uint8_t *DMA_SOUND_CONTROL = (void*) 0xFF8901;
+static volatile uint8_t *DMA_SOUND_START_H = (void*) 0xFF8903;
+static volatile uint8_t *DMA_SOUND_START_M = (void*) 0xFF8905;
+static volatile uint8_t *DMA_SOUND_START_L = (void*) 0xFF8907;
+static volatile uint8_t *DMA_SOUND_END_H   = (void*) 0xFF890F;
+static volatile uint8_t *DMA_SOUND_END_M   = (void*) 0xFF8911;
+static volatile uint8_t *DMA_SOUND_END_L   = (void*) 0xFF8913;
+static volatile uint8_t *DMA_SOUND_MODE    = (void*) 0xFF8921;
+
+#define DMA_FREQ_12517	0x01
+#define DMA_MONO		0x80
+
+#define DMA_STOP		0x00
+#define DMA_PLAY_ONCE	0x01
+
+static uint8_t *sndBuffer;
+
 
 static volatile uint8_t *PSG_REGISTER_INDEX_ADDRESS = (void*) 0xFF8800;
 static volatile uint8_t *PSG_REGISTER_DATA_ADDRESS  = (void*) 0xFF8802;
-#define PSG_R0_TONE_A_PITCH_LOW_BYTE  0
-#define PSG_R1_TONE_A_PITCH_HIGH_BYTE 1
-#define PSG_R7_MIXER_MODE 7
-#define PSG_R8_VOLUME_CHANNEL_A 8
 
+#define PSG_R0_TONE_A_PITCH_LOW_BYTE 	0
+#define PSG_R1_TONE_A_PITCH_HIGH_BYTE	1
+#define PSG_R7_MIXER_MODE				7
+#define PSG_R8_VOLUME_CHANNEL_A			8
 
-static int16_t firstsfx;
-static uint16_t	data[146];
+static uint16_t	*data;
 static int16_t	PCFX_LengthLeft;
 static const uint16_t *PCFX_Sound = NULL;
 static uint16_t	PCFX_LastSample = 0;
@@ -277,9 +297,6 @@ inline static void write_PSG(uint8_t registerIndex, uint8_t registerValue)
 }
 
 
-#define	lobyte(x)	(((uint8_t *)&(x))[1])
-#define	hibyte(x)	(((uint8_t *)&(x))[0])
-
 static void PCFX_Service(void)
 {
 	if (PCFX_Sound)
@@ -290,8 +307,8 @@ static void PCFX_Service(void)
 		{
 			PCFX_LastSample = value;
 			// now write 12 bits value into R0 and R1
-			write_PSG(PSG_R0_TONE_A_PITCH_LOW_BYTE,  lobyte(value)); // first 8 bits into R0. PSG_APITCHLOW = 0 (R0)
-			write_PSG(PSG_R1_TONE_A_PITCH_HIGH_BYTE, hibyte(value)); // last  4 bits into R1, so let's ignore first 8 bits. PSG_APITCHHIGH = 1 (R1)
+			write_PSG(PSG_R0_TONE_A_PITCH_LOW_BYTE,  (value >> 0) & 0xff); // first 8 bits into R0. PSG_APITCHLOW = 0 (R0)
+			write_PSG(PSG_R1_TONE_A_PITCH_HIGH_BYTE, (value >> 8) & 0xff); // last  4 bits into R1, so let's ignore first 8 bits. PSG_APITCHHIGH = 1 (R1)
 		}
 
 		if (--PCFX_LengthLeft == 0)
@@ -307,17 +324,24 @@ static void PCFX_Service(void)
 
 static void PCFX_Stop(void)
 {
-	if (PCFX_Sound == NULL)
-		return;
+	if (digitalSoundEffects)
+	{
+		*DMA_SOUND_CONTROL = DMA_STOP;
+	}
+	else
+	{
+		if (PCFX_Sound == NULL)
+			return;
 
-	Jdisint(13);
+		Jdisint(13);
 
-	write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000000); // volume channel A, OFF
+		write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000000); // volume channel A, OFF
 
-	PCFX_Sound      = NULL;
-	PCFX_LastSample = 0;
+		PCFX_Sound      = NULL;
+		PCFX_LastSample = 0;
 
-	Jenabint(13);
+		Jenabint(13);
+	}
 }
 
 
@@ -331,37 +355,74 @@ void PCFX_Play(int16_t lumpnum)
 {
 	PCFX_Stop();
 
-	const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(firstsfx + lumpnum);
-	PCFX_LengthLeft = pcspkmuse->length;
-	memcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
-	Z_ChangeTagToCache(pcspkmuse);
+	if (digitalSoundEffects)
+	{
+		const uint16_t *sndLump = W_GetLumpByNum(firstsfx + lumpnum);
+		uint16_t sndLength = sndLump[0];
+		memcpy(sndBuffer, sndLump + 1, sndLength);
+		Z_ChangeTagToCache(sndLump);
 
-	Jdisint(13);
+		uint32_t addr = (uint32_t)&sndBuffer[sndLength];
+		*DMA_SOUND_END_H = (addr >> 16) & 0xff;
+		*DMA_SOUND_END_M = (addr >>  8) & 0xff;
+		*DMA_SOUND_END_L = (addr >>  0) & 0xff;
 
-	PCFX_Sound = &data[0];
+		*DMA_SOUND_CONTROL = DMA_PLAY_ONCE;
+	}
+	else
+	{
+		const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(firstsfx + lumpnum);
+		PCFX_LengthLeft = pcspkmuse->length;
+		memcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
+		Z_ChangeTagToCache(pcspkmuse);
 
-	write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000111); // volume channel A, ON
+		Jdisint(13);
 
-	Jenabint(13);
+		PCFX_Sound = data;
+
+		write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000111); // volume channel A, ON
+
+		Jenabint(13);
+	}
 }
 
 
 void PCFX_Init(void)
 {
-	write_PSG(PSG_R7_MIXER_MODE, 0b00111110); // activate (0) only Tone on channel A, yes activation is 0 !
+	// Do nothing, see I_InitTimer
 }
 
 
 void PCFX_Shutdown(void)
 {
 	PCFX_Stop();
-	write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
+
+	if (!digitalSoundEffects)
+		write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
 }
 
 
 void I_InitSound2(void)
 {
-	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+	if (digitalSoundEffects)
+	{
+		sndBuffer = Z_MallocStatic(20465);
+
+		uint32_t addr = (uint32_t)&sndBuffer[0];
+		*DMA_SOUND_START_H = (addr >> 16) & 0xff;
+		*DMA_SOUND_START_M = (addr >>  8) & 0xff;
+		*DMA_SOUND_START_L = (addr >>  0) & 0xff;
+
+		*DMA_SOUND_MODE = DMA_FREQ_12517 | DMA_MONO;
+
+		firstsfx = W_GetNumForName("DSPISTOL") - 1;
+	}
+	else
+	{
+		data = Z_MallocStatic(146 * sizeof(uint16_t));
+		write_PSG(PSG_R7_MIXER_MODE, 0b00111110); // activate (0) only Tone on channel A, yes activation is 0 !
+		firstsfx = W_GetNumForName("DPPISTOL") - 1;
+	}
 }
 
 
@@ -378,7 +439,16 @@ static boolean isTimerSet;
 static volatile uint8_t *pMfpIsra  = (void*) 0xfffa0f;
 
 
-__attribute__((interrupt)) static void I_TimerISR(void)
+__attribute__((interrupt)) static void I_TimerIsrDigitalSoundEffects(void)
+{
+	ticcount++;
+
+	// Clear interrupt
+	*pMfpIsra &= ~(1<<5);
+}
+
+
+__attribute__((interrupt)) static void I_TimerIsrPcSpeaker(void)
 {
 	ticcount++;
 	PCFX_Service();
@@ -396,9 +466,18 @@ int32_t I_GetTime(void)
 
 void I_InitTimer(void)
 {
+	long soundFeatures;
+	if (Getcookie(C__SND, &soundFeatures) == C_FOUND)
+		digitalSoundEffects = soundFeatures & 2;
+	else
+		digitalSoundEffects = false;
+
 	// 7 -> 200
 	// 2457600 / (200 * 88) ~= 140 Hz
-	Xbtimer(XB_TIMERA, 7, 88, I_TimerISR);
+	if (digitalSoundEffects)
+		Xbtimer(XB_TIMERA, 7, 88, I_TimerIsrDigitalSoundEffects);
+	else
+		Xbtimer(XB_TIMERA, 7, 88, I_TimerIsrPcSpeaker);
 
 	isTimerSet = true;
 }
