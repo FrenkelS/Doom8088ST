@@ -259,7 +259,7 @@ void PCFX_Shutdown(void)
 
 void I_InitSound2(void)
 {
-	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+	firstsfx = W_GetNumForName("DSPISTOL") - 1;
 }
 
 
