@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -262,6 +262,12 @@ void PCFX_Init(void)
 
 
 void PCFX_Shutdown(void)
+{
+	// Do nothing
+}
+
+
+void I_InitSound2(void)
 {
 	// Do nothing
 }

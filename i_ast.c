@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -263,6 +263,7 @@ static volatile uint8_t *PSG_REGISTER_DATA_ADDRESS  = (void*) 0xFF8802;
 #define PSG_R8_VOLUME_CHANNEL_A 8
 
 
+static int16_t firstsfx;
 static uint16_t	data[146];
 static int16_t	PCFX_LengthLeft;
 static const uint16_t *PCFX_Sound = NULL;
@@ -330,7 +331,7 @@ void PCFX_Play(int16_t lumpnum)
 {
 	PCFX_Stop();
 
-	const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(lumpnum);
+	const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(firstsfx + lumpnum);
 	PCFX_LengthLeft = pcspkmuse->length;
 	memcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
 	Z_ChangeTagToCache(pcspkmuse);
@@ -355,6 +356,12 @@ void PCFX_Shutdown(void)
 {
 	PCFX_Stop();
 	write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
+}
+
+
+void I_InitSound2(void)
+{
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
 }
 
 

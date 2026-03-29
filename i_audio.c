@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -33,7 +33,6 @@
  *
  *-----------------------------------------------------------------------------
  */
-
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +61,6 @@
 #include "globdata.h"
 
 
-
 #define MAX_CHANNELS    1
 
 
@@ -71,8 +69,6 @@ static int16_t firstsfx;
 
 int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 {
-	int16_t lumpnum;
-
 	UNUSED(vol);
 	UNUSED(sep);
 
@@ -88,8 +84,7 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 //	 || id == sfx_sawidl)
 //		return -1;
 
-	lumpnum = firstsfx + id;
-	PCFX_Play(lumpnum);
+	PCFX_Play(id);
 
 	return channel;
 }
@@ -107,12 +102,6 @@ void I_InitSound(void)
 
 	// Finished initialization.
 	printf("I_InitSound: sound ready\r\n");
-}
-
-
-void I_InitSound2(void)
-{
-	firstsfx = W_GetNumForName("DPPISTOL") - 1;
 }
 
 
@@ -136,6 +125,7 @@ void I_StopSong(musicenum_t handle)
 {
 	UNUSED(handle);
 }
+
 
 void I_SetMusicVolume(int16_t volume)
 {

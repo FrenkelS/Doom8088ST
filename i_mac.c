@@ -196,6 +196,7 @@ void I_StartTic(void)
 // Audio
 //
 
+static int16_t firstsfx;
 static SndChannelPtr chan;
 static SoundHeader header;
 static SndCommand cmdPlay;
@@ -221,7 +222,7 @@ void PCFX_Play(int16_t lumpnum)
 {
 	PCFX_Stop();
 
-	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
+	const uint16_t *sndLump = W_GetLumpByNum(firstsfx + lumpnum);
 	uint16_t sndLength = sndLump[0];
 	BlockMoveData(sndLump + 1, sndBuffer, sndLength);
 	Z_ChangeTagToCache(sndLump);
@@ -253,6 +254,12 @@ void PCFX_Shutdown(void)
 {
 	PCFX_Stop();
 	SndDisposeChannel(chan, true);
+}
+
+
+void I_InitSound2(void)
+{
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
 }
 
 

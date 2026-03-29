@@ -93,6 +93,11 @@ void PCFX_Shutdown(void)
 }
 
 
+void I_InitSound2(void)
+{
+}
+
+
 //**************************************************************************************
 //
 // Returns time in 1/35th second tics.
