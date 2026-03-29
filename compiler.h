@@ -74,6 +74,7 @@ typedef unsigned long long uint64_t;
 #if defined _M_I86
 //16-bit
 #include <i86.h>
+#include <stdio.h>
 
 #define D_MK_FP  MK_FP
 #define D_FP_SEG FP_SEG
@@ -85,6 +86,8 @@ typedef unsigned long long uint64_t;
 
 typedef uint16_t segment_t;
 #define SIZE_OF_SEGMENT_T 2
+
+void _ffread(void __far* ptr, uint16_t size, FILE* fp);
 
 #else
 //32-bit
@@ -103,6 +106,8 @@ typedef uint32_t segment_t;
 #define _fmemset	memset
 #define _fstrcpy	strcpy
 #define _fstrlen	strlen
+
+#define _ffread(p,s,fp)	fread(p,s,1,fp)
 
 #endif
 
