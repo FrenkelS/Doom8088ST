@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -34,7 +34,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -67,26 +66,31 @@ void I_InitGraphics(void)
 
 extern struct Custom custom;
 
+static int16_t firstsfx;
+
 static uint16_t zeroIndex = 0;
 static int8_t __chip sndBuffer[18600 - 8 - 32];
 
 static int32_t stopSoundAtTic = 0;
 
 
-static void PCFX_Stop(void)
+static void DMX_Stop(void)
 {
 	custom.dmacon  = DMAF_AUD0;
 	stopSoundAtTic = 0;
 }
 
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
-	PCFX_Stop();
+	DMX_Stop();
 
-	const uint16_t *sndLump = W_GetLumpByNum(lumpnum);
-	uint16_t sndLength = sndLump[0];
-	memcpy(sndBuffer, sndLump + 1, sndLength);
+	const uint16_t *sndLump = W_TryGetLumpByNum(firstsfx + id);
+	if (sndLump == NULL)
+		return;
+
+	uint16_t sndLength = W_LumpLength(firstsfx + id);
+	memcpy(sndBuffer, sndLump, sndLength);
 	if (sndLength < zeroIndex)
 		memset(sndBuffer + sndLength, 0, zeroIndex - sndLength);
 	zeroIndex = sndLength;
@@ -99,16 +103,16 @@ void PCFX_Play(int16_t lumpnum)
 }
 
 
-static void PCFX_UpdateSound(void)
+static void DMX_UpdateSound(void)
 {
 	if (stopSoundAtTic && clock() >= stopSoundAtTic)
-		PCFX_Stop();
+		DMX_Stop();
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
-	PCFX_Stop();
+	DMX_Stop();
 
 	extern struct GfxBase *GfxBase;
 	boolean pal = (((struct GfxBase *) GfxBase)->DisplayFlags & PAL) == PAL;
@@ -120,9 +124,15 @@ void PCFX_Init(void)
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
 {
-	PCFX_Stop();
+	firstsfx = W_GetNumForName("DSPISTOL") - 1;
+}
+
+
+void DMX_Shutdown(void)
+{
+	DMX_Stop();
 }
 
 
@@ -175,7 +185,7 @@ void I_StartTic(void)
 	static uint8_t *kb_matrix_cur = &kb_matrix[0];
 	static uint8_t *kb_matrix_prv = &kb_matrix[KB_MATRIX_SIZE];
 
-	PCFX_UpdateSound();
+	DMX_UpdateSound();
 
 	uint8_t diff;
 	uint8_t *tmp = kb_matrix_cur;
