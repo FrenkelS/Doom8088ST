@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -30,7 +30,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -252,18 +251,37 @@ void I_StartTic(void)
 //
 // Audio
 //
-// This code is based on
+// The PC speaker code is based on
 // https://www.fxjavadevblog.fr/m68k-atari-st-ym-player/#interagir-avec-le-ym-2149
 
-static volatile uint8_t *PSG_REGISTER_INDEX_ADDRESS = (void*) 0xFF8800;
-static volatile uint8_t *PSG_REGISTER_DATA_ADDRESS  = (void*) 0xFF8802;
-#define PSG_R0_TONE_A_PITCH_LOW_BYTE  0
-#define PSG_R1_TONE_A_PITCH_HIGH_BYTE 1
-#define PSG_R7_MIXER_MODE 7
-#define PSG_R8_VOLUME_CHANNEL_A 8
+static boolean digitalSoundEffects = false;
+static int16_t firstsfx;
+static const uint8_t *sndLump = NULL;
+
+static volatile uint8_t *DMA_SOUND_CONTROL = (void*) 0xff8901;
+static volatile uint8_t *DMA_SOUND_START_H = (void*) 0xff8903;
+static volatile uint8_t *DMA_SOUND_START_M = (void*) 0xff8905;
+static volatile uint8_t *DMA_SOUND_START_L = (void*) 0xff8907;
+static volatile uint8_t *DMA_SOUND_END_H   = (void*) 0xff890F;
+static volatile uint8_t *DMA_SOUND_END_M   = (void*) 0xff8911;
+static volatile uint8_t *DMA_SOUND_END_L   = (void*) 0xff8913;
+static volatile uint8_t *DMA_SOUND_MODE    = (void*) 0xff8921;
+
+#define DMA_FREQ_12517	0x01
+#define DMA_MONO		0x80
+
+#define DMA_STOP		0x00
+#define DMA_PLAY_ONCE	0x01
 
 
-static uint16_t	data[146];
+static volatile uint8_t *PSG_REGISTER_INDEX_ADDRESS = (void*) 0xff8800;
+static volatile uint8_t *PSG_REGISTER_DATA_ADDRESS  = (void*) 0xff8802;
+
+#define PSG_R0_TONE_A_PITCH_LOW_BYTE 	0
+#define PSG_R1_TONE_A_PITCH_HIGH_BYTE	1
+#define PSG_R7_MIXER_MODE				7
+#define PSG_R8_VOLUME_CHANNEL_A			8
+
 static int16_t	PCFX_LengthLeft;
 static const uint16_t *PCFX_Sound = NULL;
 static uint16_t	PCFX_LastSample = 0;
@@ -276,9 +294,6 @@ inline static void write_PSG(uint8_t registerIndex, uint8_t registerValue)
 }
 
 
-#define	lobyte(x)	(((uint8_t *)&(x))[1])
-#define	hibyte(x)	(((uint8_t *)&(x))[0])
-
 static void PCFX_Service(void)
 {
 	if (PCFX_Sound)
@@ -289,8 +304,8 @@ static void PCFX_Service(void)
 		{
 			PCFX_LastSample = value;
 			// now write 12 bits value into R0 and R1
-			write_PSG(PSG_R0_TONE_A_PITCH_LOW_BYTE,  lobyte(value)); // first 8 bits into R0. PSG_APITCHLOW = 0 (R0)
-			write_PSG(PSG_R1_TONE_A_PITCH_HIGH_BYTE, hibyte(value)); // last  4 bits into R1, so let's ignore first 8 bits. PSG_APITCHHIGH = 1 (R1)
+			write_PSG(PSG_R0_TONE_A_PITCH_LOW_BYTE,  (value >> 0) & 0xff); // first 8 bits into R0. PSG_APITCHLOW = 0 (R0)
+			write_PSG(PSG_R1_TONE_A_PITCH_HIGH_BYTE, (value >> 8) & 0xff); // last  4 bits into R1, so let's ignore first 8 bits. PSG_APITCHHIGH = 1 (R1)
 		}
 
 		if (--PCFX_LengthLeft == 0)
@@ -326,35 +341,96 @@ typedef struct {
 } pcspkmuse_t;
 
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
-	PCFX_Stop();
+	if (digitalSoundEffects)
+	{
+		*DMA_SOUND_CONTROL = DMA_STOP;
 
-	const pcspkmuse_t *pcspkmuse = W_GetLumpByNum(lumpnum);
-	PCFX_LengthLeft = pcspkmuse->length;
-	memcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
-	Z_ChangeTagToCache(pcspkmuse);
+		if (sndLump != NULL)
+			Z_ChangeTagToCache(sndLump);
 
-	Jdisint(13);
+		sndLump = W_TryGetLumpByNum(firstsfx + id);
+		if (sndLump == NULL)
+			return;
 
-	PCFX_Sound = &data[0];
+		uint16_t sndLength = W_LumpLength(firstsfx + id);
+		uint32_t address;
+		address = (uint32_t)&sndLump[0];
+		*DMA_SOUND_START_H = (address >> 16) & 0xff;
+		*DMA_SOUND_START_M = (address >>  8) & 0xff;
+		*DMA_SOUND_START_L = (address >>  0) & 0xff;
 
-	write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000111); // volume channel A, ON
+		address = (uint32_t)&sndLump[sndLength];
+		*DMA_SOUND_END_H = (address >> 16) & 0xff;
+		*DMA_SOUND_END_M = (address >>  8) & 0xff;
+		*DMA_SOUND_END_L = (address >>  0) & 0xff;
 
-	Jenabint(13);
+		*DMA_SOUND_CONTROL = DMA_PLAY_ONCE;
+	}
+	else
+	{
+		PCFX_Stop();
+
+		if (sndLump != NULL)
+			Z_ChangeTagToCache(sndLump);
+
+		sndLump = W_GetLumpByNum(firstsfx + id);
+		PCFX_LengthLeft = ((pcspkmuse_t*)sndLump)->length;
+
+		Jdisint(13);
+
+		PCFX_Sound = ((pcspkmuse_t*)sndLump)->data;
+
+		write_PSG(PSG_R8_VOLUME_CHANNEL_A, 0b00000111); // volume channel A, ON
+
+		Jenabint(13);
+	}
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
-	write_PSG(PSG_R7_MIXER_MODE, 0b00111110); // activate (0) only Tone on channel A, yes activation is 0 !
+	if (M_CheckParm("-pcfx"))
+	{
+		digitalSoundEffects = false;
+		return;
+	}
+
+	long soundFeatures;
+	if (Getcookie(C__SND, &soundFeatures) == C_FOUND)
+		digitalSoundEffects = soundFeatures & 2;
+	else
+		digitalSoundEffects = false;
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
 {
-	PCFX_Stop();
-	write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
+	if (digitalSoundEffects)
+	{
+		*DMA_SOUND_MODE = DMA_FREQ_12517 | DMA_MONO;
+		firstsfx = W_GetNumForName("DSPISTOL") - 1;
+	}
+	else
+	{
+		write_PSG(PSG_R7_MIXER_MODE, 0b00111110); // activate (0) only Tone on channel A, yes activation is 0 !
+		firstsfx = W_GetNumForName("DPPISTOL") - 1;
+	}
+}
+
+
+void DMX_Shutdown(void)
+{
+	if (digitalSoundEffects)
+	{
+		*DMA_SOUND_CONTROL = DMA_STOP;
+	}
+	else
+	{
+		PCFX_Stop();
+		write_PSG(PSG_R7_MIXER_MODE, 0b00111111); // mixer, deactivate (1 !) all
+	}
 }
 
 
@@ -377,7 +453,7 @@ __attribute__((interrupt)) static void I_TimerISR(void)
 	PCFX_Service();
 
 	// Clear interrupt
-	*pMfpIsra &= ~(1<<5);
+	*pMfpIsra &= ~(1 << 5);
 }
 
 

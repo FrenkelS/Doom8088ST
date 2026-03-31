@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -348,7 +348,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 #define FUZZCOLOR3 0x44
 #define FUZZTABLE 50
 
-static const int8_t fuzzcolors[FUZZTABLE] =
+static const uint8_t fuzzcolors[FUZZTABLE] =
 {
 	FUZZCOLOR2,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR1,
 	FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR2,FUZZCOLOR1,

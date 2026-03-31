@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2023-2025 Frenkel Smeijers
+ *  Copyright (C) 2023-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -30,7 +30,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -485,6 +484,7 @@ static void TS_Terminate(int16_t priority)
 #define SND_TICRATE     140     // tic rate for updating sound
 
 
+static int16_t firstsfx;
 static uint16_t	data[146];
 static int16_t	PCFX_LengthLeft;
 static const uint16_t *PCFX_Sound = NULL;
@@ -547,11 +547,11 @@ typedef struct {
 } pcspkmuse_t;
 
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
 	PCFX_Stop();
 
-	const pcspkmuse_t __far* pcspkmuse = W_GetLumpByNum(lumpnum);
+	const pcspkmuse_t __far* pcspkmuse = W_GetLumpByNum(firstsfx + id);
 	PCFX_LengthLeft = pcspkmuse->length;
 	_fmemcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
 	Z_ChangeTagToCache(pcspkmuse);
@@ -564,7 +564,7 @@ void PCFX_Play(int16_t lumpnum)
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
 	if (PCFX_Installed)
 		return;
@@ -576,7 +576,13 @@ void PCFX_Init(void)
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
+{
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+}
+
+
+void DMX_Shutdown(void)
 {
 	if (PCFX_Installed)
 	{
@@ -682,7 +688,7 @@ void I_Quit(void)
 }
 
 
-void I_Error (const char *error, ...)
+void I_Error(const char *error, ...)
 {
 	va_list argptr;
 

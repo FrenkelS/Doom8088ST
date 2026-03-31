@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -83,6 +83,7 @@ static void __far*__far* lumpcache;
 // LUMP BASED ROUTINES.
 //
 
+#if defined _M_I86 || defined macintosh
 #define BUFFERSIZE 512
 
 static void _ffread(void __far* ptr, uint16_t size, FILE* fp)
@@ -104,6 +105,9 @@ static void _ffread(void __far* ptr, uint16_t size, FILE* fp)
 		_fmemcpy(dest, buffer, size);
 	}
 }
+#else
+#define _ffread(p,s,fp)	fread(p,s,1,fp)
+#endif
 
 
 static void W_ReadDataFromFile(void __far* dest, uint32_t src, uint16_t length)

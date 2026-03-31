@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -383,7 +383,7 @@ static void EV_VerticalDoor(line_t __far* line, mobj_t __far* thing)
     case 26:
     case 27:
     case 28:
-      door->type = normal;
+      door->type = dnormal;
       break;
 
     case 31:
@@ -532,7 +532,7 @@ boolean P_UseSpecialLine(mobj_t __far* thing, line_t __far* line)
 
     case 63:
       // Raise Door
-      if (EV_DoDoor(line,normal))
+      if (EV_DoDoor(line,dnormal))
         P_ChangeSwitchTexture(line,true);
       break;
 

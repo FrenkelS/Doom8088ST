@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -355,7 +355,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 #define FUZZCOLOR4 0x22
 #define FUZZTABLE 50
 
-static const int8_t fuzzcolors[FUZZTABLE] =
+static const uint8_t fuzzcolors[FUZZTABLE] =
 {
 	FUZZCOLOR1,FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR2,
 	FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR2,
@@ -434,8 +434,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	while (true)
 	{
-		uint8_t c = videomemory[OFFSET(x0 >> 3, y0)];
-		videomemory[OFFSET(x0 >> 3, y0)] = (c & ~bitmask) | bitmask;
+		videomemory[OFFSET(x0 >> 3, y0)] |= bitmask;
 
 		if (x0 == x1 && y0 == y1)
 			break;

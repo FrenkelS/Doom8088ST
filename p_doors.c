@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023, 2024 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -114,7 +114,7 @@ void T_VerticalDoor(vldoor_t __far* door)
       {
         switch(door->type)
         {
-          case normal:
+          case dnormal:
             door->direction = -1; // time to go back down
             S_StartSound2(&door->sector->soundorg,sfx_dorcls);
             break;
@@ -151,7 +151,7 @@ void T_VerticalDoor(vldoor_t __far* door)
         switch(door->type)
         {
           // regular open and close doors are all done, remove them
-          case normal:
+          case dnormal:
             door->sector->ceilingdata = NULL; //jff 2/22/98
             P_RemoveThinker (&door->thinker);  // unlink and free
             break;
@@ -197,7 +197,7 @@ void T_VerticalDoor(vldoor_t __far* door)
       {
         switch(door->type)
         {
-          case normal:           // regular open/close doors start waiting
+          case dnormal:           // regular open/close doors start waiting
             door->direction = 0; // wait at top with delay
             door->topcountdown = door->topwait;
             break;
@@ -271,7 +271,7 @@ boolean EV_DoDoor(const line_t __far* line, vldoor_e type)
         S_StartSound2(&door->sector->soundorg,sfx_dorcls);
         break;
 
-      case normal:
+      case dnormal:
       case dopen:
         door->direction = 1;
         door->topheight = P_FindLowestCeilingSurrounding(sec);

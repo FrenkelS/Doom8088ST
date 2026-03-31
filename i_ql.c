@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
  *
  *
- *  Copyright (C) 2025 Frenkel Smeijers
+ *  Copyright (C) 2025-2026 Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -29,13 +29,9 @@
 #include <time.h>
 
 #include "doomdef.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_sound.h"
 #include "i_system.h"
-
-
-
 
 
 void I_InitGraphicsHardwareSpecificCode(void);
@@ -229,21 +225,30 @@ typedef PACKEDATTR_PRE struct {
 typedef char assertSoundSize[sizeof(sound_t) == 10 ? 1 : -1];
 
 
-void PCFX_Play(int16_t lumpnum)
+static int16_t firstsfx;
+
+
+void DMX_Play(sfxenum_t id)
 {
-	const sound_t *s = W_GetLumpByNum(lumpnum);
+	const sound_t *s = W_GetLumpByNum(firstsfx + id);
 	do_sound(s->dur, s->pitch, s->pitch2, s->wrap, s->g_x, s->g_y, s->fuzz, s->rndm);
 	Z_ChangeTagToCache(s);
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
 	// Do nothing
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
+{
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+}
+
+
+void DMX_Shutdown(void)
 {
 	// Do nothing
 }

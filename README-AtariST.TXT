@@ -24,6 +24,7 @@ What's special?
  - Rotating overlaid automap
  - Only demo3 is supported
  - 16 and 2 color modes
+ - Digital sound effects (STE only)
  - PC speaker like sound effects
  - No music
  - No texture mapped floors and ceilings
@@ -102,4 +103,5 @@ Command line arguments:
 |---------------|---------------------|
 |-nosfx         |Disable sound effects|
 |-nosound       |Disable sound effects|
+|-pcfx          |PC speaker sfx       |
 |-timedemo demo3|Run benchmark        |
