@@ -17,7 +17,7 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
  - 16 color mode (Atari ST only)
  -  8 color mode (Sinclair QL only)
  -  2 color mode
- - Digital sound effects (Macintosh only)
+ - Digital sound effects (Macintosh and Atari STE only)
  - PC speaker like sound effects (Atari ST only)
  - No music
  - No texture mapped floors and ceilings
@@ -88,11 +88,12 @@ Download Doom8088: Motorola 68000 Edition [here](https://github.com/FrenkelS/Doo
 |IDRATE    |Toggle FPS counter       |Divide by 10 to get the real FPS|
 
 ## Command line arguments:
-|Command line argument|Effect               |
-|---------------------|---------------------|
-|`-nosfx`             |Disable sound effects|
-|`-nosound`           |Disable sound effects|
-|`-timedemo demo3`    |Run benchmark        |
+|Command line argument|Effect                                  |
+|---------------------|----------------------------------------|
+|`-nosfx`             |Disable sound effects                   |
+|`-nosound`           |Disable sound effects                   |
+|`-pcfx`              |PC speaker sound effects (Atari ST only)|
+|`-timedemo demo3`    |Run benchmark                           |
 
 ## Building:
 |Platform     |Platform specific code |Compiler                                                                         |Build script                            |Additional information                              |

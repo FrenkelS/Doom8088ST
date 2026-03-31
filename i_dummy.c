@@ -28,7 +28,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -78,22 +77,22 @@ void I_StartTic(void)
 // Audio
 //
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
 {
 }
 
 
-void I_InitSound2(void)
+void DMX_Shutdown(void)
 {
 }
 

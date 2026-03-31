@@ -30,7 +30,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -42,34 +41,6 @@ void I_ShutdownGraphics(void);
 
 
 static boolean isGraphicsModeSet = false;
-
-
-//**************************************************************************************
-//
-// Functions that are available on other operating systems, but not on DOS
-//
-
-#define BUFFERSIZE 512
-
-void _ffread(void __far* ptr, uint16_t size, FILE* fp)
-{
-	uint8_t __far* dest = ptr;
-	uint8_t buffer[BUFFERSIZE];
-
-	while (size >= BUFFERSIZE)
-	{
-		fread(buffer, BUFFERSIZE, 1, fp);
-		_fmemcpy(dest, buffer, BUFFERSIZE);
-		dest += BUFFERSIZE;
-		size -= BUFFERSIZE;
-	}
-
-	if (size > 0)
-	{
-		fread(buffer, size, 1, fp);
-		_fmemcpy(dest, buffer, size);
-	}
-}
 
 
 //**************************************************************************************
@@ -576,11 +547,11 @@ typedef struct {
 } pcspkmuse_t;
 
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
 	PCFX_Stop();
 
-	const pcspkmuse_t __far* pcspkmuse = W_GetLumpByNum(firstsfx + lumpnum);
+	const pcspkmuse_t __far* pcspkmuse = W_GetLumpByNum(firstsfx + id);
 	PCFX_LengthLeft = pcspkmuse->length;
 	_fmemcpy(data, pcspkmuse->data, pcspkmuse->length * sizeof(uint16_t));
 	Z_ChangeTagToCache(pcspkmuse);
@@ -593,7 +564,7 @@ void PCFX_Play(int16_t lumpnum)
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
 	if (PCFX_Installed)
 		return;
@@ -605,7 +576,13 @@ void PCFX_Init(void)
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
+{
+	firstsfx = W_GetNumForName("DPPISTOL") - 1;
+}
+
+
+void DMX_Shutdown(void)
 {
 	if (PCFX_Installed)
 	{
@@ -613,12 +590,6 @@ void PCFX_Shutdown(void)
 		TS_Terminate(PCFX_PRIORITY);
 		PCFX_Installed = false;
 	}
-}
-
-
-void I_InitSound2(void)
-{
-	firstsfx = W_GetNumForName("DPPISTOL") - 1;
 }
 
 

@@ -38,6 +38,7 @@
 
 #include "compiler.h"
 #include "config.h"
+#include "sounds.h"
 
 
 uint8_t __far* I_ZoneBase(uint32_t *heapSize);
@@ -77,5 +78,10 @@ void I_SetPalette(int8_t pal);
  * Can call D_PostEvent.
  */
 void I_StartTic(void);
+
+void DMX_Play(sfxenum_t id);
+void DMX_Init(void);
+void DMX_Init2(void);
+void DMX_Shutdown(void);
 
 #endif

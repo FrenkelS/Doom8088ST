@@ -83,6 +83,33 @@ static void __far*__far* lumpcache;
 // LUMP BASED ROUTINES.
 //
 
+#if defined _M_I86 || defined macintosh
+#define BUFFERSIZE 512
+
+static void _ffread(void __far* ptr, uint16_t size, FILE* fp)
+{
+	uint8_t __far* dest = ptr;
+	uint8_t buffer[BUFFERSIZE];
+
+	while (size >= BUFFERSIZE)
+	{
+		fread(buffer, BUFFERSIZE, 1, fp);
+		_fmemcpy(dest, buffer, BUFFERSIZE);
+		dest += BUFFERSIZE;
+		size -= BUFFERSIZE;
+	}
+
+	if (size > 0)
+	{
+		fread(buffer, size, 1, fp);
+		_fmemcpy(dest, buffer, size);
+	}
+}
+#else
+#define _ffread(p,s,fp)	fread(p,s,1,fp)
+#endif
+
+
 static void W_ReadDataFromFile(void __far* dest, uint32_t src, uint16_t length)
 {
 	fseek(fileWAD, src, SEEK_SET);

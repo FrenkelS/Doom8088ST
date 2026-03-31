@@ -28,7 +28,6 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "compiler.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_system.h"
 
@@ -197,14 +196,14 @@ void I_StartTic(void)
 //
 
 static int16_t firstsfx;
+static const uint8_t *sndLump = NULL;
+
 static SndChannelPtr chan;
 static SoundHeader header;
 static SndCommand cmdPlay;
 
-static uint8_t sndBuffer[18600 - 8 - 32];
 
-
-static void PCFX_Stop(void)
+static void DMX_Stop(void)
 {
 	SndCommand cmd;
 	cmd.param1 = 0;
@@ -218,26 +217,30 @@ static void PCFX_Stop(void)
 }
 
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
-	PCFX_Stop();
+	DMX_Stop();
 
-	const uint16_t *sndLump = W_GetLumpByNum(firstsfx + lumpnum);
-	uint16_t sndLength = sndLump[0];
-	BlockMoveData(sndLump + 1, sndBuffer, sndLength);
-	Z_ChangeTagToCache(sndLump);
+	if (sndLump != NULL)
+		Z_ChangeTagToCache(sndLump);
 
-	header.length = sndLength;
+	sndLump = W_TryGetLumpByNum(firstsfx + id);
+	if (sndLump == NULL)
+		return;
+
+	uint16_t sndLength = W_LumpLength(firstsfx + id);
+
+	header.samplePtr = (uint8_t *)sndLump;
+	header.length    = sndLength;
 
 	SndDoCommand(chan, &cmdPlay, true);
 }
 
 
-void PCFX_Init(void)
+void DMX_Init(void)
 {
 	SndNewChannel(&chan, sampledSynth, 0x0080, NULL);
 
-	header.samplePtr     = sndBuffer;
 	header.sampleRate    = 11025 << 16;
 	header.loopStart     = 0;
 	header.loopEnd       = 0;
@@ -250,16 +253,16 @@ void PCFX_Init(void)
 }
 
 
-void PCFX_Shutdown(void)
+void DMX_Init2(void)
 {
-	PCFX_Stop();
-	SndDisposeChannel(chan, true);
+	firstsfx = W_GetNumForName("DSPISTOL") - 1;
 }
 
 
-void I_InitSound2(void)
+void DMX_Shutdown(void)
 {
-	firstsfx = W_GetNumForName("DSPISTOL") - 1;
+	DMX_Stop();
+	SndDisposeChannel(chan, true);
 }
 
 

@@ -30,7 +30,6 @@
 #include <sys/times.h>
 
 #include "doomdef.h"
-#include "a_pcfx.h"
 #include "d_main.h"
 #include "i_sound.h"
 #include "i_system.h"
@@ -249,25 +248,25 @@ void I_StartTic(void)
 // Audio
 //
 
-void PCFX_Play(int16_t lumpnum)
+void DMX_Play(sfxenum_t id)
 {
-	UNUSED(lumpnum);
+	UNUSED(id);
 }
 
 
-void PCFX_Init(void)
-{
-	// Do nothing
-}
-
-
-void PCFX_Shutdown(void)
+void DMX_Init(void)
 {
 	// Do nothing
 }
 
 
-void I_InitSound2(void)
+void DMX_Init2(void)
+{
+	// Do nothing
+}
+
+
+void DMX_Shutdown(void)
 {
 	// Do nothing
 }

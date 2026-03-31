@@ -42,8 +42,6 @@
 #include <unistd.h>
 #endif
 
-#include "z_zone.h"
-
 #include "m_swap.h"
 #include "i_sound.h"
 #include "w_wad.h"
@@ -56,7 +54,7 @@
 
 #include "m_fixed.h"
 
-#include "a_pcfx.h"
+#include "i_system.h"
 
 #include "globdata.h"
 
@@ -84,7 +82,7 @@ int16_t I_StartSound(sfxenum_t id, int16_t channel, int16_t vol, int16_t sep)
 //	 || id == sfx_sawidl)
 //		return -1;
 
-	PCFX_Play(id);
+	DMX_Play(id);
 
 	return channel;
 }
@@ -98,10 +96,19 @@ void I_InitSound(void)
 	if (nomusicparm && nosfxparm)
 		return;
 
-	PCFX_Init();
+	DMX_Init();
 
 	// Finished initialization.
 	printf("I_InitSound: sound ready\r\n");
+}
+
+
+void I_InitSound2(void)
+{
+	if (nosfxparm)
+		return;
+
+	DMX_Init2();
 }
 
 
@@ -110,7 +117,7 @@ void I_ShutdownSound(void)
 	if (nosfxparm)
 		return;
 
-	PCFX_Shutdown();
+	DMX_Shutdown();
 }
 
 
