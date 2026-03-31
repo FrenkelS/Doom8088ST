@@ -610,8 +610,8 @@ fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 	alw = a;
 	ahw = a >> FRACBITS;
 
-	ll = (uint32_t) alw * blw;
-	hl = (uint32_t) ahw * blw;
+	ll = mulu(alw, blw);
+	hl = mulu(ahw, blw);
 	r = (ll >> FRACBITS) + hl;
 	if (neg) r = -r;
 	return r;
