@@ -377,12 +377,7 @@ static void P_SlideMove(mobj_t __far* mo)
 
 static fixed_t FixedMul32OrigFriction(fixed_t a)
 {
-	uint16_t alw = a;
-	 int16_t ahw = a >> FRACBITS;
-
-	uint32_t ll = (uint32_t) alw * ORIG_FRICTION;
-	 int32_t hl = ( int32_t) ahw * ORIG_FRICTION;
-	return (ll >> FRACBITS) + hl;
+	return (a * (ORIG_FRICTION >> 11)) >> (FRACBITS - 11);
 }
 
 
