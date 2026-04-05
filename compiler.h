@@ -19,6 +19,11 @@
 #ifndef __COMPILER__
 #define __COMPILER__
 
+#if defined __archie__
+int stricmp(const char *_s1, const char *_s2);
+#endif
+
+
 #if defined macintosh
 #define stricmp strcasecmp
 #endif
