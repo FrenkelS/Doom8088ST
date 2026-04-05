@@ -52,7 +52,7 @@ static boolean isGraphicsModeSet = false;
 
 //**************************************************************************************
 //
-// Functions that are available on other operating systems, but not on AT&T UNIX
+// Functions that are available on other operating systems, but not on Archimedes
 //
 
 int stricmp(const char *s1, const char *s2)
@@ -72,6 +72,7 @@ int stricmp(const char *s1, const char *s2)
 }
 
 
+// There's a bug in ArchieSDK's implementation of strncpy
 char* strncpy(char* dest, const char* src, size_t n)
 {
 	char* tmp = dest;

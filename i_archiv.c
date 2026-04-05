@@ -50,6 +50,14 @@ static uint8_t *videomemory;
 
 void I_ReloadPalette(void)
 {
+	char lumpName[8] = "COLORMAP";
+	if (_g_gamma != 0)
+	{
+		lumpName[6] = 'P';
+		lumpName[7] = '0' + _g_gamma;
+	}
+
+	W_ReadLumpByNum(W_GetNumForName(lumpName), (void *)fullcolormap);
 }
 
 
@@ -125,6 +133,7 @@ void I_FinishUpdate(void)
 
 void I_FinishViewWindow(void)
 {
+	// Do nothing
 }
 
 
@@ -286,26 +295,83 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 void V_ClearViewWindow(void)
 {
+	memset(_s_screen, 0, VIEWWINDOWWIDTH * (SCREENHEIGHT - ST_HEIGHT));
 }
 
 
 void V_InitDrawLine(void)
 {
+	// Do nothing
 }
 
 
 void V_ShutdownDrawLine(void)
 {
+	// Do nothing
 }
 
 
 void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 {
+	UNUSED(color);
+
+	int16_t dx = abs(x1 - x0);
+	int16_t sx = x0 < x1 ? 1 : -1;
+
+	int16_t dy = -abs(y1 - y0);
+	int16_t sy = y0 < y1 ? 1 : -1;
+
+	int16_t err = dx + dy;
+
+	uint8_t bitmask = 1 << (x0 & 7);
+
+	while (true)
+	{
+		_s_screen[y0 * VIEWWINDOWWIDTH + (x0 >> 3)] |= bitmask;
+
+		if (x0 == x1 && y0 == y1)
+			break;
+
+		int16_t e2 = 2 * err;
+
+		if (e2 >= dy)
+		{
+			err += dy;
+			x0  += sx;
+
+			bitmask = 1 << (x0 & 7);
+		}
+
+		if (e2 <= dx)
+		{
+			err += dx;
+			y0  += sy;
+		}
+	}
 }
 
 
 void V_DrawBackground(int16_t backgroundnum)
 {
+	const byte *src = W_GetLumpByNum(backgroundnum);
+
+	for (int16_t y = 0; y < SCREENHEIGHT; y++)
+	{
+		for (int16_t x = 0; x < VIEWWINDOWWIDTH; x += 16)
+		{
+			uint8_t *d = &_s_screen[y * VIEWWINDOWWIDTH + x];
+			const byte *s = &src[((y & 63) * 16)];
+
+			size_t len = 16;
+
+			if (VIEWWINDOWWIDTH - x < 16)
+				len = VIEWWINDOWWIDTH - x;
+
+			memcpy(d, s, len);
+		}
+	}
+
+	Z_ChangeTagToCache(src);
 }
 
 
