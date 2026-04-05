@@ -23,6 +23,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include <kernel.h>
 #include <archie/video.h>
 
 #include "compiler.h"
@@ -61,8 +62,26 @@ void I_ReloadPalette(void)
 }
 
 
+static const uint16_t colors[14] =
+{
+	0x000,													// normal
+	0x100, 0x300, 0x500, 0x700, 0x800, 0xa00, 0xc00, 0xe00,	// red
+	0x110, 0x321, 0x541, 0x652,								// yellow
+	0x020													// green
+};
+
+
 static void I_UploadNewPalette(int8_t pal)
 {
+	uint16_t cdark = colors[pal];
+	int buffer[2];
+	uint8_t *b = (uint8_t *)buffer;
+	b[0] = 0;
+	b[1] = 16;
+	b[2] = (cdark & 0xf00) >> 4;
+	b[3] = (cdark & 0x0f0);
+	b[4] = (cdark & 0x00f) << 4;
+	_kernel_osword(12, (int *)buffer);
 }
 
 
