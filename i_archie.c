@@ -115,69 +115,8 @@ void I_InitKeyboard(void)
 }
 
 
-static void I_PostEvent(boolean keydown, int_fast16_t key)
+static void I_PostEvent(boolean keydown, int16_t data1)
 {
-	int16_t data1;
-	switch (key)
-	{
-		case KEY_SHIFT:              data1 = KEYD_SPEED; break;
-		case KEY_CTRL:               data1 = KEYD_B; break;
-		case KEY_ALT:                data1 = KEYD_STRAFE; break;
-		case KEY_LSHIFT:             data1 = KEYD_SPEED; break;
-		case KEY_LCTRL:              data1 = KEYD_B; break;
-		case KEY_LALT:               data1 = KEYD_STRAFE; break;
-		case KEY_RSHIFT:             data1 = KEYD_SPEED; break;
-		case KEY_RCTRL:              data1 = KEYD_B; break;
-		case KEY_RALT:               data1 = KEYD_STRAFE; break;
-		case KEY_MINUS:              data1 = KEYD_MINUS; break;
-		case KEY_LEFT:               data1 = KEYD_LEFT; break;
-		case KEY_DOWN:               data1 = KEYD_DOWN; break;
-		case KEY_SQUAREBRACKETSTART: data1 = KEYD_BRACKET_LEFT; break;
-		case KEY_UP:                 data1 = KEYD_UP; break;
-		case KEY_RETURN:             data1 = KEYD_A; break;
-		case KEY_SQUAREBRACKETEND:   data1 = KEYD_BRACKET_RIGHT; break;
-		case KEY_PLUS:               data1 = KEYD_PLUS; break;
-		case KEY_TAB:                data1 = KEYD_SELECT; break;
-		case KEY_SPACE:              data1 = KEYD_A; break;
-		case KEY_COMMA:              data1 = KEYD_L; break;
-		case KEY_PERIOD:             data1 = KEYD_R; break;
-		case KEY_ESC:                data1 = KEYD_START; break;
-		case KEY_RIGHT:              data1 = KEYD_RIGHT; break;
-		case KEY_A:                  data1 = 'a'; break;
-		case KEY_B:                  data1 = 'b'; break;
-		case KEY_C:                  data1 = 'c'; break;
-		case KEY_D:                  data1 = 'd'; break;
-		case KEY_E:                  data1 = 'e'; break;
-		case KEY_F:                  data1 = 'f'; break;
-		//case KEY_G:                  data1 = ; break;
-		case KEY_H:                  data1 = 'h'; break;
-		case KEY_I:                  data1 = 'i'; break;
-		//case KEY_J:                  data1 = ; break;
-		case KEY_K:                  data1 = 'k'; break;
-		case KEY_L:                  data1 = 'l'; break;
-		//case KEY_M:                  data1 = ; break;
-		case KEY_N:                  data1 = 'n'; break;
-		case KEY_O:                  data1 = 'o'; break;
-		case KEY_P:                  data1 = 'p'; break;
-		case KEY_Q:                  data1 = 'q'; break;
-		case KEY_R:                  data1 = 'r'; break;
-		case KEY_S:                  data1 = 's'; break;
-		case KEY_T:                  data1 = 't'; break;
-		//case KEY_U:                  data1 = ; break;
-		case KEY_V:                  data1 = 'v'; break;
-		//case KEY_W:                  data1 = ; break;
-		//case KEY_X:                  data1 = ; break;
-		case KEY_Y:                  data1 = 'y'; break;
-		//case KEY_Z:                  data1 = ; break;
-		case KEY_F10: I_Quit(); break;
-		case KEY_KP6:                data1 = KEYD_RIGHT; break;
-		case KEY_KP8:                data1 = KEYD_UP; break;
-		case KEY_KPENTER:            data1 = KEYD_A; break;
-		case KEY_KP4:                data1 = KEYD_LEFT; break;
-		case KEY_KP2:                data1 = KEYD_DOWN; break;
-		default: return;
-	}
-
 	d_event_t ev;
 	ev.type  = keydown ? ev_keydown : ev_keyup;
 	ev.data1 = data1;
@@ -199,12 +138,76 @@ void I_StartTic(void)
 
 	for (int_fast16_t key = 0; key < KB_MATRIX_SIZE; key++)
 	{
+		int16_t data1;
+		switch (key)
+		{
+			case KEY_SHIFT:              data1 = KEYD_SPEED; break;
+			case KEY_CTRL:               data1 = KEYD_B; break;
+			case KEY_ALT:                data1 = KEYD_STRAFE; break;
+			case KEY_LSHIFT:             data1 = KEYD_SPEED; break;
+			case KEY_LCTRL:              data1 = KEYD_B; break;
+			case KEY_LALT:               data1 = KEYD_STRAFE; break;
+			case KEY_RSHIFT:             data1 = KEYD_SPEED; break;
+			case KEY_RCTRL:              data1 = KEYD_B; break;
+			case KEY_RALT:               data1 = KEYD_STRAFE; break;
+			case KEY_MINUS:              data1 = KEYD_MINUS; break;
+			case KEY_LEFT:               data1 = KEYD_LEFT; break;
+			case KEY_DOWN:               data1 = KEYD_DOWN; break;
+			case KEY_SQUAREBRACKETSTART: data1 = KEYD_BRACKET_LEFT; break;
+			case KEY_UP:                 data1 = KEYD_UP; break;
+			case KEY_RETURN:             data1 = KEYD_A; break;
+			case KEY_SQUAREBRACKETEND:   data1 = KEYD_BRACKET_RIGHT; break;
+			case KEY_PLUS:               data1 = KEYD_PLUS; break;
+			case KEY_TAB:                data1 = KEYD_SELECT; break;
+			case KEY_SPACE:              data1 = KEYD_A; break;
+			case KEY_COMMA:              data1 = KEYD_L; break;
+			case KEY_PERIOD:             data1 = KEYD_R; break;
+			case KEY_ESC:                data1 = KEYD_START; break;
+			case KEY_RIGHT:              data1 = KEYD_RIGHT; break;
+			case KEY_A:                  data1 = 'a'; break;
+			case KEY_B:                  data1 = 'b'; break;
+			case KEY_C:                  data1 = 'c'; break;
+			case KEY_D:                  data1 = 'd'; break;
+			case KEY_E:                  data1 = 'e'; break;
+			case KEY_F:                  data1 = 'f'; break;
+			//case KEY_G:                  data1 = ; break;
+			case KEY_H:                  data1 = 'h'; break;
+			case KEY_I:                  data1 = 'i'; break;
+			//case KEY_J:                  data1 = ; break;
+			case KEY_K:                  data1 = 'k'; break;
+			case KEY_L:                  data1 = 'l'; break;
+			//case KEY_M:                  data1 = ; break;
+			case KEY_N:                  data1 = 'n'; break;
+			case KEY_O:                  data1 = 'o'; break;
+			case KEY_P:                  data1 = 'p'; break;
+			case KEY_Q:                  data1 = 'q'; break;
+			case KEY_R:                  data1 = 'r'; break;
+			case KEY_S:                  data1 = 's'; break;
+			case KEY_T:                  data1 = 't'; break;
+			//case KEY_U:                  data1 = ; break;
+			case KEY_V:                  data1 = 'v'; break;
+			//case KEY_W:                  data1 = ; break;
+			//case KEY_X:                  data1 = ; break;
+			case KEY_Y:                  data1 = 'y'; break;
+			//case KEY_Z:                  data1 = ; break;
+			//case KEY_F10: I_Quit(); break;
+			case KEY_KP6:                data1 = KEYD_RIGHT; break;
+			case KEY_KP8:                data1 = KEYD_UP; break;
+			case KEY_KPENTER:            data1 = KEYD_A; break;
+			case KEY_KP4:                data1 = KEYD_LEFT; break;
+			case KEY_KP2:                data1 = KEYD_DOWN; break;
+			default: continue;
+		}
+
 		kb_matrix_cur[key] = k_checkKeypress(key);
 		if (kb_matrix_cur[key] && !kb_matrix_prv[key])
-			I_PostEvent(true,  key);
+			I_PostEvent(true,  data1);
 		if (!kb_matrix_cur[key] && kb_matrix_prv[key])
-			I_PostEvent(false, key);
+			I_PostEvent(false, data1);
 	}
+
+	if (k_checkKeypress(KEY_F10))
+		I_Quit();
 }
 
 
