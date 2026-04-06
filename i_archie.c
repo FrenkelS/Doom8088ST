@@ -330,9 +330,9 @@ void I_Error(const char *error, ...)
 
 int main(int argc, const char * const * argv)
 {
-    v_setMode(0);
-    v_disableTextCursor();
-    v_enableVSync();
+	v_setMode(13);
+	v_disableTextCursor();
+	v_enableVSync();
 
 	printf("Doom8088: Archimedes Edition\n");
 

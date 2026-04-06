@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -137,6 +137,18 @@ static const uint8_t mapcolor_tele = GREEN;
 static const uint8_t mapcolor_secr = LIGHT_MAGENTA;
 static const uint8_t mapcolor_unsn = DARK_GRAY;
 static const uint8_t mapcolor_sngl = WHITE;
+#elif defined __archie__
+static const uint8_t mapcolor_wall = 63;
+static const uint8_t mapcolor_fchg = 92;
+static const uint8_t mapcolor_cchg = 55;
+static const uint8_t mapcolor_clsd = 255;
+static const uint8_t mapcolor_rdor = 23;
+static const uint8_t mapcolor_bdor = 136;
+static const uint8_t mapcolor_ydor = 119;
+static const uint8_t mapcolor_tele = 64;
+static const uint8_t mapcolor_secr = 152;
+static const uint8_t mapcolor_unsn = 44;
+static const uint8_t mapcolor_sngl = 255;
 #else
 static const uint8_t mapcolor_wall = 23;    // normal 1s wall color
 static const uint8_t mapcolor_fchg = 55;    // line at floor height change color

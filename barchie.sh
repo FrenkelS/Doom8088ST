@@ -6,7 +6,7 @@ export PATH=~/archiesdk/tools/bin:$PATH
 unset CFLAGS
 
 
-export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=65 -DFLAT_SKY_COLOR=3 -DWAD_FILE=\"HostFS::HostFS.$.DOOMAR2\" -DMAPWIDTH=480 -DNR_OF_COLORS=2 -DC_ONLY"
+export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=64 -DFLAT_SKY_COLOR=47 -DWAD_FILE=\"HostFS::HostFS.$.DOOMAR56\" -DC_ONLY"
 
 
 arm-archie-gcc -c i_archiv.c $RENDER_OPTIONS -mno-thumb-interwork -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -fno-tree-pre -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN
