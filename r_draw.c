@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -488,6 +488,9 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	return (int64_t)a * b >> FRACBITS;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -522,11 +525,15 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
 inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	return (int64_t)a * b >> FRACBITS;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -552,6 +559,7 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	result = hh + hl + lh + ll;
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
@@ -566,6 +574,9 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	return (int64_t)a * b >> FRACBITS;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -589,6 +600,7 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
@@ -599,6 +611,9 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
+#if defined __archie__
+	return (int64_t)a * blw >> FRACBITS;
+#else
 	boolean neg = a < 0;
 
 	uint16_t alw, ahw;
@@ -615,6 +630,7 @@ fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 	r = (ll >> FRACBITS) + hl;
 	if (neg) r = -r;
 	return r;
+#endif
 }
 
 
