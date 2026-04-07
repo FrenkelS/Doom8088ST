@@ -154,12 +154,8 @@ void I_FinishViewWindow(void)
 inline static void R_DrawColumnPixel(uint8_t *dest, const uint8_t* colormap, const byte *source, uint16_t frac)
 {
 #if VIEWWINDOWWIDTH == 60
-	uint16_t color = colormap[source[frac>>COLBITS]];
-	color = (color | (color << 8));
+	*((uint32_t*)dest) = colormap[source[frac >> COLBITS]] * 0x01010101u;
 
-	uint16_t *d = (uint16_t *) dest;
-	*d++ = color;
-	*d   = color;
 #elif VIEWWINDOWWIDTH == 120
 	uint16_t color = colormap[source[frac>>COLBITS]];
 	color = (color | (color << 8));
