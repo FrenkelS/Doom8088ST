@@ -24,6 +24,7 @@
  *-----------------------------------------------------------------------------*/
 
 #include <kernel.h>
+#include <archie/SWI.h>
 #include <archie/video.h>
 
 #include "compiler.h"
@@ -55,16 +56,30 @@ void I_ReloadPalette(void)
 }
 
 
+static const uint8_t colors[14] =
+{
+	0x00,											// normal
+	0x10, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,	// red
+	0x43, 0x53, 0x63, 0x73,							// yellow
+	0x03											// green
+};
+
+
 static void I_UploadNewPalette(int8_t pal)
 {
-	// TODO
+	uint8_t cdark = colors[pal];
+	uint8_t palette_block[5] = {0, 16, 0, 0, 0};
+
+	palette_block[2] = cdark;
+	palette_block[3] = cdark << 4;
+
+	_kernel_osword(OSWord_WritePalette, (int *)palette_block);
 }
 
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
 	videomemory  = v_getScreenAddress();
-
 	videomemory += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 2;								// center horizontally
 	videomemory += ((SCREENHEIGHT_ARCHIMEDES - SCREENHEIGHT) / 2) * SCREENWIDTH_ARCHIMEDES;	// center vertically
 }
