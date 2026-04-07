@@ -552,9 +552,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 
 	uint16_t *backbuffer = (uint16_t *)_s_screen;
 
-	// TODO while (ticks--)
+	while (ticks--)
 	{
-		I_DrawBuffer((uint8_t *)frontbuffer);
 		for (int16_t i = 0; i < SCREENWIDTH / 2; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
@@ -601,6 +600,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 			}
 		}
 	}
+
+	I_DrawBuffer((uint8_t *)frontbuffer);
 
 	return done;
 }
