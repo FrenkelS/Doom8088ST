@@ -96,9 +96,9 @@ void I_ShutdownGraphics(void)
 }
 
 
-static void I_DrawBuffer(uint8_t *buffer)
+static void I_DrawBuffer(void)
 {
-	uint8_t *src = buffer;
+	uint8_t *src = _s_screen;
 	uint8_t *dst = videomemory;
 
 	for (uint_fast8_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
@@ -140,7 +140,7 @@ void I_FinishUpdate(void)
 		newpal = NO_PALETTE_CHANGE;
 	}
 
-	I_DrawBuffer(_s_screen);
+	I_DrawBuffer();
 }
 
 
@@ -533,15 +533,12 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 }
 
 
-static uint16_t *frontbuffer;
 static  int16_t *wipe_y_lookup;
 
 
 void wipe_StartScreen(void)
 {
-	frontbuffer = Z_TryMallocStatic(SCREENWIDTH * SCREENHEIGHT);
-	if (frontbuffer)
-		memcpy(frontbuffer, _s_screen, SCREENWIDTH * SCREENHEIGHT);
+	// Do nothing
 }
 
 
@@ -549,7 +546,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint16_t *backbuffer = (uint16_t *)_s_screen;
+	uint16_t *frontbuffer = (uint16_t *)videomemory;
+	uint16_t *backbuffer  = (uint16_t *)_s_screen;
 
 	while (ticks--)
 	{
@@ -570,8 +568,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				if (wipe_y_lookup[i] + dy >= SCREENHEIGHT)
 					dy = SCREENHEIGHT - wipe_y_lookup[i];
 
-				uint16_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * (SCREENWIDTH / 2));
-				uint16_t *d = &frontbuffer[i] + ((SCREENHEIGHT      - 1) * (SCREENWIDTH / 2));
+				uint16_t *s = &frontbuffer[i] + ((SCREENHEIGHT - dy - 1) * (SCREENWIDTH_ARCHIMEDES / 2));
+				uint16_t *d = &frontbuffer[i] + ((SCREENHEIGHT      - 1) * (SCREENWIDTH_ARCHIMEDES / 2));
 
 				// scroll down the column. Of course we need to copy from the bottom... up to
 				// SCREENHEIGHT - yLookup - dy
@@ -579,18 +577,18 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				for (int16_t j = SCREENHEIGHT - wipe_y_lookup[i] - dy; j; j--)
 				{
 					*d = *s;
-					d += -(SCREENWIDTH / 2);
-					s += -(SCREENWIDTH / 2);
+					d += -(SCREENWIDTH_ARCHIMEDES / 2);
+					s += -(SCREENWIDTH_ARCHIMEDES / 2);
 				}
 
 				// copy new screen. We need to copy only between y_lookup and + dy y_lookup
 				s = &backbuffer[i]  + wipe_y_lookup[i] * SCREENWIDTH / 2;
-				d = &frontbuffer[i] + wipe_y_lookup[i] * SCREENWIDTH / 2;
+				d = &frontbuffer[i] + wipe_y_lookup[i] * SCREENWIDTH_ARCHIMEDES / 2;
 
 				for (int16_t j = 0 ; j < dy; j++)
 				{
 					*d = *s;
-					d += (SCREENWIDTH / 2);
+					d += (SCREENWIDTH_ARCHIMEDES / 2);
 					s += (SCREENWIDTH / 2);
 				}
 
@@ -599,8 +597,6 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 			}
 		}
 	}
-
-	I_DrawBuffer((uint8_t *)frontbuffer);
 
 	return done;
 }
@@ -627,9 +623,6 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
-	if (!frontbuffer)
-		return;
-
 	wipe_initMelt();
 
 	boolean done;
@@ -652,6 +645,5 @@ void D_Wipe(void)
 
 	} while (!done);
 
-	Z_Free(frontbuffer);
 	Z_Free(wipe_y_lookup);
 }
