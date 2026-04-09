@@ -27,7 +27,6 @@
 #include <string.h>
 #include <swis.h>
 #include <time.h>
-#include <archie/video.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -298,10 +297,6 @@ static void I_Shutdown(void)
 		I_ShutdownGraphics();
 
 	I_ShutdownSound();
-
-    v_disableVSync();
-    //flush last vsync
-    v_waitForVSync();
 }
 
 
@@ -330,10 +325,6 @@ void I_Error(const char *error, ...)
 
 int main(int argc, const char * const * argv)
 {
-	v_setMode(13);
-	v_disableTextCursor();
-	v_enableVSync();
-
 	printf("Doom8088: Archimedes Edition\n");
 
 #if defined TIMEDEMO

@@ -23,7 +23,6 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include <kernel.h>
 #include <archie/SWI.h>
 #include <archie/video.h>
 
@@ -79,6 +78,9 @@ static void I_UploadNewPalette(int8_t pal)
 
 void I_InitGraphicsHardwareSpecificCode(void)
 {
+	v_setMode(13);
+	v_disableTextCursor();
+
 	videomemory  = v_getScreenAddress();
 	videomemory += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 2;								// center horizontally
 	videomemory += ((SCREENHEIGHT_ARCHIMEDES - SCREENHEIGHT) / 2) * SCREENWIDTH_ARCHIMEDES;	// center vertically
@@ -90,6 +92,7 @@ static boolean drawStatusBar = true;
 
 void I_ShutdownGraphics(void)
 {
+	// Do nothing
 }
 
 
