@@ -679,7 +679,6 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 	while (ticks--)
 	{
 		int16_t i;
-
 		for (i = 0; i < VIEWWINDOWWIDTH; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
