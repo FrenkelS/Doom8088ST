@@ -789,7 +789,6 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 	while (ticks--)
 	{
 		int16_t i;
-		I_DrawBuffer(frontbuffer);
 		for (i = 0; i < VIEWWINDOWWIDTH; i++)
 		{
 			if (wipe_y_lookup[i] < 0)
@@ -840,6 +839,8 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 			}
 		}
 	}
+
+	I_DrawBuffer(frontbuffer);
 
 	return done;
 }
