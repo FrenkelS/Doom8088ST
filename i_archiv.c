@@ -51,7 +51,24 @@ static uint8_t *videomemory;
 
 void I_ReloadPalette(void)
 {
-	// TODO
+	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
+	for (int16_t c = 1; c < 16; c++)
+	{
+		uint16_t p = playpal[c];
+		uint16_t r = (p >> 8);
+		uint16_t g = (p >> 4) & 0x00f;
+		uint16_t b = (p >> 0) & 0x00f;
+
+		r += _g_gamma;
+		g = (g * 2 + _g_gamma) / 2;
+		b += _g_gamma;
+		if (r > 7) r = 7;
+		if (g > 3) g = 3;
+		if (b > 7) b = 7;
+		uint8_t palette_block[5] = {c, 16, r << 4, g << 4, b << 4};
+		_kernel_osword(OSWord_WritePalette, (int *)palette_block);
+	}
+	Z_ChangeTagToCache(playpal);
 }
 
 
@@ -67,11 +84,7 @@ static const uint8_t colors[14] =
 static void I_UploadNewPalette(int8_t pal)
 {
 	uint8_t cdark = colors[pal];
-	uint8_t palette_block[5] = {0, 16, 0, 0, 0};
-
-	palette_block[2] = cdark;
-	palette_block[3] = cdark << 4;
-
+	uint8_t palette_block[5] = {0, 16, cdark, cdark << 4, 0};
 	_kernel_osword(OSWord_WritePalette, (int *)palette_block);
 }
 
@@ -80,6 +93,18 @@ void I_InitGraphicsHardwareSpecificCode(void)
 {
 	v_setMode(13);
 	v_disableTextCursor();
+
+	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
+	for (int16_t c = 0; c < 16; c++)
+	{
+		uint16_t p = playpal[c];
+		uint16_t r = p >> 4;
+		uint16_t g = p & 0x0f0;
+		uint16_t b = (p << 4) & 0x0f0;
+		uint8_t palette_block[5] = {c, 16, r, g, b};
+		_kernel_osword(OSWord_WritePalette, (int *)palette_block);
+	}
+	Z_ChangeTagToCache(playpal);
 
 	videomemory  = v_getScreenAddress();
 	videomemory += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 2;								// center horizontally
