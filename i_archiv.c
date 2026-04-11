@@ -123,23 +123,23 @@ void I_ShutdownGraphics(void)
 
 static void I_DrawBuffer(void)
 {
-	uint8_t *src = _s_screen;
-	uint8_t *dst = videomemory;
+	uint32_t *src = (uint32_t*)_s_screen;
+	uint32_t *dst = (uint32_t*)videomemory;
 
 	for (uint_fast8_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
 	{
-		memcpy(dst, src, SCREENWIDTH);
-		dst += SCREENWIDTH_ARCHIMEDES;
-		src += SCREENWIDTH;
+		for (uint_fast8_t x = 0; x < SCREENWIDTH / 4; x++)
+			*dst++ = *src++;
+		dst += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
 	}
 
 	if (drawStatusBar)
 	{
 		for (uint_fast8_t y = 0; y < ST_HEIGHT; y++)
 		{
-			memcpy(dst, src, SCREENWIDTH);
-			dst += SCREENWIDTH_ARCHIMEDES;
-			src += SCREENWIDTH;
+			for (uint_fast8_t x = 0; x < SCREENWIDTH / 4; x++)
+				*dst++ = *src++;
+			dst += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
 		}
 	}
 	drawStatusBar = true;
