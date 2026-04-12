@@ -22,7 +22,7 @@ arm-archie-gcc -c tables.c   $RENDER_OPTIONS -mno-thumb-interwork -Ofast -fomit-
 arm-archie-gcc -c w_wad.c    $RENDER_OPTIONS -mno-thumb-interwork -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN
 arm-archie-gcc -c z_zone.c   $RENDER_OPTIONS -mno-thumb-interwork -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN
 
-export CFLAGS="-mno-thumb-interwork -Os -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -funsafe-loop-optimizations -freorder-blocks-algorithm=stc -fno-tree-pre -fira-region=mixed -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN"
+export CFLAGS="-mno-thumb-interwork -Os -fomit-frame-pointer -fgcse-sm -fgcse-las -fipa-pta -flto -fwhole-program -funroll-all-loops -freorder-blocks-algorithm=stc -fno-tree-pre -fira-region=mixed -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN"
 #export CFLAGS="$CFLAGS -Ofast -flto -fwhole-program -fomit-frame-pointer -funroll-loops -fgcse-sm -fgcse-las -fipa-pta -Wno-attributes -Wpedantic"
 #export CFLAGS="$CFLAGS -Wall -Wextra"
 
