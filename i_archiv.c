@@ -45,8 +45,9 @@
 extern const int16_t CENTERY;
 
 
-static uint8_t _s_screen[SCREENWIDTH * SCREENHEIGHT];
-static uint8_t *videomemory;
+static int16_t page;
+static uint8_t *pages[3];
+static uint8_t *_s_screen;
 
 
 void I_ReloadPalette(void)
@@ -94,6 +95,24 @@ void I_InitGraphicsHardwareSpecificCode(void)
 	v_setMode(13);
 	v_disableTextCursor();
 
+	_kernel_swi_regs regs;
+	regs.r[0] = 2;
+	regs.r[1] = +1 * 2 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES;
+	_kernel_swi(OS_ChangeDynamicArea, &regs, &regs);
+	if (regs.r[1] != 2 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES)
+		I_Error("Failed to allocate 240 kB of video memory");
+
+	uint8_t *videomemory = v_getScreenAddress();
+	memset(videomemory, 0, 3 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES);
+	videomemory += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 2;								// center horizontally
+	videomemory += ((SCREENHEIGHT_ARCHIMEDES - SCREENHEIGHT) / 2) * SCREENWIDTH_ARCHIMEDES;	// center vertically
+
+	pages[0] = videomemory + 0 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES;
+	pages[1] = videomemory + 1 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES;
+	pages[2] = videomemory + 2 * SCREENWIDTH_ARCHIMEDES * SCREENHEIGHT_ARCHIMEDES;
+	page = 1;
+	_s_screen = pages[page];
+
 	const uint16_t *playpal = W_GetLumpByName("PLAYPAL");
 	for (int16_t c = 0; c < 16; c++)
 	{
@@ -105,44 +124,12 @@ void I_InitGraphicsHardwareSpecificCode(void)
 		_kernel_osword(OSWord_WritePalette, (int *)palette_block);
 	}
 	Z_ChangeTagToCache(playpal);
-
-	videomemory  = v_getScreenAddress();
-	videomemory += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 2;								// center horizontally
-	videomemory += ((SCREENHEIGHT_ARCHIMEDES - SCREENHEIGHT) / 2) * SCREENWIDTH_ARCHIMEDES;	// center vertically
 }
-
-
-static boolean drawStatusBar = true;
 
 
 void I_ShutdownGraphics(void)
 {
-	// Do nothing
-}
-
-
-static void I_DrawBuffer(void)
-{
-	uint32_t *src = (uint32_t*)_s_screen;
-	uint32_t *dst = (uint32_t*)videomemory;
-
-	for (uint_fast8_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
-	{
-		for (uint_fast8_t x = 0; x < SCREENWIDTH / 4; x++)
-			*dst++ = *src++;
-		dst += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
-	}
-
-	if (drawStatusBar)
-	{
-		for (uint_fast8_t y = 0; y < ST_HEIGHT; y++)
-		{
-			for (uint_fast8_t x = 0; x < SCREENWIDTH / 4; x++)
-				*dst++ = *src++;
-			dst += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
-		}
-	}
-	drawStatusBar = true;
+	_kernel_osbyte(OSByte_WriteDisplayBank, 0, 0);
 }
 
 
@@ -157,15 +144,50 @@ void I_SetPalette(int8_t p)
 
 #define NO_PALETTE_CHANGE 100
 
+static int16_t st_needrefresh = 0;
+
 void I_FinishUpdate(void)
 {
+	// palette
 	if (newpal != NO_PALETTE_CHANGE)
 	{
 		I_UploadNewPalette(newpal);
 		newpal = NO_PALETTE_CHANGE;
 	}
 
-	I_DrawBuffer();
+	// status bar
+	if (st_needrefresh)
+	{
+		st_needrefresh--;
+
+		if (st_needrefresh != 2)
+		{
+			int16_t prevpage = page - 1;
+			if (prevpage == -1)
+				prevpage = 2;
+
+			uint32_t *s = (uint32_t*)pages[prevpage];
+			uint32_t *d = (uint32_t*)_s_screen;
+			s += (SCREENHEIGHT - ST_HEIGHT) * SCREENWIDTH_ARCHIMEDES / 4;
+			d += (SCREENHEIGHT - ST_HEIGHT) * SCREENWIDTH_ARCHIMEDES / 4;
+			for (int16_t y = 0; y < ST_HEIGHT; y++)
+			{
+				for (int16_t x = 0; x < SCREENWIDTH / 4; x++)
+					*d++ = *s++;
+
+				s += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
+				d += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
+			}
+		}
+	}
+
+	// page flip
+	_kernel_osbyte(OSByte_WriteDisplayBank, page + 1, 0);
+	page++;
+	if (page == 3)
+		page = 0;
+
+	_s_screen = pages[page];
 }
 
 
@@ -216,47 +238,47 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	//  e.g. a DDA-lile scaling.
 	// This is as fast as it gets.
 
-	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
 	int16_t l = count >> 4;
 	while (l--)
 	{
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
 
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
 
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
 
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case 14: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case 13: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case 12: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case 11: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case 10: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  9: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  8: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  7: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  6: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  5: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  4: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  3: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
-		case  2: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH; frac += fracstep;
+		case 15: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case 14: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case 13: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case 12: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case 11: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case 10: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  9: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  8: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  7: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  6: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  5: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  4: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  3: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
+		case  2: R_DrawColumnPixel(dest, colormap, source, frac); dest += SCREENWIDTH_ARCHIMEDES; frac += fracstep;
 		case  1: R_DrawColumnPixel(dest, colormap, source, frac);
 	}
 }
@@ -276,63 +298,105 @@ void R_DrawColumnFlat(uint8_t col, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
 
 	uint16_t l = count >> 4;
 
 	while (l--)
 	{
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
 	}
 
 	switch (count & 15)
 	{
-		case 15: dest[SCREENWIDTH * 14] = col; dest[SCREENWIDTH * 14 + 1] = col; dest[SCREENWIDTH * 14 + 2] = col; dest[SCREENWIDTH * 14 + 3] = col;
-		case 14: dest[SCREENWIDTH * 13] = col; dest[SCREENWIDTH * 13 + 1] = col; dest[SCREENWIDTH * 13 + 2] = col; dest[SCREENWIDTH * 13 + 3] = col;
-		case 13: dest[SCREENWIDTH * 12] = col; dest[SCREENWIDTH * 12 + 1] = col; dest[SCREENWIDTH * 12 + 2] = col; dest[SCREENWIDTH * 12 + 3] = col;
-		case 12: dest[SCREENWIDTH * 11] = col; dest[SCREENWIDTH * 11 + 1] = col; dest[SCREENWIDTH * 11 + 2] = col; dest[SCREENWIDTH * 11 + 3] = col;
-		case 11: dest[SCREENWIDTH * 10] = col; dest[SCREENWIDTH * 10 + 1] = col; dest[SCREENWIDTH * 10 + 2] = col; dest[SCREENWIDTH * 10 + 3] = col;
-		case 10: dest[SCREENWIDTH *  9] = col; dest[SCREENWIDTH *  9 + 1] = col; dest[SCREENWIDTH *  9 + 2] = col; dest[SCREENWIDTH *  9 + 3] = col;
-		case  9: dest[SCREENWIDTH *  8] = col; dest[SCREENWIDTH *  8 + 1] = col; dest[SCREENWIDTH *  8 + 2] = col; dest[SCREENWIDTH *  8 + 3] = col;
-		case  8: dest[SCREENWIDTH *  7] = col; dest[SCREENWIDTH *  7 + 1] = col; dest[SCREENWIDTH *  7 + 2] = col; dest[SCREENWIDTH *  7 + 3] = col;
-		case  7: dest[SCREENWIDTH *  6] = col; dest[SCREENWIDTH *  6 + 1] = col; dest[SCREENWIDTH *  6 + 2] = col; dest[SCREENWIDTH *  6 + 3] = col;
-		case  6: dest[SCREENWIDTH *  5] = col; dest[SCREENWIDTH *  5 + 1] = col; dest[SCREENWIDTH *  5 + 2] = col; dest[SCREENWIDTH *  5 + 3] = col;
-		case  5: dest[SCREENWIDTH *  4] = col; dest[SCREENWIDTH *  4 + 1] = col; dest[SCREENWIDTH *  4 + 2] = col; dest[SCREENWIDTH *  4 + 3] = col;
-		case  4: dest[SCREENWIDTH *  3] = col; dest[SCREENWIDTH *  3 + 1] = col; dest[SCREENWIDTH *  3 + 2] = col; dest[SCREENWIDTH *  3 + 3] = col;
-		case  3: dest[SCREENWIDTH *  2] = col; dest[SCREENWIDTH *  2 + 1] = col; dest[SCREENWIDTH *  2 + 2] = col; dest[SCREENWIDTH *  2 + 3] = col;
-		case  2: dest[SCREENWIDTH *  1] = col; dest[SCREENWIDTH *  1 + 1] = col; dest[SCREENWIDTH *  1 + 2] = col; dest[SCREENWIDTH *  1 + 3] = col;
-		case  1: dest[SCREENWIDTH *  0] = col; dest[SCREENWIDTH *  0 + 1] = col; dest[SCREENWIDTH *  0 + 2] = col; dest[SCREENWIDTH *  0 + 3] = col;
+		case 15: dest[SCREENWIDTH_ARCHIMEDES * 14] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 3] = col;
+		case 14: dest[SCREENWIDTH_ARCHIMEDES * 13] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 3] = col;
+		case 13: dest[SCREENWIDTH_ARCHIMEDES * 12] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 3] = col;
+		case 12: dest[SCREENWIDTH_ARCHIMEDES * 11] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 3] = col;
+		case 11: dest[SCREENWIDTH_ARCHIMEDES * 10] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 3] = col;
+		case 10: dest[SCREENWIDTH_ARCHIMEDES *  9] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 3] = col;
+		case  9: dest[SCREENWIDTH_ARCHIMEDES *  8] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 3] = col;
+		case  8: dest[SCREENWIDTH_ARCHIMEDES *  7] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 3] = col;
+		case  7: dest[SCREENWIDTH_ARCHIMEDES *  6] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 3] = col;
+		case  6: dest[SCREENWIDTH_ARCHIMEDES *  5] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 3] = col;
+		case  5: dest[SCREENWIDTH_ARCHIMEDES *  4] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 3] = col;
+		case  4: dest[SCREENWIDTH_ARCHIMEDES *  3] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 3] = col;
+		case  3: dest[SCREENWIDTH_ARCHIMEDES *  2] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 3] = col;
+		case  2: dest[SCREENWIDTH_ARCHIMEDES *  1] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 3] = col;
+		case  1: dest[SCREENWIDTH_ARCHIMEDES *  0] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 3] = col;
 	}
 }
 
 
+#define FUZZCOLOR1 0x00
+#define FUZZCOLOR2 0x01
+#define FUZZCOLOR3 0x02
+#define FUZZCOLOR4 0x03
+#define FUZZTABLE 50
+
+static const uint8_t fuzzcolors[FUZZTABLE] =
+{
+	FUZZCOLOR1,FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR2,
+	FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR2,
+	FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR2,FUZZCOLOR4,FUZZCOLOR2,
+	FUZZCOLOR1,FUZZCOLOR4,FUZZCOLOR2,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR1,FUZZCOLOR4,
+	FUZZCOLOR3,FUZZCOLOR2,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR2,FUZZCOLOR1,
+	FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR2,FUZZCOLOR4,FUZZCOLOR2,FUZZCOLOR1,FUZZCOLOR3,
+	FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR4,FUZZCOLOR1,FUZZCOLOR3,FUZZCOLOR2,FUZZCOLOR1
+};
+
+
 void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 {
-	// TODO
+	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+
+	// Zero length, column does not exceed a pixel.
+	if (count <= 0)
+		return;
+
+	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+
+	static int16_t fuzzpos = 0;
+
+	do
+	{
+		uint8_t c = fuzzcolors[fuzzpos];
+		*dest++ = c;
+		*dest++ = c;
+		*dest++ = c;
+		*dest++ = c;
+		dest += SCREENWIDTH_ARCHIMEDES - 4;
+
+		fuzzpos++;
+		if (fuzzpos >= FUZZTABLE)
+			fuzzpos = 0;
+
+	} while (--count);
 }
 
 
 void V_ClearViewWindow(void)
 {
-	memset(_s_screen, 0, SCREENWIDTH * (SCREENHEIGHT - ST_HEIGHT));
+	for (int16_t y = 0; y < SCREENHEIGHT - ST_HEIGHT; y++)
+		memset(&_s_screen[y * SCREENWIDTH_ARCHIMEDES], 0, SCREENWIDTH);
 }
 
 
@@ -360,7 +424,7 @@ void V_DrawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color)
 
 	while (true)
 	{
-		_s_screen[y0 * SCREENWIDTH + x0] = color;
+		_s_screen[y0 * SCREENWIDTH_ARCHIMEDES + x0] = color;
 
 		if (x0 == x1 && y0 == y1)
 			break;
@@ -390,7 +454,7 @@ void V_DrawBackground(int16_t backgroundnum)
 	{
 		for (int16_t x = 0; x < SCREENWIDTH; x += 64)
 		{
-			uint8_t *d = &_s_screen[y * SCREENWIDTH + x];
+			uint8_t *d = &_s_screen[y * SCREENWIDTH_ARCHIMEDES + x];
 			const byte *s = &src[((y & 63) * 64)];
 
 			size_t len = 64;
@@ -412,21 +476,31 @@ void V_DrawRaw(int16_t num, uint16_t offset)
 
 	if (lump != NULL)
 	{
+		offset = (offset / SCREENWIDTH) * SCREENWIDTH_ARCHIMEDES;
+		const uint32_t *src = (const uint32_t*)lump;
+		uint32_t *dest = (uint32_t*)&_s_screen[offset];
 		uint16_t lumpLength = W_LumpLength(num);
-		memcpy(&_s_screen[offset], lump, lumpLength);
+		while (lumpLength)
+		{
+			for (int16_t x = 0; x < SCREENWIDTH / 4; x++)
+				*dest++ = *src++;
+
+			dest += (SCREENWIDTH_ARCHIMEDES - SCREENWIDTH) / 4;
+
+			lumpLength -= SCREENWIDTH;
+		}
 		Z_ChangeTagToCache(lump);
 	}
-	else
-		W_ReadLumpByNum(num, &_s_screen[offset]);
 }
 
 
 void ST_Drawer(void)
 {
 	if (ST_NeedUpdate())
+	{
 		ST_doRefresh();
-	else
-		drawStatusBar = false;
+		st_needrefresh = 3; // 3 screen pages
+	}
 }
 
 
@@ -435,7 +509,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 	y -= patch->topoffset;
 	x -= patch->leftoffset;
 
-	byte *desttop = &_s_screen[y * SCREENWIDTH + x];
+	byte *desttop = &_s_screen[y * SCREENWIDTH_ARCHIMEDES + x];
 
 	int16_t width = patch->width;
 
@@ -447,53 +521,53 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		while (column->topdelta != 0xff)
 		{
 			const byte *source = (const byte *)column + 3;
-			byte *dest = desttop + (column->topdelta * SCREENWIDTH);
+			byte *dest = desttop + (column->topdelta * SCREENWIDTH_ARCHIMEDES);
 
 			uint16_t count = column->length;
 
 			if (count == 7)
 			{
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				*dest = *source++;
 			}
 			else if (count == 3)
 			{
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				*dest = *source++;
 			}
 			else if (count == 5)
 			{
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				*dest = *source++;
 			}
 			else if (count == 6)
 			{
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
-				*dest = *source++; dest += SCREENWIDTH;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				*dest = *source++;
 			}
 			else if (count == 2)
 			{
-				*dest = *source++; dest += SCREENWIDTH;
+				*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				*dest = *source++;
 			}
 			else
 			{
 				while (count--)
 				{
-					*dest = *source++; dest += SCREENWIDTH;
+					*dest = *source++; dest += SCREENWIDTH_ARCHIMEDES;
 				}
 			}
 
@@ -538,7 +612,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 			int16_t dc_yh = (((y + column->topdelta + column->length) * DY) >> FRACBITS);
 
-			byte *dest = &_s_screen[dc_yl * SCREENWIDTH + dc_x];
+			byte *dest = &_s_screen[dc_yl * SCREENWIDTH_ARCHIMEDES + dc_x];
 
 			int16_t frac = 0;
 
@@ -548,7 +622,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 			while (count--)
 			{
 				*dest = source[frac >> 8];
-				dest += SCREENWIDTH;
+				dest += SCREENWIDTH_ARCHIMEDES;
 				frac += DYI;
 			}
 
@@ -558,6 +632,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 }
 
 
+static uint16_t *frontbuffer;
 static  int16_t *wipe_y_lookup;
 
 
@@ -571,8 +646,7 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 {
 	boolean done = true;
 
-	uint16_t *frontbuffer = (uint16_t *)videomemory;
-	uint16_t *backbuffer  = (uint16_t *)_s_screen;
+	uint16_t *backbuffer = (uint16_t *)_s_screen;
 
 	while (ticks--)
 	{
@@ -607,14 +681,14 @@ static boolean wipe_ScreenWipe(int16_t ticks)
 				}
 
 				// copy new screen. We need to copy only between y_lookup and + dy y_lookup
-				s = &backbuffer[i]  + wipe_y_lookup[i] * SCREENWIDTH / 2;
+				s = &backbuffer[i]  + wipe_y_lookup[i] * SCREENWIDTH_ARCHIMEDES / 2;
 				d = &frontbuffer[i] + wipe_y_lookup[i] * SCREENWIDTH_ARCHIMEDES / 2;
 
 				for (int16_t j = 0 ; j < dy; j++)
 				{
 					*d = *s;
 					d += (SCREENWIDTH_ARCHIMEDES / 2);
-					s += (SCREENWIDTH / 2);
+					s += (SCREENWIDTH_ARCHIMEDES / 2);
 				}
 
 				wipe_y_lookup[i] += dy;
@@ -648,6 +722,12 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
+	int16_t prevpage = page - 1;
+	if (prevpage == -1)
+		prevpage = 2;
+
+	frontbuffer = (uint16_t*)pages[prevpage];
+
 	wipe_initMelt();
 
 	boolean done;
