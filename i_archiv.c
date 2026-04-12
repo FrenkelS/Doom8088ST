@@ -298,50 +298,51 @@ void R_DrawColumnFlat(uint8_t col, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+	uint32_t color = col * 0x01010101u;
+	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
 
 	uint16_t l = count >> 4;
 
 	while (l--)
 	{
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
 
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
-		*dest++ = col; *dest++ = col; *dest++ = col; *dest++ = col; dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
 	}
 
 	switch (count & 15)
 	{
-		case 15: dest[SCREENWIDTH_ARCHIMEDES * 14] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 14 + 3] = col;
-		case 14: dest[SCREENWIDTH_ARCHIMEDES * 13] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 13 + 3] = col;
-		case 13: dest[SCREENWIDTH_ARCHIMEDES * 12] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 12 + 3] = col;
-		case 12: dest[SCREENWIDTH_ARCHIMEDES * 11] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 11 + 3] = col;
-		case 11: dest[SCREENWIDTH_ARCHIMEDES * 10] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES * 10 + 3] = col;
-		case 10: dest[SCREENWIDTH_ARCHIMEDES *  9] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  9 + 3] = col;
-		case  9: dest[SCREENWIDTH_ARCHIMEDES *  8] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  8 + 3] = col;
-		case  8: dest[SCREENWIDTH_ARCHIMEDES *  7] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  7 + 3] = col;
-		case  7: dest[SCREENWIDTH_ARCHIMEDES *  6] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  6 + 3] = col;
-		case  6: dest[SCREENWIDTH_ARCHIMEDES *  5] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  5 + 3] = col;
-		case  5: dest[SCREENWIDTH_ARCHIMEDES *  4] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  4 + 3] = col;
-		case  4: dest[SCREENWIDTH_ARCHIMEDES *  3] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  3 + 3] = col;
-		case  3: dest[SCREENWIDTH_ARCHIMEDES *  2] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  2 + 3] = col;
-		case  2: dest[SCREENWIDTH_ARCHIMEDES *  1] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  1 + 3] = col;
-		case  1: dest[SCREENWIDTH_ARCHIMEDES *  0] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 1] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 2] = col; dest[SCREENWIDTH_ARCHIMEDES *  0 + 3] = col;
+		case 15: dest[SCREENWIDTH_ARCHIMEDES / 4 * 14] = color;
+		case 14: dest[SCREENWIDTH_ARCHIMEDES / 4 * 13] = color;
+		case 13: dest[SCREENWIDTH_ARCHIMEDES / 4 * 12] = color;
+		case 12: dest[SCREENWIDTH_ARCHIMEDES / 4 * 11] = color;
+		case 11: dest[SCREENWIDTH_ARCHIMEDES / 4 * 10] = color;
+		case 10: dest[SCREENWIDTH_ARCHIMEDES / 4 *  9] = color;
+		case  9: dest[SCREENWIDTH_ARCHIMEDES / 4 *  8] = color;
+		case  8: dest[SCREENWIDTH_ARCHIMEDES / 4 *  7] = color;
+		case  7: dest[SCREENWIDTH_ARCHIMEDES / 4 *  6] = color;
+		case  6: dest[SCREENWIDTH_ARCHIMEDES / 4 *  5] = color;
+		case  5: dest[SCREENWIDTH_ARCHIMEDES / 4 *  4] = color;
+		case  4: dest[SCREENWIDTH_ARCHIMEDES / 4 *  3] = color;
+		case  3: dest[SCREENWIDTH_ARCHIMEDES / 4 *  2] = color;
+		case  2: dest[SCREENWIDTH_ARCHIMEDES / 4 *  1] = color;
+		case  1: dest[SCREENWIDTH_ARCHIMEDES / 4 *  0] = color;
 	}
 }
 
