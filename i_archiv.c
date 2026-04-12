@@ -205,15 +205,8 @@ inline static void R_DrawColumnPixel(uint8_t *dest, const uint8_t* colormap, con
 {
 #if VIEWWINDOWWIDTH == 60
 	*((uint32_t*)dest) = colormap[source[frac >> COLBITS]] * 0x01010101u;
-
 #elif VIEWWINDOWWIDTH == 120
-	uint16_t color = colormap[source[frac>>COLBITS]];
-	color = (color | (color << 8));
-
-	uint16_t *d = (uint16_t *) dest;
-	*d   = color;
-#elif VIEWWINDOWWIDTH == 240
-	*dest = colormap[source[frac>>COLBITS]];
+	*((uint16_t*)dest) = colormap[source[frac >> COLBITS]] * 0x0101u;
 #else
 #error unsupported VIEWWINDOWWIDTH value
 #endif
@@ -298,51 +291,58 @@ void R_DrawColumnFlat(uint8_t col, const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
+#if VIEWWINDOWWIDTH == 60
 	uint32_t color = col * 0x01010101u;
-	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(color))];
+#elif VIEWWINDOWWIDTH == 120
+	uint16_t color = col * 0x0101u;
+	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(color))];
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 	uint16_t l = count >> 4;
 
 	while (l--)
 	{
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
 
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
 
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
 
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
-		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / 4;
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
+		*dest = color; dest += SCREENWIDTH_ARCHIMEDES / sizeof(color);
 	}
 
 	switch (count & 15)
 	{
-		case 15: dest[SCREENWIDTH_ARCHIMEDES / 4 * 14] = color;
-		case 14: dest[SCREENWIDTH_ARCHIMEDES / 4 * 13] = color;
-		case 13: dest[SCREENWIDTH_ARCHIMEDES / 4 * 12] = color;
-		case 12: dest[SCREENWIDTH_ARCHIMEDES / 4 * 11] = color;
-		case 11: dest[SCREENWIDTH_ARCHIMEDES / 4 * 10] = color;
-		case 10: dest[SCREENWIDTH_ARCHIMEDES / 4 *  9] = color;
-		case  9: dest[SCREENWIDTH_ARCHIMEDES / 4 *  8] = color;
-		case  8: dest[SCREENWIDTH_ARCHIMEDES / 4 *  7] = color;
-		case  7: dest[SCREENWIDTH_ARCHIMEDES / 4 *  6] = color;
-		case  6: dest[SCREENWIDTH_ARCHIMEDES / 4 *  5] = color;
-		case  5: dest[SCREENWIDTH_ARCHIMEDES / 4 *  4] = color;
-		case  4: dest[SCREENWIDTH_ARCHIMEDES / 4 *  3] = color;
-		case  3: dest[SCREENWIDTH_ARCHIMEDES / 4 *  2] = color;
-		case  2: dest[SCREENWIDTH_ARCHIMEDES / 4 *  1] = color;
-		case  1: dest[SCREENWIDTH_ARCHIMEDES / 4 *  0] = color;
+		case 15: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) * 14] = color;
+		case 14: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) * 13] = color;
+		case 13: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) * 12] = color;
+		case 12: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) * 11] = color;
+		case 11: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) * 10] = color;
+		case 10: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  9] = color;
+		case  9: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  8] = color;
+		case  8: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  7] = color;
+		case  7: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  6] = color;
+		case  6: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  5] = color;
+		case  5: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  4] = color;
+		case  4: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  3] = color;
+		case  3: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  2] = color;
+		case  2: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  1] = color;
+		case  1: dest[SCREENWIDTH_ARCHIMEDES / sizeof(color) *  0] = color;
 	}
 }
 
@@ -373,18 +373,22 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 	if (count <= 0)
 		return;
 
-	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4 * 60 / VIEWWINDOWWIDTH)];
+#if VIEWWINDOWWIDTH == 60
+	const uint32_t c = 0x01010101u;
+	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(c))];
+#elif VIEWWINDOWWIDTH == 120
+	const uint16_t c = 0x0101u;
+	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(c))];
+#else
+#error unsupported VIEWWINDOWWIDTH value
+#endif
 
 	static int16_t fuzzpos = 0;
 
 	do
 	{
-		uint8_t c = fuzzcolors[fuzzpos];
-		*dest++ = c;
-		*dest++ = c;
-		*dest++ = c;
-		*dest++ = c;
-		dest += SCREENWIDTH_ARCHIMEDES - 4;
+		*dest = c * fuzzcolors[fuzzpos];
+		dest += SCREENWIDTH_ARCHIMEDES / sizeof(c);
 
 		fuzzpos++;
 		if (fuzzpos >= FUZZTABLE)
