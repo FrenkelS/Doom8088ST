@@ -642,10 +642,14 @@ inline
 #endif
 fixed_t CONSTFUNC FixedApproxDiv(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	return FixedMul(a, FixedReciprocal(b));
+#else
 	if (b <= 0xffffu)
 		return FixedMul3232(a, FixedReciprocalSmall(b));
 	else
 		return FixedMul3216(a, FixedReciprocalBig(b));
+#endif
 }
 
 
