@@ -489,7 +489,14 @@ inline
 fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 {
 #if defined __archie__
-	return (int64_t)a * b >> FRACBITS;
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+	uint16_t blw = b;
+	 int16_t bhw = b >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (a * bhw) + (ll >> FRACBITS) + hl;
 #else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
@@ -532,7 +539,14 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 {
 #if defined __archie__
-	return (int64_t)a * b >> FRACBITS;
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+	uint16_t blw = b;
+	 int16_t bhw = b >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (a * bhw) + (ll >> FRACBITS) + hl;
 #else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
@@ -575,7 +589,13 @@ inline
 fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 {
 #if defined __archie__
-	return (int64_t)a * b >> FRACBITS;
+	uint16_t blw = b;
+	fixed_t r = FixedMul3216(a, blw);
+
+	if (b < 0)
+		r -= a;
+
+	return r;
 #else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
@@ -612,7 +632,12 @@ inline
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
 #if defined __archie__
-	return (int64_t)a * blw >> FRACBITS;
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (ll >> FRACBITS) + hl;
 #else
 	boolean neg = a < 0;
 
@@ -642,14 +667,10 @@ inline
 #endif
 fixed_t CONSTFUNC FixedApproxDiv(fixed_t a, fixed_t b)
 {
-#if defined __archie__
-	return FixedMul(a, FixedReciprocal(b));
-#else
 	if (b <= 0xffffu)
 		return FixedMul3232(a, FixedReciprocalSmall(b));
 	else
 		return FixedMul3216(a, FixedReciprocalBig(b));
-#endif
 }
 
 
