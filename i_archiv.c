@@ -207,6 +207,8 @@ inline static void R_DrawColumnPixel(uint8_t *dest, const uint8_t* colormap, con
 	*((uint32_t*)dest) = colormap[source[frac >> COLBITS]] * 0x01010101u;
 #elif VIEWWINDOWWIDTH == 120
 	*((uint16_t*)dest) = colormap[source[frac >> COLBITS]] * 0x0101u;
+#elif VIEWWINDOWWIDTH == 240
+	*dest = colormap[source[frac >> COLBITS]];
 #else
 #error unsupported VIEWWINDOWWIDTH value
 #endif
@@ -293,10 +295,13 @@ void R_DrawColumnFlat(uint8_t col, const draw_column_vars_t *dcvars)
 
 #if VIEWWINDOWWIDTH == 60
 	uint32_t color = col * 0x01010101u;
-	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(color))];
+	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4)];
 #elif VIEWWINDOWWIDTH == 120
 	uint16_t color = col * 0x0101u;
-	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(color))];
+	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 2)];
+#elif VIEWWINDOWWIDTH == 240
+	uint8_t color = col;
+	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + dcvars->x];
 #else
 #error unsupported VIEWWINDOWWIDTH value
 #endif
@@ -375,10 +380,13 @@ void R_DrawFuzzColumn(const draw_column_vars_t *dcvars)
 
 #if VIEWWINDOWWIDTH == 60
 	const uint32_t c = 0x01010101u;
-	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(c))];
+	uint32_t *dest = (uint32_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 4)];
 #elif VIEWWINDOWWIDTH == 120
 	const uint16_t c = 0x0101u;
-	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * sizeof(c))];
+	uint16_t *dest = (uint16_t*)&_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + (dcvars->x * 2)];
+#elif VIEWWINDOWWIDTH == 240
+	const uint8_t c = 0x01u;
+	uint8_t *dest = &_s_screen[(dcvars->yl * SCREENWIDTH_ARCHIMEDES) + dcvars->x];
 #else
 #error unsupported VIEWWINDOWWIDTH value
 #endif
