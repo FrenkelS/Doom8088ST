@@ -10,7 +10,7 @@
  *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
  *  Copyright 2005, 2006 by
  *  Florian Schulze, Colin Phipps, Neil Stevens, Andrey Budko
- *  Copyright 2023-2025 by
+ *  Copyright 2023-2026 by
  *  Frenkel Smeijers
  *
  *  This program is free software; you can redistribute it and/or
@@ -137,9 +137,21 @@ static const uint8_t mapcolor_tele = GREEN;
 static const uint8_t mapcolor_secr = LIGHT_MAGENTA;
 static const uint8_t mapcolor_unsn = DARK_GRAY;
 static const uint8_t mapcolor_sngl = WHITE;
+#elif defined __archie__
+static const uint8_t mapcolor_wall = 212;
+static const uint8_t mapcolor_fchg = 221;
+static const uint8_t mapcolor_cchg =  62;
+static const uint8_t mapcolor_clsd = 255;
+static const uint8_t mapcolor_rdor =  30;
+static const uint8_t mapcolor_bdor = 128;
+static const uint8_t mapcolor_ydor = 125;
+static const uint8_t mapcolor_tele =  69;
+static const uint8_t mapcolor_secr = 149;
+static const uint8_t mapcolor_unsn =  40;
+static const uint8_t mapcolor_sngl = 255;
 #else
-static const uint8_t mapcolor_wall = 23;    // normal 1s wall color
-static const uint8_t mapcolor_fchg = 55;    // line at floor height change color
+static const uint8_t mapcolor_wall =  23;    // normal 1s wall color
+static const uint8_t mapcolor_fchg =  55;    // line at floor height change color
 static const uint8_t mapcolor_cchg = 215;    // line at ceiling height change color
 static const uint8_t mapcolor_clsd = 208;    // line at sector with floor=ceiling color
 static const uint8_t mapcolor_rdor = 175;    // red door color  (diff from keys to allow option)
