@@ -304,7 +304,7 @@ void I_Quit(void)
 {
 	I_Shutdown();
 
-	printf("\n");
+	printf("\r\n");
 	exit(0);
 }
 
@@ -318,14 +318,14 @@ void I_Error(const char *error, ...)
 	va_start(argptr, error);
 	vprintf(error, argptr);
 	va_end(argptr);
-	printf("\n");
+	printf("\r\n");
 	exit(1);
 }
 
 
 int main(int argc, const char * const * argv)
 {
-	printf("Doom8088: Archimedes Edition\n");
+	printf("Doom8088: Archimedes Edition\r\n");
 
 #if defined TIMEDEMO
 	const char * const args[] = {"DOOM8088", "-timedemo", "demo3"};

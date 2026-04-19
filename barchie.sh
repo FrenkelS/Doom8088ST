@@ -6,7 +6,10 @@ export PATH=~/archiesdk/tools/bin:$PATH
 unset CFLAGS
 
 
-export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=64 -DFLAT_SKY_COLOR=47 -DWAD_FILE=\"HostFS::HostFS.$.DOOMAR56\" -DVIEWWINDOWWIDTH=60 -DC_ONLY"
+export RENDER_OPTIONS="-DFLAT_SPAN -DFLAT_NUKAGE1_COLOR=64 -DFLAT_SKY_COLOR=47 -DWAD_FILE=\"DOOMWADC\" -DVIEWWINDOWWIDTH=$1 -DC_ONLY"
+
+
+export OUTPUT=$2
 
 
 arm-archie-gcc -c i_archiv.c $RENDER_OPTIONS -mno-thumb-interwork -Ofast -fomit-frame-pointer -fgcse-sm -fgcse-las -flto -fwhole-program -funroll-all-loops -fira-loop-pressure -freorder-blocks-algorithm=simple -DLITTLE_ENDIAN=1234 -DBYTE_ORDER=LITTLE_ENDIAN
@@ -88,7 +91,12 @@ export GLOBOBJS+=" z_bmallo.c"
 export GLOBOBJS+=" z_zone.o"
 
 arm-archie-gcc $GLOBOBJS $CFLAGS $RENDER_OPTIONS -o archie/tmpProg
-arm-archie-objcopy -O binary archie/tmpProg archie/DOOM8088,ff8
+arm-archie-objcopy -O binary archie/tmpProg archie/$OUTPUT,ff8
+
+cat << EOF > archie/!Run$OUTPUT,feb
+Set Doom\$Dir <Obey\$Dir>
+<Doom\$Dir>.$OUTPUT %*0
+EOF
 
 rm i_archiv.o
 rm p_enemy2.o

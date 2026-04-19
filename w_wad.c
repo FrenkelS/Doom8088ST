@@ -136,7 +136,18 @@ void W_Init(void)
 	printf("\tadding " WAD_FILE "\r\n");
 	printf("\tshareware version.\r\n");
 
+#if defined __archie__
+	char *dir = getenv("Doom$Dir");
+	if (dir == NULL)
+		I_Error("Doom$Dir not set.");
+
+	char filename[256];
+	snprintf(filename, sizeof(filename), "%s.%s", dir, WAD_FILE);
+	fileWAD = fopen(filename, "rb");
+#else
 	fileWAD = fopen(WAD_FILE, "rb");
+#endif
+
 	if (fileWAD == NULL)
 		I_Error("Can't open " WAD_FILE ".");
 
