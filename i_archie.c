@@ -71,26 +71,6 @@ int stricmp(const char *s1, const char *s2)
 }
 
 
-// There's a bug in ArchieSDK's implementation of strncpy
-char* strncpy(char* dest, const char* src, size_t n)
-{
-	char* tmp = dest;
-
-	while (n--)
-	{
-		if (!(*dest++ = *src++))
-		{
-			while (n--)
-				*dest++ = '\0';
-
-			break;
-		}
-	}
-
-	return tmp;
-}
-
-
 //**************************************************************************************
 //
 // Screen code
