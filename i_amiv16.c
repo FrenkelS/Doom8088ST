@@ -692,7 +692,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (int16_t col = 0; col < width; col++)
 	{
-		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t *)((const byte *)patch + patch->columnofs[col]);
 
 		uint8_t andmask = ~(0x80 >> x);
 
