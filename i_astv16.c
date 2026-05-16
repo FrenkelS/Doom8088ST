@@ -46,7 +46,7 @@
 extern const int16_t CENTERY;
 
 
-static int16_t page;
+static int page;
 static uint8_t *pages[3];
 static uint8_t *_s_screen;
 
@@ -223,7 +223,7 @@ void I_FinishUpdate(void)
 
 		if (st_needrefresh != 2)
 		{
-			int16_t prevpage = page - 1;
+			int prevpage = page - 1;
 			if (prevpage == -1)
 				prevpage = 2;
 
@@ -231,7 +231,7 @@ void I_FinishUpdate(void)
 			uint8_t *d = _s_screen;
 			s += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
 			d += (SCREENHEIGHT - ST_HEIGHT) * PLANEWIDTH;
-			for (int16_t y = 0; y < ST_HEIGHT; y++)
+			for (int y = 0; y < ST_HEIGHT; y++)
 			{
 				memcpy(d, s, VIEWWINDOWPLANEWIDTH);
 				s += PLANEWIDTH;
@@ -328,7 +328,7 @@ void I_FinishViewWindow(void)
 #if VIEWWINDOWWIDTH == 120 || VIEWWINDOWWIDTH == 60
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -347,53 +347,54 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	//  e.g. a DDA-lile scaling.
 	// This is as fast as it gets.
 
-	int16_t l = count >> 4;
+	const uint8_t colbits = COLBITS;
+	int l = count >> 4;
 	while (l--)
 	{
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
 
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		*dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		*dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case 14: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case 13: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case 12: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case 11: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case 10: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  9: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  8: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  7: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  6: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  5: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  4: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  3: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  2: *dest = colmap[src[frac >> COLBITS]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
-		case  1: *dest = colmap[src[frac >> COLBITS]];
+		case 15: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case 14: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case 13: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case 12: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case 11: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case 10: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  9: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  8: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  7: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  6: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  5: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  4: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  3: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  2: *dest = colmap[src[frac >> colbits]]; dest += VIEWWINDOWWIDTHNEXTPOWEROFTWO; frac += fracstep;
+		case  1: *dest = colmap[src[frac >> colbits]];
 	}
 }
 #elif VIEWWINDOWWIDTH == 30
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -412,47 +413,48 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	//  e.g. a DDA-lile scaling.
 	// This is as fast as it gets.
 
-	int16_t l = count >> 4;
+	const uint8_t colbits = COLBITS;
+	int l = count >> 4;
 	while (l--)
 	{
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
 
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 14: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 13: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 12: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 11: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case 10: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  9: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  8: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  7: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  6: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  5: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  4: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  3: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  2: movep(lutc[colmap[src[frac >> COLBITS]]], dest); dest += PLANEWIDTH; frac += fracstep;
-		case  1: movep(lutc[colmap[src[frac >> COLBITS]]], dest);
+		case 15: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 14: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 13: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 12: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 11: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case 10: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  9: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  8: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  7: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  6: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  5: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  4: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  3: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  2: movep(lutc[colmap[src[frac >> colbits]]], dest); dest += PLANEWIDTH; frac += fracstep;
+		case  1: movep(lutc[colmap[src[frac >> colbits]]], dest);
 	}
 }
 #else
@@ -475,7 +477,7 @@ static uint8_t swapNibbles(uint8_t color)
 #if VIEWWINDOWWIDTH == 120 || VIEWWINDOWWIDTH == 60
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -483,7 +485,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 
 	uint8_t *dest = &viewwindow[dcvars->x + dcvars->yl * VIEWWINDOWWIDTHNEXTPOWEROFTWO];
 
-	int16_t l = count >> 4;
+	int l = count >> 4;
 
 	uint8_t color0;
 	uint8_t color1;
@@ -544,7 +546,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 #elif VIEWWINDOWWIDTH == 30
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -552,7 +554,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 
 	uint8_t *dest = &_s_screen[OFFSET(dcvars->x, dcvars->yl)];
 
-	int16_t l = count >> 4;
+	int l = count >> 4;
 
 	uint32_t color0;
 	uint32_t color1;
@@ -866,7 +868,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (int16_t col = 0; col < width; col++)
 	{
-		const column_t *column = (const column_t *)((const byte *)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t *)((const byte *)patch + patch->columnofs[col]);
 
 		uint32_t andmask = ~(0x80808080 >> x);
 
@@ -1087,7 +1089,7 @@ static void wipe_initMelt()
 
 void D_Wipe(void)
 {
-	int16_t prevpage = page - 1;
+	int prevpage = page - 1;
 	if (prevpage == -1)
 		prevpage = 2;
 
