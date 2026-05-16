@@ -341,7 +341,7 @@ static void setcolor(uint8_t c, uint8_t *a)
 
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -360,7 +360,7 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	//  e.g. a DDA-lile scaling.
 	// This is as fast as it gets.
 
-	int16_t l = count >> 4;
+	int l = count >> 4;
 	while (l--)
 	{
 		setcolor(colormap[source[frac >> COLBITS]], dest); dest += PLANEWIDTH; frac += fracstep;
@@ -419,7 +419,7 @@ static uint8_t swapNibbles(uint8_t color)
 
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -427,7 +427,7 @@ void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 
 	uint8_t *dest = &_s_screen[(dcvars->yl * PLANEWIDTH) + dcvars->x];
 
-	int16_t l = count >> 4;
+	int l = count >> 4;
 
 	uint8_t color0;
 	uint8_t color1;
