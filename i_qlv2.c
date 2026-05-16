@@ -342,13 +342,14 @@ void I_FinishViewWindow(void)
 
 void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	const uint8_t *source;
 	const uint8_t *colormap;
 	uint16_t fracstep, frac;
 	uint8_t *dest;
-	int16_t l;
+	const uint8_t colbits = COLBITS;
+	int l;
 
 	// Zero length, column does not exceed a pixel.
 	if (count <= 0)
@@ -368,44 +369,44 @@ void R_DrawColumnSprite(const draw_column_vars_t *dcvars)
 	l = count >> 4;
 	while (l--)
 	{
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
 
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		*dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		*dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
 	}
 
 	switch (count & 15)
 	{
-		case 15: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 14: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 13: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 12: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 11: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case 10: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  9: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  8: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  7: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  6: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  5: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  4: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  3: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  2: *dest = colormap[source[frac >> COLBITS]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
-		case  1: *dest = colormap[source[frac >> COLBITS]];
+		case 15: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 14: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 13: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 12: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 11: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case 10: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  9: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  8: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  7: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  6: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  5: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  4: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  3: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  2: *dest = colormap[source[frac >> colbits]]; dest += VIEWWINDOWWIDTH; frac += fracstep;
+		case  1: *dest = colormap[source[frac >> colbits]];
 	}
 }
 
@@ -424,7 +425,7 @@ static uint8_t swapNibbles(uint8_t color)
 
 void R_DrawColumnFlat(uint8_t color, const draw_column_vars_t *dcvars)
 {
-	int16_t count = (dcvars->yh - dcvars->yl) + 1;
+	int count = (dcvars->yh - dcvars->yl) + 1;
 
 	uint8_t color0, color1;
 	uint8_t *dest;
@@ -638,7 +639,7 @@ void V_DrawPatchNotScaled(int16_t x, int16_t y, const patch_t __far* patch)
 
 	for (col = 0; col < width; col++)
 	{
-		const column_t *column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col]);
+		const column_t *column = (const column_t*)((const byte*)patch + patch->columnofs[col]);
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff)
