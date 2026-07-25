@@ -533,7 +533,7 @@ static const angle16_t clipangle = 0x2008; // = xtoviewangleTable[0]
 
 // Emits a mulu.w instruction. It's quite difficult to get gcc to do that :-)
 static uint32_t mulu(uint16_t a, uint16_t b) {
-#if C_ONLY
+#if defined C_ONLY
 	return (uint32_t)a * b;
 #else
 	uint32_t result = a;
