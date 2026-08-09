@@ -729,7 +729,7 @@ void V_DrawPatchScaled(int16_t x, int16_t y, const patch_t __far* patch)
 		else if (dc_x >= SCREENWIDTH)
 			break;
 
-		column = (const column_t*)((const byte*)patch + (uint16_t)patch->columnofs[col >> 8]);
+		column = (const column_t*)((const byte*)patch + patch->columnofs[col >> 8]);
 
 		p = dc_x & 3;
 		bitmask = bitmasks4[p];
