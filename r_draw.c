@@ -1162,7 +1162,7 @@ static void R_DrawVisSprite(const vissprite_t *vis)
 
     while (dcvars.x < VIEWWINDOWWIDTH)
     {
-        const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[frac >> FRACBITS]);
+        const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + patch->columnofs[frac >> FRACBITS]);
         R_DrawMaskedColumn(colfunc, &dcvars, column);
 
         frac += vis->xiscale;
@@ -1277,7 +1277,7 @@ static void R_RenderMaskedSegRange(const drawseg_t *ds, int16_t x1, int16_t x2)
 			dcvars.fracstep = FixedReciprocal((uint32_t)spryscale) >> COLEXTRABITS;
 
 			// draw the texture
-			column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[xc]);
+			column = (const column_t __far*) ((const byte __far*)patch + patch->columnofs[xc]);
 
 			R_DrawMaskedColumn(R_DrawColumnWall, &dcvars, column);
 			maskedtexturecol[dcvars.x] = SHRT_MAX; // dropoff overflow
@@ -1923,7 +1923,7 @@ static const byte __far* R_ComposeColumn(const int16_t texture, const texture_t 
 
             if (xc < x2)
             {
-                const column_t __far* patchcol = (const column_t __far*)((const byte __far*)realpatch + (uint16_t)realpatch->columnofs[xc - x1]);
+                const column_t __far* patchcol = (const column_t __far*)((const byte __far*)realpatch + realpatch->columnofs[xc - x1]);
 
                 R_DrawColumnInCache (patchcol, tmpCache, patch->originy, tex->height);
             }
@@ -1954,7 +1954,7 @@ static void R_DrawSegTextureColumn(const texture_t __far* tex, int16_t texture, 
             R_DrawColumnFlat(texture, dcvars);
         else
         {
-            const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + (uint16_t)patch->columnofs[x_c]);
+            const column_t __far* column = (const column_t __far*) ((const byte __far*)patch + patch->columnofs[x_c]);
 
             dcvars->source = (const byte __far*)column + 3;
             R_DrawColumnWall(dcvars);
