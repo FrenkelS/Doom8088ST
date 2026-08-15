@@ -4,7 +4,7 @@
 // $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2023-2025 by Frenkel Smeijers
+// Copyright (C) 2023-2026 by Frenkel Smeijers
 //
 // This source is available for distribution and/or modification
 // only under the terms of the DOOM Source Code License as
@@ -101,7 +101,18 @@ static memblock_t __far* segmentToPointer(segment_t seg)
 
 boolean Z_EqualNames(const char __far* farName, const char* nearName)
 {
+#if defined __archie__
+	return farName[0] == nearName[0]
+	    && farName[1] == nearName[1]
+	    && farName[2] == nearName[2]
+	    && farName[3] == nearName[3]
+	    && farName[4] == nearName[4]
+	    && farName[5] == nearName[5]
+	    && farName[6] == nearName[6]
+	    && farName[7] == nearName[7];
+#else
 	return *(uint64_t __far*)farName == *(uint64_t*)nearName;
+#endif
 }
 
 

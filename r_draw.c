@@ -554,6 +554,16 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+	uint16_t blw = b;
+	 int16_t bhw = b >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (a * bhw) + (ll >> FRACBITS) + hl;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -588,11 +598,22 @@ fixed_t CONSTFUNC FixedMul(fixed_t a, fixed_t b)
 
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
 inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+	uint16_t blw = b;
+	 int16_t bhw = b >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (a * bhw) + (ll >> FRACBITS) + hl;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -618,6 +639,7 @@ inline static fixed_t CONSTFUNC FixedMul3232(fixed_t a, fixed_t b)
 	result = hh + hl + lh + ll;
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
@@ -632,6 +654,15 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 {
+#if defined __archie__
+	uint16_t blw = b;
+	fixed_t r = FixedMul3216(a, blw);
+
+	if (b < 0)
+		r -= a;
+
+	return r;
+#else
 	// Is the result a negative number?
 	uint32_t neg = (a ^ b) < 0 ? 0xffff : 0;
 
@@ -655,6 +686,7 @@ fixed_t CONSTFUNC FixedMulAngle(fixed_t a, fixed_t b)
 
 	if (neg) result = -result;
 	return result;
+#endif
 }
 
 
@@ -665,6 +697,14 @@ inline
 #endif
 fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 {
+#if defined __archie__
+	uint16_t alw = a;
+	 int16_t ahw = a >> FRACBITS;
+
+	uint32_t ll = (uint32_t) alw * blw;
+	 int32_t hl = ( int32_t) ahw * blw;
+	return (ll >> FRACBITS) + hl;
+#else
 	boolean neg = a < 0;
 
 	uint16_t alw, ahw;
@@ -681,6 +721,7 @@ fixed_t CONSTFUNC FixedMul3216(fixed_t a, uint16_t blw)
 	r = (ll >> FRACBITS) + hl;
 	if (neg) r = -r;
 	return r;
+#endif
 }
 
 
